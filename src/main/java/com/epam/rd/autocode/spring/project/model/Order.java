@@ -25,8 +25,8 @@ public class Order {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @ManyToOne(optional = false)//?
-    @JoinColumn(name = "client_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "client_id")
     private Client client;
 
     @Column(nullable = false, name = "order_date")
