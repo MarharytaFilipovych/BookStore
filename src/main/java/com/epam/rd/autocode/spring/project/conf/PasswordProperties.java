@@ -5,15 +5,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-@Configuration
+@ConfigurationProperties(prefix = "password")
 @PropertySource("classpath:password.properties")
 @Validated
 @Getter
 @Setter
+@Component
 public class PasswordProperties {
 
     @NotNull @Min(4) @Max(50)
@@ -22,22 +24,22 @@ public class PasswordProperties {
     @NotNull @Min(8) @Max(100)
     private Integer maxLength;
 
-    @Min(0) @Max(10)
+    @NotNull @Min(0) @Max(10)
     private Integer minUppercase;
 
-    @Min(0) @Max(10)
+    @NotNull @Min(0) @Max(10)
     private Integer minLowercase;
 
-    @Min(0) @Max(10)
+    @NotNull @Min(0) @Max(10)
     private Integer minDigits ;
 
-    @Min(0) @Max(10)
+    @NotNull @Min(0) @Max(10)
     private Integer minSpecial;
 
-    @Min(1) @Max(10)
+    @NotNull @Min(1) @Max(10)
     private Integer maxRepeatChars;
 
-    @Min(1) @Max(10)
+    @NotNull @Min(1) @Max(10)
     private Integer maxSequenceLength;
 
     private boolean allowWhitespace = false;

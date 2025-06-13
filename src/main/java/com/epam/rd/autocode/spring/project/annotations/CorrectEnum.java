@@ -3,7 +3,6 @@ package com.epam.rd.autocode.spring.project.annotations;
 import com.epam.rd.autocode.spring.project.validation.EnumValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-
 import java.lang.annotation.*;
 
 @Documented
