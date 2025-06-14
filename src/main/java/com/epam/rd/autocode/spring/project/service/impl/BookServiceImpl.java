@@ -50,7 +50,6 @@ public class BookServiceImpl implements BookService {
         }).orElseThrow(() -> new NotFoundException("The book with a name " + name + " was not found"));
     }
 
-
     @Override
     public void deleteBookByName(String name) {
         bookRepository.deleteByName(name);

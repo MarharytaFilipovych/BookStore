@@ -23,7 +23,7 @@ public class BookItem {
     private Order order;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id")
     private Book book;
 
     @Column(nullable = false)
