@@ -10,7 +10,7 @@ public interface ClientService {
 
     List<ClientDTO> getAllClients();
 
-    Page<ClientDTO> getAllEmployees(Pageable pageable);
+    Page<ClientDTO> getAllClients(Pageable pageable);
 
     ClientDTO getClientByEmail(String email);
 
@@ -19,4 +19,14 @@ public interface ClientService {
     void deleteClientByEmail(String email);
 
     ClientDTO addClient(ClientDTO client);
+
+    List<ClientDTO> getBlockedClients();
+
+    Page<ClientDTO> getBlockedClients(Pageable pageable);
+
+    void blockClient(String clientEmail);
+
+    void unblockClient(String clientEmail);
+
+    boolean isClientBlocked(String clientEmail);
 }

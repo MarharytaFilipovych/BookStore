@@ -55,4 +55,13 @@ public class OrderServiceImpl implements OrderService {
         order.setClient(client);
         return orderMapper.toDto(orderRepository.save(order));
     }
+
+    @Override
+    public void confirmOrder(OrderDTO dto) {
+        Order order = orderRepository.findDistinctByClient_EmailAndOrderDate(dto.getClientEmail(), dto.getOrderDate());
+        Employee employee = employeeRepository.getByEmail(dto.getEmployeeEmail())
+                .orElseThrow(()-> new NotFoundException("Employee with email " + dto.getEmployeeEmail()));
+        order.setEmployee(employee);
+        orderRepository.save(order);
+    }
 }

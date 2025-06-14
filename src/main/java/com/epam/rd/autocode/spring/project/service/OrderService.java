@@ -13,4 +13,6 @@ public interface OrderService {
     List<OrderDTO> getOrdersByEmployee(String employeeEmail);
 
     OrderDTO addOrder(OrderDTO order);
+
+    void confirmOrder(OrderDTO order);
 }

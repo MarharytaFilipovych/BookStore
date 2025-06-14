@@ -4,9 +4,10 @@ import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.mappers.ClientMapper;
+import com.epam.rd.autocode.spring.project.model.BlockedClient;
 import com.epam.rd.autocode.spring.project.model.Client;
+import com.epam.rd.autocode.spring.project.repo.BlockedClientRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
-import com.epam.rd.autocode.spring.project.repo.OrderRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -18,10 +19,12 @@ import java.util.List;
 public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
+    private final BlockedClientRepository blockedClientRepository;
 
-    public ClientServiceImpl(ClientRepository clientRepository, ClientMapper mapper) {
+    public ClientServiceImpl(ClientRepository clientRepository, ClientMapper mapper, BlockedClientRepository blockedClientRepository) {
         this.clientRepository = clientRepository;
         this.clientMapper = mapper;
+        this.blockedClientRepository = blockedClientRepository;
     }
 
     @Override
@@ -30,7 +33,36 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Page<ClientDTO> getAllEmployees(Pageable pageable) {
+    public List<ClientDTO> getBlockedClients() {
+        return blockedClientRepository.findAll().stream()
+                .map(b -> clientMapper.toDto(b.getClient())).toList();
+    }
+
+    @Override
+    public Page<ClientDTO> getBlockedClients(Pageable pageable) {
+        return blockedClientRepository.findAll(pageable)
+                .map(b -> clientMapper.toDto(b.getClient()));
+    }
+
+    @Override
+    public void blockClient(String clientEmail) {
+        Client client = clientRepository.getByEmail(clientEmail)
+                .orElseThrow(()-> new NotFoundException("Client with email " + clientEmail));
+        blockedClientRepository.save(new BlockedClient(client));
+    }
+
+    @Override
+    public void unblockClient(String clientEmail) {
+        blockedClientRepository.deleteByClient_Email(clientEmail);
+    }
+
+    @Override
+    public boolean isClientBlocked(String clientEmail) {
+        return blockedClientRepository.existsByClient_Email(clientEmail);
+    }
+
+    @Override
+    public Page<ClientDTO> getAllClients(Pageable pageable) {
         return clientRepository.findAll(pageable).map(clientMapper::toDto);
     }
 
@@ -53,6 +85,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void deleteClientByEmail(String email) {
+        unblockClient(email);
         clientRepository.deleteByEmail(email);
     }
 
