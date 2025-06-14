@@ -11,19 +11,13 @@ public class BookItemMapper {
 
     public BookItemMapper(ModelMapper mapper) {
         this.mapper = mapper;
-        mapper.typeMap(BookItemDTO.class, BookItem.class).addMappings(m ->{
-            m.skip(BookItem::setId);
-            m.skip(BookItem::setBook);
-            m.skip(BookItem::setOrder);
-        });
-        mapper.typeMap(BookItem.class, BookItemDTO.class).addMapping(bookItem ->
-           bookItem.getBook().getName(), BookItemDTO::setBookName
-        );
+
+        mapper.createTypeMap(BookItem.class, BookItemDTO.class)
+                .addMapping(bookItem -> bookItem.getBook().getName(), BookItemDTO::setBookName);
     }
 
     public BookItemDTO toDto(BookItem bookItem){
         return mapper.map(bookItem, BookItemDTO.class);
-
     }
 
     public BookItem toEntity(BookItemDTO dto){

@@ -11,7 +11,7 @@ public class ClientMapper {
 
     public ClientMapper(ModelMapper mapper) {
         this.mapper = mapper;
-        mapper.typeMap(ClientDTO.class, Client.class).addMappings(m ->
+        mapper.createTypeMap(ClientDTO.class, Client.class).addMappings(m ->
            m.skip(Client::setId)
         );
     }

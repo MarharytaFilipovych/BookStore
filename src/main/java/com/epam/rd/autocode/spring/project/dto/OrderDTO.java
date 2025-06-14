@@ -23,7 +23,6 @@ public class OrderDTO {
     @Email(message = "Please provide a valid employee email address")
     private String employeeEmail;
 
-    @NotBlank(message = "Client email is required")
     @Email(message = "Please provide a valid client email address")
     private String clientEmail;
 

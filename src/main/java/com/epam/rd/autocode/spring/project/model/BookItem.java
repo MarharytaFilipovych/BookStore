@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-
 @Table(name = "book_item")
 public class BookItem {
     @Id

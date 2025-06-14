@@ -11,7 +11,7 @@ public class EmployeeMapper {
 
     public EmployeeMapper(ModelMapper mapper) {
         this.mapper = mapper;
-        mapper.typeMap(EmployeeDTO.class, Employee.class).addMappings(m ->
+        mapper.createTypeMap(EmployeeDTO.class, Employee.class).addMappings(m ->
                 m.skip(Employee::setId)
         );
     }

@@ -11,7 +11,7 @@ public class BookMapper {
 
     public BookMapper(ModelMapper mapper) {
         this.mapper = mapper;
-        mapper.typeMap(BookDTO.class, Book.class)
+        mapper.createTypeMap(BookDTO.class, Book.class)
                 .addMappings(m ->
                         m.skip(Book::setId));
     }

@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.dto;
 
 import com.epam.rd.autocode.spring.project.annotations.CorrectName;
 import com.epam.rd.autocode.spring.project.annotations.ValidPassword;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,5 +37,6 @@ public class EmployeeDTO {
 
     @NotNull(message = "Birth date is required")
     @Past(message = "Birth date must be in the past")
+    @JsonProperty("birthdate")
     private LocalDate birthDate;
 }
