@@ -27,6 +27,4 @@ public interface ClientService {
     void blockClient(String clientEmail);
 
     void unblockClient(String clientEmail);
-
-    boolean isClientBlocked(String clientEmail);
 }

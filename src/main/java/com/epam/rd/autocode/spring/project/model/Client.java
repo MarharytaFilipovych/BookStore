@@ -1,8 +1,14 @@
 package com.epam.rd.autocode.spring.project.model;
 
+import com.epam.rd.autocode.spring.project.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,5 +22,12 @@ public class Client extends User {
     public Client(Long id, String email, String password, String name, BigDecimal balance) {
         super(id, email, password, name);
         this.balance = balance;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(
+                new SimpleGrantedAuthority(Role.CLIENT.toString())
+        );
     }
 }

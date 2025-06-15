@@ -1,7 +1,7 @@
 package com.epam.rd.autocode.spring.project.validation;
 
 import com.epam.rd.autocode.spring.project.annotations.ValidPassword;
-import com.epam.rd.autocode.spring.project.conf.PasswordProperties;
+import com.epam.rd.autocode.spring.project.conf.PasswordSettings;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.passay.*;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class MyPasswordValidator implements ConstraintValidator<ValidPassword, String> {
     @Autowired
-    private  PasswordProperties properties;
+    private PasswordSettings properties;
 
     @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {

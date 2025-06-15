@@ -11,7 +11,6 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    boolean existsByClient_Email(String clientEmail);
 
     List<Order> findAllByEmployee_Email(String employeeEmail);
 

@@ -16,7 +16,7 @@ import org.springframework.validation.annotation.Validated;
 @Getter
 @Setter
 @Component
-public class PasswordProperties {
+public class PasswordSettings {
 
     @NotNull @Min(4) @Max(50)
     private Integer minLength = 8;

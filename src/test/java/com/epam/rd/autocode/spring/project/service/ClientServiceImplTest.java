@@ -376,34 +376,6 @@ public class ClientServiceImplTest {
     }
 
     @Test
-    void isClientBlocked_WhenClientIsBlocked_ShouldReturnTrue() {
-        // Arrange
-        String clientEmail = client.getEmail();
-        when(blockedClientRepository.existsByClient_Email(clientEmail)).thenReturn(true);
-
-        // Act
-        boolean result = clientService.isClientBlocked(clientEmail);
-
-        // Assert
-        assertTrue(result);
-        verify(blockedClientRepository).existsByClient_Email(clientEmail);
-    }
-
-    @Test
-    void isClientBlocked_WhenClientIsNotBlocked_ShouldReturnFalse() {
-        // Arrange
-        String clientEmail = client.getEmail();
-        when(blockedClientRepository.existsByClient_Email(clientEmail)).thenReturn(false);
-
-        // Act
-        boolean result = clientService.isClientBlocked(clientEmail);
-
-        // Assert
-        assertFalse(result);
-        verify(blockedClientRepository).existsByClient_Email(clientEmail);
-    }
-
-    @Test
     void getBlockedClients_WithoutPageable_ShouldReturnListOfClientDTOs() {
         // Arrange
         List<BlockedClient> blockedClients = List.of(blockedClient);

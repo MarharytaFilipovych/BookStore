@@ -1,0 +1,27 @@
+package com.epam.rd.autocode.spring.project.model.tokens.refresh;
+
+import com.epam.rd.autocode.spring.project.model.Client;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "client_refresh_tokens")
+@NoArgsConstructor
+public class ClientRefreshToken extends RefreshToken {
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
+    public ClientRefreshToken(Client client,LocalDateTime expiresAt) {
+        this.client = client;
+        setExpiresAt(expiresAt);
+    }
+}

@@ -56,10 +56,6 @@ public class ClientServiceImpl implements ClientService {
         blockedClientRepository.deleteByClient_Email(clientEmail);
     }
 
-    @Override
-    public boolean isClientBlocked(String clientEmail) {
-        return blockedClientRepository.existsByClient_Email(clientEmail);
-    }
 
     @Override
     public Page<ClientDTO> getAllClients(Pageable pageable) {
