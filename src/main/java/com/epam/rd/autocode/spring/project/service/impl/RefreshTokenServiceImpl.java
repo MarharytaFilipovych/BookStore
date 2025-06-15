@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.exception.UserDetailsAreNullException;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.tokens.refresh.ClientRefreshToken;
@@ -32,9 +33,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     public UUID generateRefreshToken(UserDetails userDetails) {
         LocalDateTime expiresAt = LocalDateTime.now().plus(refreshTokenExpirationTime);
-        return userDetails instanceof Employee employee
-                ? employeeRefreshTokenRepository.save(new EmployeeRefreshToken(employee, expiresAt)).getToken()
-                : clientRefreshTokenRepository.save(new ClientRefreshToken((Client) userDetails, expiresAt)).getToken();
+
+        if (userDetails instanceof Employee employee) {
+            return employeeRefreshTokenRepository.save(new EmployeeRefreshToken(employee, expiresAt)).getToken();
+        } else if (userDetails instanceof Client client) {
+            return clientRefreshTokenRepository.save(new ClientRefreshToken(client, expiresAt)).getToken();
+        }
+        throw new UserDetailsAreNullException(userDetails == null ? "null" : userDetails.getClass().getSimpleName());
     }
 
     public boolean isValidRefreshToken(UUID token, UserDetails user){

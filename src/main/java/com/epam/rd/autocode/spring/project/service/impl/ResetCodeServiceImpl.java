@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.exception.UserDetailsAreNullException;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.tokens.reset.ClientResetCode;
@@ -30,9 +31,12 @@ public class ResetCodeServiceImpl implements ResetCodeService {
 
     public UUID generateResetCode(UserDetails user){
         LocalDateTime expiresAt = LocalDateTime.now().plus(resetCodeExpirationTime);
-        return user instanceof Employee employee
-                ? employeeResetCodeRepository.save(new EmployeeResetCode(employee, expiresAt)).getCode()
-                : clientResetCodeRepository.save(new ClientResetCode((Client) user, expiresAt)).getCode();
+        if(user instanceof Employee employee){
+            return employeeResetCodeRepository.save(new EmployeeResetCode(employee, expiresAt)).getCode();
+        } else if (user instanceof Client client) {
+            return clientResetCodeRepository.save(new ClientResetCode(client, expiresAt)).getCode();
+        }
+        throw new UserDetailsAreNullException(user == null ? "null" : user.getClass().getSimpleName());
     }
 
     public boolean isValidResetCode(UUID code, UserDetails user){

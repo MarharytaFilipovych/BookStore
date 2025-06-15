@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.Map;
+
 @Component
 public class RoleBasedAuthenticationProvider implements AuthenticationProvider {
     private final MyUserDetailsService userDetailsService;
@@ -27,20 +29,16 @@ public class RoleBasedAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
         String password = (String) authentication.getCredentials();
-        String role = getRoleFromRequest();
+        String role = "client";
+        if (authentication.getDetails() instanceof Map<?, ?> details) {
+            Object roleObj = details.get("role");
+            role = roleObj instanceof String ? (String) roleObj : "employee";
+        }
         UserDetails userDetails = userDetailsService.loadUserBasedOnRole(email, role);
         if(!passwordEncoder.matches(password, userDetails.getPassword())){
             throw new BadCredentialsException("Invalid credentials!");
         }
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-
-    }
-
-    private String getRoleFromRequest() {
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        HttpServletRequest request = attr.getRequest();
-        return request.getParameter("role");
     }
 
     @Override

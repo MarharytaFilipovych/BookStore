@@ -15,12 +15,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 @AllArgsConstructor
-//@Table(name = "books", uniqueConstraints = {
-//        @UniqueConstraint(
-//                name = "unique_book_author_publish_date",
-//                columnNames = {"author", "publication_year", "name"}
-//        )
-//})
 @Table(name = "books")
 public class Book {
 

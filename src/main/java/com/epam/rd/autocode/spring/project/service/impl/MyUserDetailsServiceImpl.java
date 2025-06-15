@@ -29,7 +29,7 @@ public class MyUserDetailsServiceImpl implements MyUserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Client client = clientRepository.getByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "Client with email " + email + "was not found!"));
+                        "Client with email " + email + " was not found!"));
         if(blockedClientRepository.existsByClient_Email(email)){
             throw new LockedException("Account is blocked!");
         }
