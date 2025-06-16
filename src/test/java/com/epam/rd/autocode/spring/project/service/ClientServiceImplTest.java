@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service;
 
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
+import com.epam.rd.autocode.spring.project.dto.ClientUpdateDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.mappers.ClientMapper;
@@ -24,6 +25,8 @@ import static com.epam.rd.autocode.spring.project.testdata.ClientData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -258,6 +261,97 @@ public class ClientServiceImplTest {
         verify(clientRepository).getByEmail(clientEmail);
         verify(clientMapper, never()).toEntity(any(ClientDTO.class));
         verify(clientRepository, never()).save(any());
+    }
+
+    @Test
+    void updateClientByEmailWithClientUpdateDTO_WhenClientExists_ShouldReturnUpdatedClientDTO() {
+        // Arrange
+        ClientUpdateDTO updateData = new ClientUpdateDTO();
+        updateData.setName("Updated Name");
+        updateData.setBalance(new BigDecimal("500.00"));
+
+        Client updatedClient = new Client();
+        updatedClient.setName("Updated Name");
+        updatedClient.setBalance(new BigDecimal("500.00"));
+
+        ClientDTO expectedResult = new ClientDTO();
+        expectedResult.setEmail(client.getEmail());
+        expectedResult.setName("Updated Name");
+        expectedResult.setBalance(new BigDecimal("500.00"));
+
+        when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
+        when(clientMapper.toEntity(updateData)).thenReturn(updatedClient);
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> {
+            Client saved = invocation.getArgument(0);
+            assertEquals(client.getId(), saved.getId());
+            assertEquals(client.getEmail(), saved.getEmail());
+            return saved;
+        });
+        when(clientMapper.toDto(updatedClient)).thenReturn(expectedResult);
+
+        // Act
+        ClientDTO result = clientService.updateClientByEmail(client.getEmail(), updateData);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedResult, result);
+        verify(clientRepository).getByEmail(client.getEmail());
+        verify(clientMapper).toEntity(updateData);
+        verify(clientRepository).save(argThat(c ->
+                c.getId().equals(client.getId()) &&
+                        c.getEmail().equals(client.getEmail())
+        ));
+        verify(clientMapper).toDto(updatedClient);
+    }
+
+    @Test
+    void updateClientByEmailWithClientUpdateDTO_WhenClientDoesNotExist_ShouldThrowNotFoundException() {
+        // Arrange
+        String clientEmail = "nonexistent@example.com";
+        ClientUpdateDTO updateData = new ClientUpdateDTO();
+        updateData.setName("Updated Name");
+        updateData.setBalance(new BigDecimal("500.00"));
+
+        when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> clientService.updateClientByEmail(clientEmail, updateData));
+
+        assertTrue(exception.getMessage().contains("Client with email " + clientEmail));
+        verify(clientRepository).getByEmail(clientEmail);
+        verify(clientMapper, never()).toEntity(any(ClientUpdateDTO.class));
+        verify(clientRepository, never()).save(any());
+    }
+
+    @Test
+    void updateClientByEmailWithClientUpdateDTO_ShouldPreserveOriginalIdAndEmail() {
+        // Arrange
+        ClientUpdateDTO updateData = new ClientUpdateDTO();
+        updateData.setName("New Name");
+        updateData.setBalance(new BigDecimal("999.99"));
+
+        Client mappedClient = new Client();
+        mappedClient.setName("New Name");
+        mappedClient.setBalance(new BigDecimal("999.99"));
+
+        when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
+        when(clientMapper.toEntity(updateData)).thenReturn(mappedClient);
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(clientMapper.toDto(any(Client.class))).thenReturn(clientDTO);
+
+        // Act
+        clientService.updateClientByEmail(client.getEmail(), updateData);
+
+        // Assert
+        ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
+        verify(clientRepository).save(clientCaptor.capture());
+
+        Client savedClient = clientCaptor.getValue();
+        assertEquals(client.getId(), savedClient.getId());
+        assertEquals(client.getEmail(), savedClient.getEmail());
+        assertEquals("New Name", savedClient.getName());
+        assertEquals(new BigDecimal("999.99"), savedClient.getBalance());
     }
 
     @Test

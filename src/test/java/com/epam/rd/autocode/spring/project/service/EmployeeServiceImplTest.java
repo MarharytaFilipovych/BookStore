@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service;
 
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
+import com.epam.rd.autocode.spring.project.dto.EmployeeUpdateDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.mappers.EmployeeMapper;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -252,6 +254,107 @@ public class EmployeeServiceImplTest {
         verify(employeeRepository).getByEmail(employeeEmail);
         verify(employeeMapper, never()).toEntity(any(EmployeeDTO.class));
         verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    void updateEmployeeByEmailWithEmployeeUpdateDTO_WhenEmployeeExists_ShouldReturnUpdatedEmployeeDTO() {
+        // Arrange
+        EmployeeUpdateDTO updateData = new EmployeeUpdateDTO();
+        updateData.setName("Updated Name");
+        updateData.setPhone("+1-555-9999");
+        updateData.setBirthDate(LocalDate.of(1990, 1, 1));
+
+        Employee updatedEmployee = new Employee();
+        updatedEmployee.setName("Updated Name");
+        updatedEmployee.setPhone("+1-555-9999");
+        updatedEmployee.setBirthDate(LocalDate.of(1990, 1, 1));
+
+        EmployeeDTO expectedResult = new EmployeeDTO();
+        expectedResult.setEmail(employee.getEmail());
+        expectedResult.setName("Updated Name");
+        expectedResult.setPhone("+1-555-9999");
+        expectedResult.setBirthDate(LocalDate.of(1990, 1, 1));
+
+        when(employeeRepository.getByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
+        when(employeeMapper.toEntity(updateData)).thenReturn(updatedEmployee);
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> {
+            Employee saved = invocation.getArgument(0);
+            assertEquals(employee.getId(), saved.getId());
+            assertEquals(employee.getPassword(), saved.getPassword());
+            assertEquals(employee.getEmail(), saved.getEmail());
+            return saved;
+        });
+        when(employeeMapper.toDto(updatedEmployee)).thenReturn(expectedResult);
+
+        // Act
+        EmployeeDTO result = employeeService.updateEmployeeByEmail(employee.getEmail(), updateData);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedResult, result);
+        verify(employeeRepository).getByEmail(employee.getEmail());
+        verify(employeeMapper).toEntity(updateData);
+        verify(employeeRepository).save(argThat(emp ->
+                emp.getId().equals(employee.getId()) &&
+                        emp.getPassword().equals(employee.getPassword()) &&
+                        emp.getEmail().equals(employee.getEmail())
+        ));
+        verify(employeeMapper).toDto(updatedEmployee);
+    }
+
+    @Test
+    void updateEmployeeByEmailWithEmployeeUpdateDTO_WhenEmployeeDoesNotExist_ShouldThrowNotFoundException() {
+        // Arrange
+        String employeeEmail = "nonexistent@example.com";
+        EmployeeUpdateDTO updateData = new EmployeeUpdateDTO();
+        updateData.setName("Updated Name");
+        updateData.setPhone("+1-555-9999");
+        updateData.setBirthDate(LocalDate.of(1990, 1, 1));
+
+        when(employeeRepository.getByEmail(employeeEmail)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> employeeService.updateEmployeeByEmail(employeeEmail, updateData));
+
+        assertTrue(exception.getMessage().contains("Employee with email " + employeeEmail));
+        verify(employeeRepository).getByEmail(employeeEmail);
+        verify(employeeMapper, never()).toEntity(any(EmployeeUpdateDTO.class));
+        verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    void updateEmployeeByEmailWithEmployeeUpdateDTO_ShouldPreserveOriginalPasswordAndEmail() {
+        // Arrange
+        EmployeeUpdateDTO updateData = new EmployeeUpdateDTO();
+        updateData.setName("New Name");
+        updateData.setPhone("+1-555-0000");
+        updateData.setBirthDate(LocalDate.of(1995, 5, 5));
+
+        Employee mappedEmployee = new Employee();
+        mappedEmployee.setName("New Name");
+        mappedEmployee.setPhone("+1-555-0000");
+        mappedEmployee.setBirthDate(LocalDate.of(1995, 5, 5));
+
+        when(employeeRepository.getByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
+        when(employeeMapper.toEntity(updateData)).thenReturn(mappedEmployee);
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(employeeMapper.toDto(any(Employee.class))).thenReturn(employeeDTO);
+
+        // Act
+        employeeService.updateEmployeeByEmail(employee.getEmail(), updateData);
+
+        // Assert
+        ArgumentCaptor<Employee> employeeCaptor = ArgumentCaptor.forClass(Employee.class);
+        verify(employeeRepository).save(employeeCaptor.capture());
+
+        Employee savedEmployee = employeeCaptor.getValue();
+        assertEquals(employee.getId(), savedEmployee.getId());
+        assertEquals(employee.getPassword(), savedEmployee.getPassword());
+        assertEquals(employee.getEmail(), savedEmployee.getEmail());
+        assertEquals("New Name", savedEmployee.getName());
+        assertEquals("+1-555-0000", savedEmployee.getPhone());
+        assertEquals(LocalDate.of(1995, 5, 5), savedEmployee.getBirthDate());
     }
 
     @Test
