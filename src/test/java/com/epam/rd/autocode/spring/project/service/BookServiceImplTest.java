@@ -1,12 +1,16 @@
 package com.epam.rd.autocode.spring.project.service;
 
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
+import com.epam.rd.autocode.spring.project.dto.SearchBookDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.mappers.BookMapper;
 import com.epam.rd.autocode.spring.project.model.Book;
+import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
+import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.service.impl.BookServiceImpl;
+import com.querydsl.core.BooleanBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.math.BigDecimal;
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +45,7 @@ public class BookServiceImplTest {
     private BookDTO bookDTO;
     private List<Book> books;
     private List<BookDTO> bookDTOs;
+    private SearchBookDTO searchBookDTO;
 
     @BeforeEach
     void setUp(){
@@ -45,6 +53,7 @@ public class BookServiceImplTest {
         bookDTO = getBookDTO();
         books = getBookEntities();
         bookDTOs = getBookDTOs();
+        searchBookDTO = new SearchBookDTO();
     }
 
     @Test
@@ -293,6 +302,157 @@ public class BookServiceImplTest {
         assertEquals("The book with a name " + bookDTO.getName() + " already exists!", exception.getMessage());
         verify(bookMapper).toEntity(bookDTO);
         verify(bookRepository).save(book);
+    }
+
+    @Test
+    void getAllBooksWithSearchCondition_WithAllCriteria_ShouldReturnMatchingBooks() {
+        // Arrange
+        SearchBookDTO searchCriteria = new SearchBookDTO();
+        searchCriteria.setName("Adventure");
+        searchCriteria.setGenre("Fantasy");
+        searchCriteria.setAuthor("John");
+        searchCriteria.setAgeGroup(AgeGroup.CHILD);
+        searchCriteria.setLanguage(Language.ENGLISH);
+        searchCriteria.setMinPrice(new BigDecimal("10.00"));
+        searchCriteria.setMaxPrice(new BigDecimal("20.00"));
+        searchCriteria.setMinPages(200);
+        searchCriteria.setMaxPages(300);
+        searchCriteria.setPublicationYear(Year.of(2023));
+
+        List<Book> expectedBooks = books.stream()
+                .filter(book -> book.getName().toLowerCase().contains("adventure") &&
+                        book.getGenre().toLowerCase().contains("fantasy") &&
+                        book.getAuthor().toLowerCase().contains("john") &&
+                        book.getAgeGroup() == AgeGroup.CHILD &&
+                        book.getLanguage() == Language.ENGLISH &&
+                        book.getPrice().compareTo(new BigDecimal("10.00")) >= 0 &&
+                        book.getPrice().compareTo(new BigDecimal("20.00")) <= 0 &&
+                        book.getPages() >= 200 &&
+                        book.getPages() <= 300 &&
+                        book.getPublicationDate().getYear() == 2023)
+                .toList();
+
+        List<BookDTO> expectedDTOs = bookDTOs.stream()
+                .filter(dto -> dto.getName().toLowerCase().contains("adventure") &&
+                        dto.getGenre().toLowerCase().contains("fantasy") &&
+                        dto.getAuthor().toLowerCase().contains("john") &&
+                        dto.getAgeGroup() == AgeGroup.CHILD &&
+                        dto.getLanguage() == Language.ENGLISH &&
+                        dto.getPrice().compareTo(new BigDecimal("10.00")) >= 0 &&
+                        dto.getPrice().compareTo(new BigDecimal("20.00")) <= 0 &&
+                        dto.getPages() >= 200 &&
+                        dto.getPages() <= 300 &&
+                        dto.getPublicationDate().getYear() == 2023)
+                .toList();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Book> bookPage = new PageImpl<>(expectedBooks, pageable, expectedBooks.size());
+
+        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
+        for (int i = 0; i < expectedBooks.size(); i++) {
+            when(bookMapper.toDto(expectedBooks.get(i))).thenReturn(expectedDTOs.get(i));
+        }
+
+        // Act
+        Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(searchCriteria, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedBooks.size(), result.getTotalElements());
+        assertEquals(expectedBooks.size(), result.getContent().size());
+        assertEquals(expectedDTOs, result.getContent());
+
+        assertTrue(result.getContent().stream().allMatch(book ->
+                book.getName().toLowerCase().contains("adventure") &&
+                        book.getGenre().toLowerCase().contains("fantasy") &&
+                        book.getAuthor().toLowerCase().contains("john") &&
+                        book.getAgeGroup() == AgeGroup.CHILD &&
+                        book.getLanguage() == Language.ENGLISH &&
+                        book.getPrice().compareTo(new BigDecimal("10.00")) >= 0 &&
+                        book.getPrice().compareTo(new BigDecimal("20.00")) <= 0 &&
+                        book.getPages() >= 200 &&
+                        book.getPages() <= 300 &&
+                        book.getPublicationDate().getYear() == 2023
+        ));
+
+        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
+        verify(bookMapper, times(expectedBooks.size())).toDto(any(Book.class));
+
+        ArgumentCaptor<BooleanBuilder> predicateCaptor = ArgumentCaptor.forClass(BooleanBuilder.class);
+        verify(bookRepository).findAll(predicateCaptor.capture(), eq(pageable));
+        BooleanBuilder capturedPredicate = predicateCaptor.getValue();
+        assertNotNull(capturedPredicate);
+        assertTrue(capturedPredicate.hasValue());
+    }
+
+    @Test
+    void getAllBooksWithSearchCondition_WithNoMatchingCriteria_ShouldReturnEmptyResults() {
+        // Arrange
+        SearchBookDTO noMatchCriteria = new SearchBookDTO();
+        noMatchCriteria.setName("NonExistentBook");
+        noMatchCriteria.setGenre("Science Fiction");
+        noMatchCriteria.setAuthor("Unknown Author");
+        noMatchCriteria.setLanguage(Language.SPANISH);
+        noMatchCriteria.setAgeGroup(AgeGroup.OTHER);
+        noMatchCriteria.setMinPrice(new BigDecimal("1000.00"));
+        noMatchCriteria.setMaxPrice(new BigDecimal("1500.00"));
+        noMatchCriteria.setMinPages(5000);
+        noMatchCriteria.setMaxPages(6000);
+        noMatchCriteria.setPublicationYear(Year.of(1900));
+
+        List<Book> expectedBooks = books.stream()
+                .filter(book -> book.getName().toLowerCase().contains("nonexistentbook") &&
+                        book.getGenre().toLowerCase().contains("science fiction") &&
+                        book.getAuthor().toLowerCase().contains("unknown author") &&
+                        book.getLanguage() == Language.SPANISH &&
+                        book.getAgeGroup() == AgeGroup.OTHER &&
+                        book.getPrice().compareTo(new BigDecimal("1000.00")) >= 0 &&
+                        book.getPrice().compareTo(new BigDecimal("1500.00")) <= 0 &&
+                        book.getPages() >= 5000 &&
+                        book.getPages() <= 6000 &&
+                        book.getPublicationDate().getYear() == 1900)
+                .toList();
+
+        List<BookDTO> expectedDTOs = bookDTOs.stream()
+                .filter(dto -> dto.getName().toLowerCase().contains("nonexistentbook") &&
+                        dto.getGenre().toLowerCase().contains("science fiction") &&
+                        dto.getAuthor().toLowerCase().contains("unknown author") &&
+                        dto.getLanguage() == Language.SPANISH &&
+                        dto.getAgeGroup() == AgeGroup.OTHER &&
+                        dto.getPrice().compareTo(new BigDecimal("1000.00")) >= 0 &&
+                        dto.getPrice().compareTo(new BigDecimal("1500.00")) <= 0 &&
+                        dto.getPages() >= 5000 &&
+                        dto.getPages() <= 6000 &&
+                        dto.getPublicationDate().getYear() == 1900)
+                .toList();
+
+        assertTrue(expectedBooks.isEmpty(), "Test data should not contain books matching these criteria");
+        assertTrue(expectedDTOs.isEmpty(), "Test data should not contain DTOs matching these criteria");
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Book> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(emptyPage);
+
+        // Act
+        Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(noMatchCriteria, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getContent().size());
+        assertTrue(result.getContent().isEmpty());
+
+        assertTrue(result.getContent().isEmpty(), "No books should match the specified criteria");
+
+        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
+        verify(bookMapper, never()).toDto(any(Book.class));
+
+        ArgumentCaptor<BooleanBuilder> predicateCaptor = ArgumentCaptor.forClass(BooleanBuilder.class);
+        verify(bookRepository).findAll(predicateCaptor.capture(), eq(pageable));
+        BooleanBuilder capturedPredicate = predicateCaptor.getValue();
+        assertNotNull(capturedPredicate);
+        assertTrue(capturedPredicate.hasValue());
     }
 }
 

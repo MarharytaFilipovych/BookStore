@@ -6,7 +6,6 @@ import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
@@ -14,7 +13,6 @@ import java.math.BigDecimal;
 import java.time.Year;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class SearchBookDTO {
     @Length(min = 1, max = 255, message = "Book name must be between 1 and 255 characters")

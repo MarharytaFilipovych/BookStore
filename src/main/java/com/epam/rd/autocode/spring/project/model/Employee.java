@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Entity
 @NoArgsConstructor
-@Table(name = "employees")
+@Table(name = "employees", indexes = @Index(name = "unique_email", columnList = "email", unique = true))
 public class Employee extends User{
     @Column(nullable = false, length = 19)
     private String phone;

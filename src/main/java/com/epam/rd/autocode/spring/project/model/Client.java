@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Entity
 @NoArgsConstructor
-@Table(name = "clients")
+@Table(name = "clients", indexes = @Index(name = "unique_email", columnList = "email", unique = true))
 public class Client extends User {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balance;
