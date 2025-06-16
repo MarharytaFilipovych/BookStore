@@ -32,11 +32,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String token = authHeader.substring(7);
 
+                if (token.trim().isEmpty()) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     String username = jwtUtils.getUserName(token);
+                    if (username == null || username.trim().isEmpty()) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
                     List<String> roles = jwtUtils.getRoles(token);
 
-                    if (username != null && !jwtUtils.isTokenExpired(token)) {
+                    if (!jwtUtils.isTokenExpired(token)) {
                         List<SimpleGrantedAuthority> authorities = roles.stream()
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList());
