@@ -18,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import static com.epam.rd.autocode.spring.project.testdata.ClientData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +38,9 @@ public class ClientServiceImplTest {
 
     @Mock
     private BlockedClientRepository blockedClientRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private ClientServiceImpl clientService;
@@ -210,7 +215,7 @@ public class ClientServiceImplTest {
     }
 
     @Test
-    void updateClientByEmail_WhenClientExists_ShouldReturnUpdatedClientDTO() {
+    void updateClientByEmailWithClientDTO_WhenClientExists_ShouldReturnUpdatedClientDTO() {
         // Arrange
         ClientDTO updateData = getClientDTO();
         updateData.setName("New Name");
@@ -240,7 +245,7 @@ public class ClientServiceImplTest {
     }
 
     @Test
-    void updateClientByEmail_WhenClientDoesNotExist_ShouldThrowNotFoundException(){
+    void updateClientByEmailWithClientDTO_WhenClientDoesNotExist_ShouldThrowNotFoundException(){
         // Arrange
         String clientEmail = "nonexistent@example.com";
         when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.empty());
@@ -251,7 +256,7 @@ public class ClientServiceImplTest {
 
         assertTrue(exception.getMessage().contains("Client with email " + clientEmail));
         verify(clientRepository).getByEmail(clientEmail);
-        verify(clientMapper, never()).toEntity(any());
+        verify(clientMapper, never()).toEntity(any(ClientDTO.class));
         verify(clientRepository, never()).save(any());
     }
 

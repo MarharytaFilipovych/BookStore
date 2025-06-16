@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static com.epam.rd.autocode.spring.project.testdata.EmployeeData.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +34,9 @@ public class EmployeeServiceImplTest {
 
     @Mock
     private EmployeeMapper employeeMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private EmployeeServiceImpl employeeService;
@@ -205,7 +209,7 @@ public class EmployeeServiceImplTest {
     }
 
     @Test
-    void updateEmployeeByEmail_WhenEmployeeExists_ShouldReturnUpdatedEmployeeDTO() {
+    void updateEmployeeByEmailWithEmployeeDTO_WhenEmployeeExists_ShouldReturnUpdatedEmployeeDTO() {
         // Arrange
         EmployeeDTO updateData = getEmployeeDTO();
         updateData.setName("New Name");
@@ -235,7 +239,7 @@ public class EmployeeServiceImplTest {
     }
 
     @Test
-    void updateEmployeeByEmail_WhenEmployeeDoesNotExist_ShouldThrowNotFoundException(){
+    void updateEmployeeByEmailWithEmployeeDTO_WhenEmployeeDoesNotExist_ShouldThrowNotFoundException(){
         // Arrange
         String employeeEmail = "nonexistent@example.com";
         when(employeeRepository.getByEmail(employeeEmail)).thenReturn(Optional.empty());
@@ -246,7 +250,7 @@ public class EmployeeServiceImplTest {
 
         assertTrue(exception.getMessage().contains("Employee with email " + employeeEmail));
         verify(employeeRepository).getByEmail(employeeEmail);
-        verify(employeeMapper, never()).toEntity(any());
+        verify(employeeMapper, never()).toEntity(any(EmployeeDTO.class));
         verify(employeeRepository, never()).save(any());
     }
 
