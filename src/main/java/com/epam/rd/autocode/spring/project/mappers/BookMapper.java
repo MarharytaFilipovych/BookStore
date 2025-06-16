@@ -16,10 +16,7 @@ public class BookMapper {
                         m.skip(Book::setId));
     }
 
-    public BookDTO toDto(Book book){
-        return mapper.map(book, BookDTO.class);
-
-    }
+    public BookDTO toDto(Book book){return mapper.map(book, BookDTO.class); }
 
     public Book toEntity(BookDTO dto){
         return mapper.map(dto, Book.class);
