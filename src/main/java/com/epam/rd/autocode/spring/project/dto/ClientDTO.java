@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.dto;
 
 import com.epam.rd.autocode.spring.project.annotations.CorrectName;
 import com.epam.rd.autocode.spring.project.annotations.ValidPassword;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,6 +23,7 @@ public class ClientDTO {
 
     @NotBlank(message = "Password is required")
     @ValidPassword
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @CorrectName

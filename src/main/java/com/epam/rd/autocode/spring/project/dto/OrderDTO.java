@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -21,13 +22,16 @@ import java.util.List;
 public class OrderDTO {
 
     @Email(message = "Please provide a valid employee email address")
+    @JsonProperty("employee_email")
     private String employeeEmail;
 
     @Email(message = "Please provide a valid client email address")
+    @JsonProperty("client_email")
     private String clientEmail;
 
     @NotNull(message = "Order date is required")
     @PastOrPresent(message = "Order date cannot be in the future")
+    @JsonProperty("order_date")
     private LocalDateTime orderDate;
 
     @NotNull(message = "Order price is required")
@@ -37,5 +41,6 @@ public class OrderDTO {
     @NotNull(message = "Book items list is required")
     @NotEmpty(message = "Order must contain at least one book item")
     @Valid
+    @JsonProperty("book_items")
     private List<BookItemDTO> bookItems = new ArrayList<>();
 }

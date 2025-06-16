@@ -4,6 +4,7 @@ import com.epam.rd.autocode.spring.project.annotations.CorrectEnum;
 import com.epam.rd.autocode.spring.project.annotations.CorrectName;
 import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -30,6 +31,7 @@ public class BookDTO {
 
     @NotNull(message = "Age group is required")
     @CorrectEnum(enumClass = AgeGroup.class, message = "Invalid age group. Must be one of: CHILD, TEEN, ADULT, OTHER")
+    @JsonProperty("age_group")
     private AgeGroup ageGroup;
 
     @NotNull(message = "Price is required")
@@ -38,6 +40,7 @@ public class BookDTO {
 
     @NotNull(message = "Publication date is required")
     @Past(message = "Publication date must be in the past")
+    @JsonProperty("publication_date")
     private LocalDate publicationDate;
 
     @CorrectName

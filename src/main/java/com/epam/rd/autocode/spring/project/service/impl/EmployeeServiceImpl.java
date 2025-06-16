@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
+import com.epam.rd.autocode.spring.project.dto.EmployeeUpdateDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.mappers.EmployeeMapper;
@@ -11,6 +12,7 @@ import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +21,12 @@ import java.util.List;
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper mapper, OrderRepository orderRepository) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper mapper, OrderRepository orderRepository, PasswordEncoder passwordEncoder) {
         this.employeeRepository = employeeRepository;
         this.employeeMapper = mapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -52,6 +56,18 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new NotFoundException("Employee with email " + email));
     }
 
+    @Override
+    public EmployeeDTO updateEmployeeByEmail(String email, EmployeeUpdateDTO employee) {
+        return employeeRepository.getByEmail(email)
+                .map(existingEmployee -> {
+                    Employee updatedEmployee = employeeMapper.toEntity(employee);
+                    updatedEmployee.setId(existingEmployee.getId());
+                    updatedEmployee.setPassword(existingEmployee.getPassword());
+                    updatedEmployee.setEmail(existingEmployee.getEmail());
+                    return employeeMapper.toDto(employeeRepository.save(updatedEmployee));
+                })
+                .orElseThrow(() -> new NotFoundException("Employee with email " + email));
+    }
 
     @Override
     public void deleteEmployeeByEmail(String email) {
@@ -59,11 +75,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeDTO addEmployee(EmployeeDTO employee) {
+    public EmployeeDTO addEmployee(EmployeeDTO dto) {
         try{
-            return employeeMapper.toDto(employeeRepository.save(employeeMapper.toEntity(employee)));
+            Employee employee = employeeMapper.toEntity(dto);
+            employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+            return employeeMapper.toDto(employeeRepository.save(employee));
         }catch (DataIntegrityViolationException e){
-            throw new AlreadyExistException("Employee with email " + employee.getEmail());
+            throw new AlreadyExistException("Employee with email " + dto.getEmail());
         }
     }
 }

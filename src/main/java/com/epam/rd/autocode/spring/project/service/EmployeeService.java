@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service;
 
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
+import com.epam.rd.autocode.spring.project.dto.EmployeeUpdateDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +16,8 @@ public interface EmployeeService {
     EmployeeDTO getEmployeeByEmail(String email);
 
     EmployeeDTO updateEmployeeByEmail(String email, EmployeeDTO employee);
+
+    EmployeeDTO updateEmployeeByEmail(String email, EmployeeUpdateDTO employee);
 
     void deleteEmployeeByEmail(String email);
 

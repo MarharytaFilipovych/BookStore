@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service;
 
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
+import com.epam.rd.autocode.spring.project.dto.ClientUpdateDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +16,8 @@ public interface ClientService {
     ClientDTO getClientByEmail(String email);
 
     ClientDTO updateClientByEmail(String email, ClientDTO client);
+
+    ClientDTO updateClientByEmail(String email, ClientUpdateDTO client);
 
     void deleteClientByEmail(String email);
 

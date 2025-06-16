@@ -24,6 +24,7 @@ public class EmployeeDTO {
 
     @NotBlank(message = "Password is required")
     @ValidPassword(message = "Password does not meet security requirements")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @NotBlank(message = "Name is required")
