@@ -192,8 +192,8 @@ public class BookServiceImplTest {
         verify(bookMapper).toDto(updatedBook);
     }
 
-    private void verifyNotFoundScenario(String bookName, Class<? extends Exception> expectedExceptionType) {
-        Exception exception = assertThrows(expectedExceptionType,
+    private void verifyNotFoundScenario(String bookName) {
+        Exception exception = assertThrows(NotFoundException.class,
                 () -> bookService.getBookByName(bookName));
         assertTrue(exception.getMessage().contains("The book with a name " + bookName));
         verify(bookRepository).findByName(bookName);
@@ -222,7 +222,7 @@ public class BookServiceImplTest {
         assertNotNull(capturedPredicate);
     }
 
-    private void testSortingScenario(Sort sort, String testDescription) {
+    private void testSortingScenario(Sort sort) {
         Pageable pageable = PageRequest.of(0, 10, sort);
         Pageable mappedPageable = PageRequest.of(0, 10, sort);
 
@@ -253,18 +253,18 @@ public class BookServiceImplTest {
 
     @Test
     void getAllBooks_WithSortByNameAsc_ShouldPassCorrectSortToRepository() {
-        testSortingScenario(Sort.by("name"), "name ascending");
+        testSortingScenario(Sort.by("name"));
     }
 
     @Test
     void getAllBooks_WithSortByPriceDesc_ShouldPassCorrectSortToRepository() {
-        testSortingScenario(Sort.by("price").descending(), "price descending");
+        testSortingScenario(Sort.by("price").descending());
     }
 
     @Test
     void getAllBooks_WithMultipleSort_ShouldPassCorrectSortToRepository() {
         Sort multiSort = Sort.by("name").and(Sort.by("price").descending());
-        testSortingScenario(multiSort, "multiple sort");
+        testSortingScenario(multiSort);
     }
 
     @Test
@@ -335,7 +335,7 @@ public class BookServiceImplTest {
         when(bookRepository.findByName(bookName)).thenReturn(Optional.empty());
 
         // Act & Assert
-        verifyNotFoundScenario(bookName, NotFoundException.class);
+        verifyNotFoundScenario(bookName);
     }
 
     @Test

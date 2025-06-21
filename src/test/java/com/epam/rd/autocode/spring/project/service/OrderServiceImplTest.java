@@ -15,11 +15,12 @@ import com.epam.rd.autocode.spring.project.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,26 +36,13 @@ import static com.epam.rd.autocode.spring.project.testdata.OrderData.*;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceImplTest {
 
-    @Mock
-    private OrderRepository orderRepository;
-
-    @Mock
-    private OrderMapper orderMapper;
-
-    @Mock
-    private EmployeeRepository employeeRepository;
-
-    @Mock
-    private ClientRepository clientRepository;
-
-    @Mock
-    private BookItemMapper bookItemMapper;
-
-    @Mock
-    private BookRepository bookRepository;
-
-    @Mock
-    private SortMappingService sortMappingService;
+    @Mock private OrderRepository orderRepository;
+    @Mock private OrderMapper orderMapper;
+    @Mock private EmployeeRepository employeeRepository;
+    @Mock private ClientRepository clientRepository;
+    @Mock private BookItemMapper bookItemMapper;
+    @Mock private BookRepository bookRepository;
+    @Mock private SortMappingService sortMappingService;
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -63,117 +51,233 @@ class OrderServiceImplTest {
     private OrderDTO testOrderDTO;
     private Employee employee;
     private Client client;
-    private Book book;
-    private BookItem bookItem;
     private BookItemDTO bookItemDTO;
     private List<Order> orders;
     private List<OrderDTO> orderDTOs;
+    private List<Book> books;
+    private List<BookItemDTO> bookItemDTOs;
 
     @BeforeEach
     void setUp() {
         employee = getEmployeeEntity();
         client = getClientEntity();
-        book = getBookEntity();
-        bookItem = getBookItemEntity();
         order = getOrderEntity();
         bookItemDTO = getBookItemDTO();
         testOrderDTO = getOrderDTO();
         orders = getOrderEntities();
         orderDTOs = getOrderDTOs();
+        books = getBookEntities();
+        bookItemDTOs = getBookItemDTOs();
+    }
+
+    private void mockPageableOrderOperations(Pageable pageable, Pageable mappedPageable,
+                                             List<Order> orderList, List<OrderDTO> orderDTOList) {
+        Page<Order> orderPage = new PageImpl<>(orderList, mappedPageable, orderList.size());
+        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
+        when(orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable)).thenReturn(orderPage);
+
+        for (int i = 0; i < orderList.size(); i++) {
+            when(orderMapper.toDto(orderList.get(i))).thenReturn(orderDTOList.get(i));
+        }
+    }
+
+    private void mockEmptyPageableRepository(Pageable pageable, Pageable mappedPageable) {
+        Page<Order> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
+        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
+        when(orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable)).thenReturn(emptyPage);
+    }
+
+    private void mockClientOrderOperations(String clientEmail, Pageable pageable, Pageable mappedPageable,
+                                           List<Order> clientOrders, List<OrderDTO> expectedDTOs) {
+
+        if (pageable != null) {
+            when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
+            Page<Order> orderPage = new PageImpl<>(clientOrders, mappedPageable, clientOrders.size());
+            when(orderRepository.findAllByClient_Email(clientEmail, mappedPageable)).thenReturn(orderPage);
+        } else {
+            when(orderRepository.findAllByClient_Email(clientEmail)).thenReturn(clientOrders);
+        }
+        for (int i = 0; i < clientOrders.size(); i++) {
+            when(orderMapper.toDto(clientOrders.get(i))).thenReturn(expectedDTOs.get(i));
+        }
+    }
+
+    private void mockEmployeeOrderOperations(String employeeEmail, Pageable pageable, Pageable mappedPageable,
+                                             List<Order> employeeOrders, List<OrderDTO> expectedDTOs) {
+        if (pageable != null) {
+            when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
+            Page<Order> orderPage = new PageImpl<>(employeeOrders, mappedPageable, employeeOrders.size());
+            when(orderRepository.findAllByEmployee_Email(employeeEmail, mappedPageable)).thenReturn(orderPage);
+        } else {
+            when(orderRepository.findAllByEmployee_Email(employeeEmail)).thenReturn(employeeOrders);
+        }
+        for (int i = 0; i < employeeOrders.size(); i++) {
+            when(orderMapper.toDto(employeeOrders.get(i))).thenReturn(expectedDTOs.get(i));
+        }
+    }
+
+    private void mockSuccessfulOrderCreation(OrderDTO dto, Order mappedOrder, Order savedOrder) {
+        when(orderMapper.toEntity(dto)).thenReturn(mappedOrder);
+        when(employeeRepository.getByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(employee));
+        when(clientRepository.getByEmail(dto.getClientEmail())).thenReturn(Optional.of(client));
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+        when(orderMapper.toDto(savedOrder)).thenReturn(dto);
+    }
+
+    private void mockBookItemOperations(List<BookItemDTO> itemDTOs, List<Book> booksToReturn) {
+        for (int i = 0; i < itemDTOs.size() && i < booksToReturn.size();  i++) {
+            when(bookRepository.findByName(itemDTOs.get(i).getBookName()))
+                    .thenReturn(Optional.of(booksToReturn.get(i)));
+            when(bookItemMapper.toEntity(itemDTOs.get(i))).thenReturn(new BookItem());
+        }
+    }
+
+    private void mockOrderConfirmation(OrderDTO dto, Order orderToConfirm) {
+        when(orderRepository.findDistinctByClient_EmailAndOrderDate(dto.getClientEmail(), dto.getOrderDate()))
+                .thenReturn(orderToConfirm);
+        when(employeeRepository.getByEmail(dto.getEmployeeEmail())).thenReturn(Optional.of(employee));
+        when(orderRepository.save(orderToConfirm)).thenReturn(orderToConfirm);
+    }
+
+    private void mockEmptyOrderResults(String email, boolean isClient) {
+        if (isClient) {
+            when(orderRepository.findAllByClient_Email(email)).thenReturn(List.of());
+        } else {
+            when(orderRepository.findAllByEmployee_Email(email)).thenReturn(List.of());
+        }
+    }
+
+    private void verifyPageableOperations(Pageable originalPageable, Pageable mappedPageable) {
+        verify(sortMappingService).applyMappings(originalPageable, "order");
+        verify(orderRepository).findAllByClientNotNullAndEmployeeNotNull(mappedPageable);
+    }
+
+    private void verifyPagedResults(Page<OrderDTO> result, List<OrderDTO> expectedContent, int expectedTotalElements) {
+        assertNotNull(result);
+        assertEquals(expectedTotalElements, result.getTotalElements());
+        assertEquals(expectedContent, result.getContent());
+    }
+
+    private void verifyListResults(List<OrderDTO> result, List<OrderDTO> expectedContent) {
+        assertNotNull(result);
+        assertEquals(expectedContent.size(), result.size());
+        assertEquals(expectedContent, result);
+    }
+
+    private void verifyEmptyResults(Page<OrderDTO> result) {
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
+    }
+
+    private void verifyEmptyListResults(List<OrderDTO> result) {
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    private void verifyOrderCreationOperations(OrderDTO dto) {
+        verify(orderMapper).toEntity(dto);
+        verify(employeeRepository).getByEmail(dto.getEmployeeEmail());
+        verify(clientRepository).getByEmail(dto.getClientEmail());
+        verify(orderRepository).save(any(Order.class));
+        verify(orderMapper).toDto(any(Order.class));
+    }
+
+    private void verifyOrderConfirmationOperations(OrderDTO dto, Order orderToConfirm) {
+        verify(orderRepository).findDistinctByClient_EmailAndOrderDate(dto.getClientEmail(), dto.getOrderDate());
+        verify(employeeRepository).getByEmail(dto.getEmployeeEmail());
+        verify(orderRepository).save(orderToConfirm);
+        assertEquals(employee, orderToConfirm.getEmployee());
+    }
+
+    private void verifyClientOrderOperations(String clientEmail, Pageable pageable) {
+        if (pageable != null) {
+            verify(sortMappingService).applyMappings(pageable, "order");
+            verify(orderRepository).findAllByClient_Email(eq(clientEmail), any(Pageable.class));
+        } else {
+            verify(orderRepository).findAllByClient_Email(clientEmail);
+        }
+    }
+
+    private void verifyEmployeeOrderOperations(String employeeEmail, Pageable pageable) {
+        if (pageable != null) {
+            verify(sortMappingService).applyMappings(pageable, "order");
+            verify(orderRepository).findAllByEmployee_Email(eq(employeeEmail), any(Pageable.class));
+        } else {
+            verify(orderRepository).findAllByEmployee_Email(employeeEmail);
+        }
+    }
+
+    private void verifyBookItemMappingOperations(List<BookItemDTO> itemDTOs) {
+        for (BookItemDTO itemDTO : itemDTOs) {
+            verify(bookRepository).findByName(itemDTO.getBookName());
+        }
+        verify(bookItemMapper, times(itemDTOs.size())).toEntity(any(BookItemDTO.class));
+    }
+
+    private void verifyNotFoundScenario(Class<? extends Exception> exceptionType, String expectedMessageFragment,
+                                        Runnable serviceCall) {
+        Exception exception = assertThrows(exceptionType, serviceCall::run);
+        assertTrue(exception.getMessage().contains(expectedMessageFragment));
+    }
+
+    private void testSortingScenario(Sort sort) {
+        Pageable pageable = PageRequest.of(0, 10, sort);
+        Pageable mappedPageable = PageRequest.of(0, 10, sort);
+        mockPageableOrderOperations(pageable, mappedPageable, orders, orderDTOs);
+
+        // Act
+        orderService.getAllOrders(pageable);
+
+        // Assert
+        verifyPageableOperations(pageable, mappedPageable);
     }
 
     @Test
-    void getAllOrders_ShouldReturnPageOfOrderDTOs() {
+    void getAllOrders_WithValidPageable_ShouldReturnPageOfOrderDTOs() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("orderDate"));
-        Page<Order> orderPage = new PageImpl<>(orders, mappedPageable, orders.size());
-
-        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
-        when(orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable))
-                .thenReturn(orderPage);
-        for (int i = 0; i < orders.size(); i++) {
-            when(orderMapper.toDto(orders.get(i))).thenReturn(orderDTOs.get(i));
-        }
+        mockPageableOrderOperations(pageable, mappedPageable, orders, orderDTOs);
 
         // Act
         Page<OrderDTO> result = orderService.getAllOrders(pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(orders.size(), result.getTotalElements());
-        assertEquals(orderDTOs, result.getContent());
-        verify(sortMappingService).applyMappings(pageable, "order");
-        verify(orderRepository).findAllByClientNotNullAndEmployeeNotNull(mappedPageable);
+        verifyPagedResults(result, orderDTOs, orders.size());
+        verifyPageableOperations(pageable, mappedPageable);
         verify(orderMapper, times(orders.size())).toDto(any(Order.class));
     }
 
     @Test
     void getAllOrders_WithSortByOrderDateAsc_ShouldPassCorrectSortToRepository() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("orderDate").ascending());
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("orderDate").ascending());
-        Page<Order> orderPage = new PageImpl<>(orders, mappedPageable, orders.size());
+        testSortingScenario(Sort.by("orderDate").ascending());
+    }
 
-        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
-        when(orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable))
-                .thenReturn(orderPage);
-        for (int i = 0; i < orders.size(); i++) {
-            when(orderMapper.toDto(orders.get(i))).thenReturn(orderDTOs.get(i));
-        }
+    @Test
+    void getAllOrders_WithSortByPriceDesc_ShouldPassCorrectSortToRepository() {
+        testSortingScenario(Sort.by("price").descending());
+    }
+
+    @Test
+    void getAllOrders_WithMultipleSort_ShouldPassCorrectSortToRepository() {
+        Sort multiSort = Sort.by("orderDate").ascending().and(Sort.by("price").descending());
+        testSortingScenario(multiSort);
+    }
+
+    @Test
+    void getAllOrders_WithEmptyRepository_ShouldReturnEmptyPage() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("orderDate"));
+        mockEmptyPageableRepository(pageable, mappedPageable);
 
         // Act
         Page<OrderDTO> result = orderService.getAllOrders(pageable);
 
         // Assert
-        assertNotNull(result);
-        verify(sortMappingService).applyMappings(pageable, "order");
-        verify(orderRepository).findAllByClientNotNullAndEmployeeNotNull(mappedPageable);
-    }
-
-    @Test
-    void getAllOrders_WithSortByPriceDesc_ShouldPassCorrectSortToRepository() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("price").descending());
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("price").descending());
-        Page<Order> orderPage = new PageImpl<>(orders, mappedPageable, orders.size());
-
-        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
-        when(orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable))
-                .thenReturn(orderPage);
-        for (int i = 0; i < orders.size(); i++) {
-            when(orderMapper.toDto(orders.get(i))).thenReturn(orderDTOs.get(i));
-        }
-
-        // Act
-        orderService.getAllOrders(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "order");
-        verify(orderRepository).findAllByClientNotNullAndEmployeeNotNull(mappedPageable);
-    }
-
-    @Test
-    void getAllOrders_WithMultipleSort_ShouldPassCorrectSortToRepository() {
-        // Arrange
-        Sort multiSort = Sort.by("orderDate").ascending().and(Sort.by("price").descending());
-        Pageable pageable = PageRequest.of(0, 10, multiSort);
-        Pageable mappedPageable = PageRequest.of(0, 10, multiSort);
-        Page<Order> orderPage = new PageImpl<>(orders, mappedPageable, orders.size());
-
-        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
-        when(orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable))
-                .thenReturn(orderPage);
-        for (int i = 0; i < orders.size(); i++) {
-            when(orderMapper.toDto(orders.get(i))).thenReturn(orderDTOs.get(i));
-        }
-
-        // Act
-        orderService.getAllOrders(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "order");
-        verify(orderRepository).findAllByClientNotNullAndEmployeeNotNull(mappedPageable);
+        verifyEmptyResults(result);
+        verify(orderMapper, never()).toDto(any());
     }
 
     @Test
@@ -181,18 +285,14 @@ class OrderServiceImplTest {
         // Arrange
         String clientEmail = client.getEmail();
         List<Order> clientOrders = List.of(order);
-
-        when(orderRepository.findAllByClient_Email(clientEmail)).thenReturn(clientOrders);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
+        mockClientOrderOperations(clientEmail, null, null, clientOrders, List.of(testOrderDTO));
 
         // Act
         List<OrderDTO> result = orderService.getOrdersByClient(clientEmail);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testOrderDTO, result.get(0));
-        verify(orderRepository).findAllByClient_Email(clientEmail);
+        verifyListResults(result, List.of(testOrderDTO));
+        verifyClientOrderOperations(clientEmail, null);
         verify(orderMapper).toDto(order);
     }
 
@@ -203,22 +303,30 @@ class OrderServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
         Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("orderDate"));
         List<Order> clientOrders = List.of(order);
-        Page<Order> orderPage = new PageImpl<>(clientOrders, mappedPageable, 1);
-
-        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
-        when(orderRepository.findAllByClient_Email(clientEmail, mappedPageable)).thenReturn(orderPage);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
+        mockClientOrderOperations(clientEmail, pageable, mappedPageable, clientOrders, List.of(testOrderDTO));
 
         // Act
         Page<OrderDTO> result = orderService.getOrdersByClient(clientEmail, pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(testOrderDTO, result.getContent().get(0));
-        verify(sortMappingService).applyMappings(pageable, "order");
-        verify(orderRepository).findAllByClient_Email(clientEmail, mappedPageable);
+        verifyPagedResults(result, List.of(testOrderDTO), 1);
+        verifyClientOrderOperations(clientEmail, pageable);
         verify(orderMapper).toDto(order);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"nonexistent@example.com", "missing@client.com", "invalid@test.com"})
+    void getOrdersByClient_WithEmptyResults_ShouldReturnEmptyList(String clientEmail) {
+        // Arrange
+        mockEmptyOrderResults(clientEmail, true);
+
+        // Act
+        List<OrderDTO> result = orderService.getOrdersByClient(clientEmail);
+
+        // Assert
+        verifyEmptyListResults(result);
+        verify(orderRepository).findAllByClient_Email(clientEmail);
+        verify(orderMapper, never()).toDto(any());
     }
 
     @Test
@@ -226,18 +334,14 @@ class OrderServiceImplTest {
         // Arrange
         String employeeEmail = employee.getEmail();
         List<Order> employeeOrders = List.of(order);
-
-        when(orderRepository.findAllByEmployee_Email(employeeEmail)).thenReturn(employeeOrders);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
+        mockEmployeeOrderOperations(employeeEmail, null, null, employeeOrders, List.of(testOrderDTO));
 
         // Act
         List<OrderDTO> result = orderService.getOrdersByEmployee(employeeEmail);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testOrderDTO, result.get(0));
-        verify(orderRepository).findAllByEmployee_Email(employeeEmail);
+        verifyListResults(result, List.of(testOrderDTO));
+        verifyEmployeeOrderOperations(employeeEmail, null);
         verify(orderMapper).toDto(order);
     }
 
@@ -248,22 +352,30 @@ class OrderServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
         Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("orderDate"));
         List<Order> employeeOrders = List.of(order);
-        Page<Order> orderPage = new PageImpl<>(employeeOrders, mappedPageable, 1);
-
-        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
-        when(orderRepository.findAllByEmployee_Email(employeeEmail, mappedPageable)).thenReturn(orderPage);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
+        mockEmployeeOrderOperations(employeeEmail, pageable, mappedPageable, employeeOrders, List.of(testOrderDTO));
 
         // Act
         Page<OrderDTO> result = orderService.getOrdersByEmployee(employeeEmail, pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(testOrderDTO, result.getContent().get(0));
-        verify(sortMappingService).applyMappings(pageable, "order");
-        verify(orderRepository).findAllByEmployee_Email(employeeEmail, mappedPageable);
+        verifyPagedResults(result, List.of(testOrderDTO), 1);
+        verifyEmployeeOrderOperations(employeeEmail, pageable);
         verify(orderMapper).toDto(order);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"nonexistent@example.com", "missing@employee.com", "invalid@test.com"})
+    void getOrdersByEmployee_WithEmptyResults_ShouldReturnEmptyList(String employeeEmail) {
+        // Arrange
+        mockEmptyOrderResults(employeeEmail, false);
+
+        // Act
+        List<OrderDTO> result = orderService.getOrdersByEmployee(employeeEmail);
+
+        // Assert
+        verifyEmptyListResults(result);
+        verify(orderRepository).findAllByEmployee_Email(employeeEmail);
+        verify(orderMapper, never()).toDto(any());
     }
 
     @Test
@@ -272,22 +384,8 @@ class OrderServiceImplTest {
         Order mappedOrder = new Order();
         mappedOrder.setOrderDate(testOrderDTO.getOrderDate());
         mappedOrder.setPrice(testOrderDTO.getPrice());
-
-        when(orderMapper.toEntity(testOrderDTO)).thenReturn(mappedOrder);
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.of(employee));
-        when(clientRepository.getByEmail(testOrderDTO.getClientEmail()))
-                .thenReturn(Optional.of(client));
-
-        // Mock book items
-        for (BookItemDTO itemDTO : testOrderDTO.getBookItems()) {
-            when(bookRepository.findByName(itemDTO.getBookName()))
-                    .thenReturn(Optional.of(book));
-            when(bookItemMapper.toEntity(itemDTO)).thenReturn(bookItem);
-        }
-
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
+        mockSuccessfulOrderCreation(testOrderDTO, mappedOrder, order);
+        mockBookItemOperations(testOrderDTO.getBookItems(), books);
 
         // Act
         OrderDTO result = orderService.addOrder(testOrderDTO);
@@ -295,11 +393,7 @@ class OrderServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(testOrderDTO, result);
-        verify(orderMapper).toEntity(testOrderDTO);
-        verify(employeeRepository).getByEmail(testOrderDTO.getEmployeeEmail());
-        verify(clientRepository).getByEmail(testOrderDTO.getClientEmail());
-        verify(orderRepository).save(any(Order.class));
-        verify(orderMapper).toDto(order);
+        verifyOrderCreationOperations(testOrderDTO);
     }
 
     @Test
@@ -308,9 +402,10 @@ class OrderServiceImplTest {
         testOrderDTO.setClientEmail(null);
 
         // Act & Assert
-        OrderMustContainClientException exception = assertThrows(OrderMustContainClientException.class,
+        verifyNotFoundScenario(OrderMustContainClientException.class,
+                "The client's email within order cannot be null!",
                 () -> orderService.addOrder(testOrderDTO));
-        assertTrue(exception.getMessage().contains("The client's email within order cannot be null!"));
+
         verify(orderMapper, never()).toEntity(any());
         verify(employeeRepository, never()).getByEmail(any());
         verify(clientRepository, never()).getByEmail(any());
@@ -321,13 +416,13 @@ class OrderServiceImplTest {
     void addOrder_WithNonExistentEmployee_ShouldThrowNotFoundException() {
         // Arrange
         when(orderMapper.toEntity(testOrderDTO)).thenReturn(new Order());
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.empty());
+        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail())).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        verifyNotFoundScenario(NotFoundException.class,
+                "Employee with email " + testOrderDTO.getEmployeeEmail(),
                 () -> orderService.addOrder(testOrderDTO));
-        assertTrue(exception.getMessage().contains("Employee with email " + testOrderDTO.getEmployeeEmail()));
+
         verify(employeeRepository).getByEmail(testOrderDTO.getEmployeeEmail());
         verify(clientRepository, never()).getByEmail(any());
         verify(orderRepository, never()).save(any(Order.class));
@@ -337,15 +432,14 @@ class OrderServiceImplTest {
     void addOrder_WithNonExistentClient_ShouldThrowNotFoundException() {
         // Arrange
         when(orderMapper.toEntity(testOrderDTO)).thenReturn(new Order());
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.of(employee));
-        when(clientRepository.getByEmail(testOrderDTO.getClientEmail()))
-                .thenReturn(Optional.empty());
+        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail())).thenReturn(Optional.of(employee));
+        when(clientRepository.getByEmail(testOrderDTO.getClientEmail())).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        verifyNotFoundScenario(NotFoundException.class,
+                "Client with email " + testOrderDTO.getClientEmail(),
                 () -> orderService.addOrder(testOrderDTO));
-        assertTrue(exception.getMessage().contains("Client with email " + testOrderDTO.getClientEmail()));
+
         verify(employeeRepository).getByEmail(testOrderDTO.getEmployeeEmail());
         verify(clientRepository).getByEmail(testOrderDTO.getClientEmail());
         verify(orderRepository, never()).save(any(Order.class));
@@ -356,37 +450,34 @@ class OrderServiceImplTest {
         // Arrange
         Order mappedOrder = new Order();
         when(orderMapper.toEntity(testOrderDTO)).thenReturn(mappedOrder);
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.of(employee));
-        when(clientRepository.getByEmail(testOrderDTO.getClientEmail()))
-                .thenReturn(Optional.of(client));
-        when(bookRepository.findByName(bookItemDTO.getBookName()))
-                .thenReturn(Optional.empty());
+        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail())).thenReturn(Optional.of(employee));
+        when(clientRepository.getByEmail(testOrderDTO.getClientEmail())).thenReturn(Optional.of(client));
+        when(bookRepository.findByName(bookItemDTO.getBookName())).thenReturn(Optional.empty());
         when(bookItemMapper.toEntity(bookItemDTO)).thenReturn(new BookItem());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        verifyNotFoundScenario(NotFoundException.class,
+                "Book with name " + bookItemDTO.getBookName(),
                 () -> orderService.addOrder(testOrderDTO));
-        assertTrue(exception.getMessage().contains("Book with name " + bookItemDTO.getBookName()));
+
         verify(bookRepository).findByName(bookItemDTO.getBookName());
         verify(orderRepository, never()).save(any(Order.class));
     }
 
-    @Test
-    void addOrder_WithEmptyBookItems_ShouldStillCreateOrder() {
+    @ParameterizedTest
+    @ValueSource(strings = {"empty", "null"})
+    void addOrder_WithEmptyOrNullBookItems_ShouldStillCreateOrder(String bookItemsType) {
         // Arrange
-        testOrderDTO.setBookItems(new ArrayList<>());
+        if ("empty".equals(bookItemsType)) {
+            testOrderDTO.setBookItems(new ArrayList<>());
+        } else {
+            testOrderDTO.setBookItems(null);
+        }
+
         Order mappedOrder = new Order();
         mappedOrder.setOrderDate(testOrderDTO.getOrderDate());
         mappedOrder.setPrice(testOrderDTO.getPrice());
-
-        when(orderMapper.toEntity(testOrderDTO)).thenReturn(mappedOrder);
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.of(employee));
-        when(clientRepository.getByEmail(testOrderDTO.getClientEmail()))
-                .thenReturn(Optional.of(client));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
+        mockSuccessfulOrderCreation(testOrderDTO, mappedOrder, order);
 
         // Act
         OrderDTO result = orderService.addOrder(testOrderDTO);
@@ -400,20 +491,11 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void addOrder_WithNullBookItems_ShouldStillCreateOrder() {
+    void addOrder_WithMultipleBookItems_ShouldMapAllBookItems() {
         // Arrange
-        testOrderDTO.setBookItems(null);
-        Order mappedOrder = new Order();
-        mappedOrder.setOrderDate(testOrderDTO.getOrderDate());
-        mappedOrder.setPrice(testOrderDTO.getPrice());
-
-        when(orderMapper.toEntity(testOrderDTO)).thenReturn(mappedOrder);
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.of(employee));
-        when(clientRepository.getByEmail(testOrderDTO.getClientEmail()))
-                .thenReturn(Optional.of(client));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
+        testOrderDTO.setBookItems(bookItemDTOs);
+        mockSuccessfulOrderCreation(testOrderDTO, order, order);
+        mockBookItemOperations(bookItemDTOs, books);
 
         // Act
         OrderDTO result = orderService.addOrder(testOrderDTO);
@@ -421,45 +503,34 @@ class OrderServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(testOrderDTO, result);
-        verify(bookRepository, never()).findByName(any());
-        verify(bookItemMapper, never()).toEntity(any());
+        verifyBookItemMappingOperations(bookItemDTOs);
         verify(orderRepository).save(any(Order.class));
     }
 
     @Test
     void confirmOrder_WithValidData_ShouldUpdateOrderWithEmployee() {
         // Arrange
-        when(orderRepository.findDistinctByClient_EmailAndOrderDate(
-                testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate()))
-                .thenReturn(order);
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.of(employee));
-        when(orderRepository.save(order)).thenReturn(order);
+        mockOrderConfirmation(testOrderDTO, order);
 
         // Act
         orderService.confirmOrder(testOrderDTO);
 
         // Assert
-        verify(orderRepository).findDistinctByClient_EmailAndOrderDate(
-                testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate());
-        verify(employeeRepository).getByEmail(testOrderDTO.getEmployeeEmail());
-        verify(orderRepository).save(order);
-        assertEquals(employee, order.getEmployee());
+        verifyOrderConfirmationOperations(testOrderDTO, order);
     }
 
     @Test
     void confirmOrder_WithNonExistentEmployee_ShouldThrowNotFoundException() {
         // Arrange
         when(orderRepository.findDistinctByClient_EmailAndOrderDate(
-                testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate()))
-                .thenReturn(order);
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.empty());
+                testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate())).thenReturn(order);
+        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail())).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        verifyNotFoundScenario(NotFoundException.class,
+                "Employee with email " + testOrderDTO.getEmployeeEmail(),
                 () -> orderService.confirmOrder(testOrderDTO));
-        assertTrue(exception.getMessage().contains("Employee with email " + testOrderDTO.getEmployeeEmail()));
+
         verify(orderRepository).findDistinctByClient_EmailAndOrderDate(
                 testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate());
         verify(employeeRepository).getByEmail(testOrderDTO.getEmployeeEmail());
@@ -470,104 +541,14 @@ class OrderServiceImplTest {
     void confirmOrder_WithNullOrder_ShouldThrowNullPointerException() {
         // Arrange
         when(orderRepository.findDistinctByClient_EmailAndOrderDate(
-                testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate()))
-                .thenReturn(null);
+                testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate())).thenReturn(null);
 
         // Act & Assert
-        assertThrows(NotFoundException.class,
-                () -> orderService.confirmOrder(testOrderDTO));
+        assertThrows(NotFoundException.class, () -> orderService.confirmOrder(testOrderDTO));
+
         verify(orderRepository).findDistinctByClient_EmailAndOrderDate(
                 testOrderDTO.getClientEmail(), testOrderDTO.getOrderDate());
         verify(employeeRepository).getByEmail(any());
         verify(orderRepository, never()).save(any(Order.class));
-    }
-
-    @Test
-    void addOrder_WithMultipleBookItems_ShouldMapAllBookItems() {
-        // Arrange
-        List<BookItemDTO> bookItemDTOs = getBookItemDTOs();
-        List<Book> books = getBookEntities();
-
-        testOrderDTO.setBookItems(bookItemDTOs);
-
-        when(orderMapper.toEntity(testOrderDTO)).thenReturn(order);
-        when(employeeRepository.getByEmail(testOrderDTO.getEmployeeEmail()))
-                .thenReturn(Optional.of(employee));
-        when(clientRepository.getByEmail(testOrderDTO.getClientEmail()))
-                .thenReturn(Optional.of(client));
-
-        for (int i = 0; i < bookItemDTOs.size(); i++) {
-            when(bookRepository.findByName(bookItemDTOs.get(i).getBookName()))
-                    .thenReturn(Optional.of(books.get(i)));
-            when(bookItemMapper.toEntity(bookItemDTOs.get(i))).thenReturn(new BookItem());
-        }
-
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(orderMapper.toDto(order)).thenReturn(testOrderDTO);
-
-        // Act
-        OrderDTO result = orderService.addOrder(testOrderDTO);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(testOrderDTO, result);
-        for (BookItemDTO bookItemDTO : bookItemDTOs) {
-            verify(bookRepository).findByName(bookItemDTO.getBookName());
-        }
-        verify(bookItemMapper, times(bookItemDTOs.size())).toEntity(any(BookItemDTO.class));
-        verify(orderRepository).save(any(Order.class));
-    }
-
-    @Test
-    void getAllOrders_WithEmptyRepository_ShouldReturnEmptyPage() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10);
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("orderDate"));
-        Page<Order> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
-
-        when(sortMappingService.applyMappings(pageable, "order")).thenReturn(mappedPageable);
-        when(orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable))
-                .thenReturn(emptyPage);
-
-        // Act
-        Page<OrderDTO> result = orderService.getAllOrders(pageable);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
-        assertTrue(result.getContent().isEmpty());
-        verify(orderMapper, never()).toDto(any());
-    }
-
-    @Test
-    void getOrdersByClient_WithEmptyResults_ShouldReturnEmptyList() {
-        // Arrange
-        String clientEmail = "nonexistent@example.com";
-        when(orderRepository.findAllByClient_Email(clientEmail)).thenReturn(List.of());
-
-        // Act
-        List<OrderDTO> result = orderService.getOrdersByClient(clientEmail);
-
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(orderRepository).findAllByClient_Email(clientEmail);
-        verify(orderMapper, never()).toDto(any());
-    }
-
-    @Test
-    void getOrdersByEmployee_WithEmptyResults_ShouldReturnEmptyList() {
-        // Arrange
-        String employeeEmail = "nonexistent@example.com";
-        when(orderRepository.findAllByEmployee_Email(employeeEmail)).thenReturn(List.of());
-
-        // Act
-        List<OrderDTO> result = orderService.getOrdersByEmployee(employeeEmail);
-
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(orderRepository).findAllByEmployee_Email(employeeEmail);
-        verify(orderMapper, never()).toDto(any());
     }
 }

@@ -82,7 +82,7 @@ class AuthServiceImplTest {
         lenient().when(jwtSettings.getExpirationTime()).thenReturn(jwtExpirationTime);
     }
 
-    private void mockSuccessfulAuthentication(Role role, UserDetails userDetails) {
+    private void mockSuccessfulAuthentication(UserDetails userDetails) {
         Authentication authenticatedResult = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
 
@@ -252,7 +252,7 @@ class AuthServiceImplTest {
         LoginDTO loginRequest = new LoginDTO(email, password, role);
         UserDetails userDetails = role == Role.EMPLOYEE ? employee : client;
 
-        mockSuccessfulAuthentication(role, userDetails);
+        mockSuccessfulAuthentication(userDetails);
         mockRefreshTokenCreation(role, refreshTokenUuid);
 
         // Act
@@ -269,7 +269,7 @@ class AuthServiceImplTest {
     void loginUser_WithEmployeeCredentials_ShouldCreateEmployeeRefreshToken() {
         // Arrange
         LoginDTO loginRequest = new LoginDTO(employee.getEmail(), password, Role.EMPLOYEE);
-        mockSuccessfulAuthentication(Role.EMPLOYEE, employee);
+        mockSuccessfulAuthentication(employee);
         mockRefreshTokenCreation(Role.EMPLOYEE, refreshTokenUuid);
 
         // Act
@@ -285,7 +285,7 @@ class AuthServiceImplTest {
     void loginUser_WithClientCredentials_ShouldCreateClientRefreshToken() {
         // Arrange
         LoginDTO loginRequest = new LoginDTO(client.getEmail(), password, Role.CLIENT);
-        mockSuccessfulAuthentication(Role.CLIENT, client);
+        mockSuccessfulAuthentication(client);
         mockRefreshTokenCreation(Role.CLIENT, refreshTokenUuid);
 
         // Act
@@ -491,7 +491,7 @@ class AuthServiceImplTest {
     void loginUser_ShouldDeleteOldRefreshTokenBeforeCreatingNew() {
         // Arrange
         LoginDTO loginRequest = new LoginDTO(client.getEmail(), password, Role.CLIENT);
-        mockSuccessfulAuthentication(Role.CLIENT, client);
+        mockSuccessfulAuthentication(client);
         mockRefreshTokenCreation(Role.CLIENT, refreshTokenUuid);
 
         // Act

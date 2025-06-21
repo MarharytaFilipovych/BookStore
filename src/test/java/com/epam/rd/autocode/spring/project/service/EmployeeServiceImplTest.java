@@ -126,7 +126,7 @@ public class EmployeeServiceImplTest {
         return mappedEmployee;
     }
 
-    private void verifyPageableOperations(Pageable originalPageable, Pageable mappedPageable) {
+    private void verifyPageableOperations(Pageable originalPageable) {
         verify(sortMappingService).applyMappings(originalPageable, "employee");
         verify(employeeRepository).findAll(originalPageable);
     }
@@ -178,15 +178,15 @@ public class EmployeeServiceImplTest {
         assertEquals(expectedBirthDate, savedEmployee.getBirthDate());
     }
 
-    private void verifyNotFoundScenario(String email, Class<? extends Exception> expectedExceptionType) {
-        Exception exception = assertThrows(expectedExceptionType,
+    private void verifyNotFoundScenario(String email) {
+        Exception exception = assertThrows(NotFoundException.class,
                 () -> employeeService.getEmployeeByEmail(email));
         assertTrue(exception.getMessage().contains("Employee with email " + email));
         verify(employeeRepository).getByEmail(email);
         verify(employeeMapper, never()).toDto(any());
     }
 
-    private void verifyEmployeeCreationOperations(EmployeeDTO dto, String rawPassword, String encodedPassword) {
+    private void verifyEmployeeCreationOperations(EmployeeDTO dto, String rawPassword) {
         verify(employeeMapper).toEntity(dto);
         verify(passwordEncoder).encode(rawPassword);
         verify(employeeRepository).save(any(Employee.class));
@@ -200,7 +200,7 @@ public class EmployeeServiceImplTest {
         assertEquals(encodedPassword, employee.getPassword());
     }
 
-    private void testSortingScenario(Sort sort, String testDescription) {
+    private void testSortingScenario(Sort sort) {
         Pageable pageable = PageRequest.of(0, 10, sort);
         Pageable mappedPageable = PageRequest.of(0, 10, sort);
 
@@ -210,7 +210,7 @@ public class EmployeeServiceImplTest {
         employeeService.getAllEmployees(pageable);
 
         // Assert
-        verifyPageableOperations(pageable, mappedPageable);
+        verifyPageableOperations(pageable);
     }
 
     @Test
@@ -225,24 +225,24 @@ public class EmployeeServiceImplTest {
 
         // Assert
         verifyPagedResults(result, employeeDTOs, employees.size());
-        verifyPageableOperations(pageable, mappedPageable);
+        verifyPageableOperations(pageable);
         verify(employeeMapper, times(employees.size())).toDto(any(Employee.class));
     }
 
     @Test
     void getAllEmployees_WithSortByNameAsc_ShouldPassCorrectSortToRepository() {
-        testSortingScenario(Sort.by("name"), "name ascending");
+        testSortingScenario(Sort.by("name"));
     }
 
     @Test
     void getAllEmployees_WithSortByBirthDateDesc_ShouldPassCorrectSortToRepository() {
-        testSortingScenario(Sort.by("birthdate").descending(), "birth date descending");
+        testSortingScenario(Sort.by("birthdate").descending());
     }
 
     @Test
     void getAllEmployees_WithMultipleSort_ShouldPassCorrectSortToRepository() {
         Sort multiSort = Sort.by("name").ascending().and(Sort.by("birthdate").descending());
-        testSortingScenario(multiSort, "multiple sort");
+        testSortingScenario(multiSort);
     }
 
     @Test
@@ -405,7 +405,7 @@ public class EmployeeServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(employeeDTO, result);
-        verifyEmployeeCreationOperations(employeeDTO, rawPassword, encodedPassword);
+        verifyEmployeeCreationOperations(employeeDTO, rawPassword);
         assertEquals(encodedPassword, employeeToSave.getPassword());
     }
 
@@ -449,7 +449,7 @@ public class EmployeeServiceImplTest {
         when(employeeRepository.getByEmail(employeeEmail)).thenReturn(Optional.empty());
 
         // Act & Assert
-        verifyNotFoundScenario(employeeEmail, NotFoundException.class);
+        verifyNotFoundScenario(employeeEmail);
     }
 
     @Test
@@ -527,6 +527,6 @@ public class EmployeeServiceImplTest {
 
         // Assert
         assertNotNull(result);
-        verifyPageableOperations(originalPageable, mappedPageable);
+        verifyPageableOperations(originalPageable);
     }
 }

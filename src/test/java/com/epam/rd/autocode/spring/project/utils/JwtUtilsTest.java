@@ -22,38 +22,25 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class JwtUtilsTest {
 
-    @Mock
-    private JwtSettings jwtSettings;
+    @Mock private JwtSettings jwtSettings;
 
-    @InjectMocks
-    private JwtUtils jwtUtils;
+    @InjectMocks private JwtUtils jwtUtils;
 
     private Authentication authentication;
-    private String secretKey;
-    private Duration expirationTime;
     private String email;
     private String invalidToken;
 
     @BeforeEach
     void setUp() {
-        secretKey = "dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1hbmQtdmFsaWRhdGlvbi10ZXN0aW5n"; // Base64 encoded
         email = "test@example.com";
         invalidToken = "invalid.token.here";
-        expirationTime = Duration.ofMinutes(15);
 
-        // Use lenient() to avoid UnnecessaryStubbingException
-        lenient().when(jwtSettings.getSecretKey()).thenReturn(secretKey);
-        lenient().when(jwtSettings.getExpirationTime()).thenReturn(expirationTime);
+        lenient().when(jwtSettings.getSecretKey()).thenReturn("dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1hbmQtdmFsaWRhdGlvbi10ZXN0aW5n");
+        lenient().when(jwtSettings.getExpirationTime()).thenReturn(Duration.ofMinutes(15));
         lenient().when(jwtSettings.getIssuer()).thenReturn("TestIssuer");
 
-        Collection<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority(Role.CLIENT.toString())
-        );
-        authentication = new UsernamePasswordAuthenticationToken(
-                email,
-                null,
-                authorities
-        );
+        Collection<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(Role.CLIENT.toString()));
+        authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
     }
 
     @Test
@@ -218,7 +205,7 @@ class JwtUtilsTest {
 
     @Test
     void isTokenValid_WithExpiredToken_ShouldReturnFalse() {
-        // Arrange - Override expiration time for this specific test
+        // Arrange
         when(jwtSettings.getExpirationTime()).thenReturn(Duration.ofMillis(1));
         String token = jwtUtils.generateToken(authentication);
 
