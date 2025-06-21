@@ -17,9 +17,11 @@ public interface EmployeeService {
 
     EmployeeDTO updateEmployeeByEmail(String email, EmployeeDTO employee);
 
-    EmployeeDTO updateEmployeeByEmail(String email, EmployeeUpdateDTO employee);
+    void updateEmployeeByEmail(String email, EmployeeUpdateDTO employee);
 
     void deleteEmployeeByEmail(String email);
 
     EmployeeDTO addEmployee(EmployeeDTO employee);
+
+    void updateEmployeePassword(String email, String newPassword);
 }

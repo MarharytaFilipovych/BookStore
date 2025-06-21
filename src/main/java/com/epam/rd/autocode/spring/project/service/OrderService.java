@@ -10,7 +10,11 @@ public interface OrderService {
 
     List<OrderDTO> getOrdersByClient(String clientEmail);
 
+    Page<OrderDTO> getOrdersByClient(String clientEmail, Pageable pageable);
+
     List<OrderDTO> getOrdersByEmployee(String employeeEmail);
+
+    Page<OrderDTO> getOrdersByEmployee(String employeeEmail, Pageable pageable);
 
     OrderDTO addOrder(OrderDTO order);
 

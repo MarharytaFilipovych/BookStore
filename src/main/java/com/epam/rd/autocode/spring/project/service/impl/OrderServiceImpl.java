@@ -12,6 +12,7 @@ import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.repo.EmployeeRepository;
 import com.epam.rd.autocode.spring.project.repo.OrderRepository;
 import com.epam.rd.autocode.spring.project.service.OrderService;
+import com.epam.rd.autocode.spring.project.service.SortMappingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,19 +26,22 @@ public class OrderServiceImpl implements OrderService {
     private final ClientRepository clientRepository;
     private final BookItemMapper bookItemMapper;
     private final BookRepository bookRepository;
+    private final SortMappingService sortMappingService;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper, EmployeeRepository employeeRepository, ClientRepository clientRepository, BookItemMapper bookItemMapper, BookRepository bookRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper, EmployeeRepository employeeRepository, ClientRepository clientRepository, BookItemMapper bookItemMapper, BookRepository bookRepository, SortMappingService sortMappingService) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.employeeRepository = employeeRepository;
         this.clientRepository = clientRepository;
         this.bookItemMapper = bookItemMapper;
         this.bookRepository = bookRepository;
+        this.sortMappingService = sortMappingService;
     }
 
     @Override
     public Page<OrderDTO> getAllOrders(Pageable pageable) {
-        return orderRepository.findAllByClientNotNullAndEmployeeNotNull(pageable).map(orderMapper::toDto);
+        Pageable mappedPageable = sortMappingService.applyMappings(pageable, "order");
+        return orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable).map(orderMapper::toDto);
     }
 
     @Override
@@ -46,8 +50,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Page<OrderDTO> getOrdersByClient(String clientEmail, Pageable pageable) {
+        Pageable mappedPageable = sortMappingService.applyMappings(pageable, "order");
+        return orderRepository.findAllByClient_Email(clientEmail, mappedPageable).map(orderMapper::toDto);
+    }
+
+    @Override
     public List<OrderDTO> getOrdersByEmployee(String employeeEmail) {
         return orderRepository.findAllByEmployee_Email(employeeEmail).stream().map(orderMapper::toDto).toList();
+    }
+
+    @Override
+    public Page<OrderDTO> getOrdersByEmployee(String employeeEmail, Pageable pageable) {
+        Pageable mappedPageable = sortMappingService.applyMappings(pageable, "order");
+        return orderRepository.findAllByEmployee_Email(employeeEmail, mappedPageable).map(orderMapper::toDto);
     }
 
     @Override

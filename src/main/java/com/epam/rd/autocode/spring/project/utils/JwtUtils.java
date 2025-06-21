@@ -23,30 +23,19 @@ public class JwtUtils {
         this.settings = settings;
     }
 
-//    public String generateToken(UserDetails userDetails){
-//        return Jwts.builder()
-//                .issuer(settings.getIssuer())
-//                .subject(userDetails.getUsername())
-//                .claim("roles", userDetails.getAuthorities().stream()
-//                        .map(GrantedAuthority::getAuthority)
-//                        .toList())
-//                .issuedAt(new Date())
-//                .expiration(new Date(System.currentTimeMillis() + settings.getExpirationTime().toMillis()))
-//                .signWith(getSignInKey())
-//                .compact();
-//    }
-        public String generateToken(Authentication authentication) {
-            return Jwts.builder()
-                    .issuer(settings.getIssuer())
-                    .subject((String) authentication.getPrincipal())
-                    .claim("roles", authentication.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .toList())
-                    .issuedAt(new Date())
-                    .expiration(new Date(System.currentTimeMillis() + settings.getExpirationTime().toMillis()))
-                    .signWith(getSignInKey())
-                    .compact();
-        }
+    public String generateToken(Authentication authentication) {
+        return Jwts.builder()
+                .issuer(settings.getIssuer())
+                .subject((String) authentication.getPrincipal())
+                .claim("roles", authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + settings.getExpirationTime().toMillis()))
+                .signWith(getSignInKey())
+                .compact();
+    }
+
     public String getUserName(String token){
         Claims claims = extractAllClaims(token);
         return claims != null ? claims.getSubject() : null;
@@ -71,13 +60,6 @@ public class JwtUtils {
         Claims claims = extractAllClaims(token);
         return claims == null || claims.getExpiration().before(new Date());
     }
-
-//    public boolean isTokenValid(String token, UserDetails userDetails){
-//        String username = getUserName(token);
-//        return username != null &&
-//                username.equals(userDetails.getUsername()) &&
-//                !isTokenExpired(token);
-//    }
 
     public boolean isTokenValid(String token, Authentication authentication) {
         String username = getUserName(token);

@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.service;
 
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
+import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.repo.BlockedClientRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.repo.EmployeeRepository;
@@ -123,11 +124,10 @@ class MyUserDetailsServiceImplTest {
     @Test
     void loadUserBasedOnRole_WhenRoleIsEmployee_ShouldCallLoadEmployeeByUsername() {
         // Arrange
-        String role = "employee";
         when(employeeRepository.getByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
 
         // Act
-        UserDetails result = userDetailsService.loadUserBasedOnRole(employee.getEmail(), role);
+        UserDetails result = userDetailsService.loadUserBasedOnRole(employee.getEmail(), Role.EMPLOYEE);
 
         // Assert
         assertNotNull(result);
@@ -140,12 +140,11 @@ class MyUserDetailsServiceImplTest {
     @Test
     void loadUserBasedOnRole_WhenRoleIsClient_ShouldCallLoadUserByUsername() {
         // Arrange
-        String role = "client";
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
         when(blockedClientRepository.existsByClient_Email(client.getEmail())).thenReturn(false);
 
         // Act
-        UserDetails result = userDetailsService.loadUserBasedOnRole(client.getEmail(), role);
+        UserDetails result = userDetailsService.loadUserBasedOnRole(client.getEmail(), Role.CLIENT);
 
         // Assert
         assertNotNull(result);
@@ -158,30 +157,11 @@ class MyUserDetailsServiceImplTest {
     @Test
     void loadUserBasedOnRole_WhenRoleIsNull_ShouldCallLoadUserByUsername() {
         // Arrange
-        String role = null;
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
         when(blockedClientRepository.existsByClient_Email(client.getEmail())).thenReturn(false);
 
         // Act
-        UserDetails result = userDetailsService.loadUserBasedOnRole(client.getEmail(), role);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(client, result);
-        verify(clientRepository).getByEmail(client.getEmail());
-        verify(blockedClientRepository).existsByClient_Email(client.getEmail());
-        verify(employeeRepository, never()).getByEmail(client.getEmail());
-    }
-
-    @Test
-    void loadUserBasedOnRole_WhenRoleIsUnknown_ShouldCallLoadUserByUsername() {
-        // Arrange
-        String role = "admin";
-        when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
-        when(blockedClientRepository.existsByClient_Email(client.getEmail())).thenReturn(false);
-
-        // Act
-        UserDetails result = userDetailsService.loadUserBasedOnRole(client.getEmail(), role);
+        UserDetails result = userDetailsService.loadUserBasedOnRole(client.getEmail(), null);
 
         // Assert
         assertNotNull(result);
@@ -194,12 +174,11 @@ class MyUserDetailsServiceImplTest {
     @Test
     void loadUserBasedOnRole_WhenEmployeeRoleButEmployeeNotFound_ShouldThrowException() {
         // Arrange
-        String role = "employee";
         when(employeeRepository.getByEmail(employee.getEmail())).thenReturn(Optional.empty());
 
         // Act & Assert
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class,
-                () -> userDetailsService.loadUserBasedOnRole(employee.getEmail(), role));
+                () -> userDetailsService.loadUserBasedOnRole(employee.getEmail(), Role.EMPLOYEE));
 
         assertTrue(exception.getMessage().contains("Employee with email " + employee.getEmail() + " was not found!"));
         verify(employeeRepository).getByEmail(employee.getEmail());
@@ -209,13 +188,12 @@ class MyUserDetailsServiceImplTest {
     @Test
     void loadUserBasedOnRole_WhenClientRoleButClientIsBlocked_ShouldThrowLockedException() {
         // Arrange
-        String role = "client";
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
         when(blockedClientRepository.existsByClient_Email(client.getEmail())).thenReturn(true);
 
         // Act & Assert
         LockedException exception = assertThrows(LockedException.class,
-                () -> userDetailsService.loadUserBasedOnRole(client.getEmail(), role));
+                () -> userDetailsService.loadUserBasedOnRole(client.getEmail(), Role.CLIENT));
 
         assertEquals("Account is blocked!", exception.getMessage());
         verify(clientRepository).getByEmail(client.getEmail());

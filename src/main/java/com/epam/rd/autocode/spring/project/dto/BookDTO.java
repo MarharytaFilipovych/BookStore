@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.dto;
 
+import com.epam.rd.autocode.spring.project.annotations.BookTitle;
 import com.epam.rd.autocode.spring.project.annotations.CorrectEnum;
 import com.epam.rd.autocode.spring.project.annotations.CorrectName;
 import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
@@ -22,8 +23,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class BookDTO {
 
-    @NotBlank(message = "Book name is required")
-    @Length(min = 1, max = 255, message = "Book name must be between 1 and 255 characters")
+    @BookTitle
     private String name;
 
     @CorrectName(message = "Genre must contain only letters, spaces, hyphens, and apostrophes")

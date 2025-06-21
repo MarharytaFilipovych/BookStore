@@ -10,6 +10,7 @@ import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.repo.BlockedClientRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
+import com.epam.rd.autocode.spring.project.service.SortMappingService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,12 +24,14 @@ public class ClientServiceImpl implements ClientService {
     private final ClientMapper clientMapper;
     private final BlockedClientRepository blockedClientRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SortMappingService sortMappingService;
 
-    public ClientServiceImpl(ClientRepository clientRepository, ClientMapper mapper, BlockedClientRepository blockedClientRepository, PasswordEncoder passwordEncoder) {
+    public ClientServiceImpl(ClientRepository clientRepository, ClientMapper mapper, BlockedClientRepository blockedClientRepository, PasswordEncoder passwordEncoder, SortMappingService sortMappingService) {
         this.clientRepository = clientRepository;
         this.clientMapper = mapper;
         this.blockedClientRepository = blockedClientRepository;
         this.passwordEncoder = passwordEncoder;
+        this.sortMappingService = sortMappingService;
     }
 
     @Override
@@ -63,7 +66,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Page<ClientDTO> getAllClients(Pageable pageable) {
-        return clientRepository.findAll(pageable).map(clientMapper::toDto);
+        Pageable mappedPageable = sortMappingService.applyMappings(pageable, "client");
+        return clientRepository.findAll(mappedPageable).map(clientMapper::toDto);
     }
 
     @Override
@@ -84,15 +88,17 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientDTO updateClientByEmail(String email, ClientUpdateDTO client) {
-        return clientRepository.getByEmail(email)
-                .map(existingClient -> {
-                    Client updatedClient = clientMapper.toEntity(client);
-                    updatedClient.setId(existingClient.getId());
-                    updatedClient.setEmail(existingClient.getEmail());
-                    return clientMapper.toDto(clientRepository.save(updatedClient));
-                })
-                .orElseThrow(() -> new NotFoundException("Client with email " + email));
+    public void updateClientByEmail(String email, ClientUpdateDTO client) {
+        clientRepository.getByEmail(email)
+                .ifPresentOrElse(
+                        existingClient -> {
+                            Client updatedClient = clientMapper.toEntity(client);
+                            updatedClient.setId(existingClient.getId());
+                            updatedClient.setEmail(existingClient.getEmail());
+                            clientRepository.save(updatedClient);
+                        },
+                        () -> {throw new NotFoundException("Client with email " + email);}
+                );
     }
 
     @Override
@@ -110,5 +116,14 @@ public class ClientServiceImpl implements ClientService {
         }catch (DataIntegrityViolationException e){
             throw new AlreadyExistException("Client with email " + dto.getEmail());
         }
+    }
+
+    @Override
+    public void updateClientPassword(String email, String newPassword) {
+        Client client = clientRepository.getByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Client with email " + email));
+
+        client.setPassword(passwordEncoder.encode(newPassword));
+        clientRepository.save(client);
     }
 }

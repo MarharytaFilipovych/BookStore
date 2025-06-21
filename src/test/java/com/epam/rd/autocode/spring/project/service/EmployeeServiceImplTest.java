@@ -257,7 +257,7 @@ public class EmployeeServiceImplTest {
     }
 
     @Test
-    void updateEmployeeByEmailWithEmployeeUpdateDTO_WhenEmployeeExists_ShouldReturnUpdatedEmployeeDTO() {
+    void updateEmployeeByEmailWithEmployeeUpdateDTO_WhenEmployeeExists_ShouldSaveNewEmployee() {
         // Arrange
         EmployeeUpdateDTO updateData = new EmployeeUpdateDTO();
         updateData.setName("Updated Name");
@@ -287,11 +287,9 @@ public class EmployeeServiceImplTest {
         when(employeeMapper.toDto(updatedEmployee)).thenReturn(expectedResult);
 
         // Act
-        EmployeeDTO result = employeeService.updateEmployeeByEmail(employee.getEmail(), updateData);
+        employeeService.updateEmployeeByEmail(employee.getEmail(), updateData);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(expectedResult, result);
         verify(employeeRepository).getByEmail(employee.getEmail());
         verify(employeeMapper).toEntity(updateData);
         verify(employeeRepository).save(argThat(emp ->

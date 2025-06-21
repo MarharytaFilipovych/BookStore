@@ -1,16 +1,25 @@
 package com.epam.rd.autocode.spring.project.model.enums;
 
 public enum Role {
-    CLIENT("ROLE_CLIENT"),
-    EMPLOYEE("ROLE_EMPLOYEE");
-
-    private final String role;
-    Role(String roleEmployee) {
-        this.role = roleEmployee;
-    }
+    CLIENT,
+    EMPLOYEE;
 
     @Override
     public String toString(){
-        return role;
+        return "ROLE_" + this.name();
+    }
+
+    public String getSimpleName() {
+        return this.name();
+    }
+
+    public static Role fromString(String role) {
+        if (role == null) return null;
+
+        try {
+            return Role.valueOf(role.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid role: " + role);
+        }
     }
 }

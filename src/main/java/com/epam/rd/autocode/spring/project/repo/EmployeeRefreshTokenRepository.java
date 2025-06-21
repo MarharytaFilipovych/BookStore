@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface EmployeeRefreshTokenRepository extends JpaRepository<EmployeeRefreshToken, Long> {
-    Optional<EmployeeRefreshToken> findByTokenAndExpiresAtAfter(UUID token, LocalDateTime expiresAtAfter);
-
     boolean existsByTokenAndExpiresAtAfter(UUID token, LocalDateTime expiresAtAfter);
+
+    void deleteEmployeeRefreshTokenByEmployee_Email(String employeeEmail);
 }

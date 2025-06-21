@@ -42,8 +42,8 @@ public class MyUserDetailsServiceImpl implements MyUserDetailsService {
                         "Employee with email " + email + " was not found!"));
     }
 
-    public UserDetails loadUserBasedOnRole(String email, String role) {
-        return Objects.equals(role, "employee")
+    public UserDetails loadUserBasedOnRole(String email, Role role) {
+        return role == Role.EMPLOYEE
                 ? loadEmployeeByUsername(email)
                 : loadUserByUsername(email);
     }

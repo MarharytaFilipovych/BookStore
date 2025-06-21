@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface ClientRefreshTokenRepository extends JpaRepository<ClientRefreshToken, Long> {
     boolean existsByTokenAndExpiresAtAfter(UUID token, LocalDateTime expiresAtAfter);
+
+    void deleteClientRefreshTokensByClient_Email(String clientEmail);
 }

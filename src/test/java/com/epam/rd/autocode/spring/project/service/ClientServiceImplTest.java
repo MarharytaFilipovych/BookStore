@@ -264,7 +264,7 @@ public class ClientServiceImplTest {
     }
 
     @Test
-    void updateClientByEmailWithClientUpdateDTO_WhenClientExists_ShouldReturnUpdatedClientDTO() {
+    void updateClientByEmailWithClientUpdateDTO_WhenClientExists_ShouldUpdateClientAndSaveNew() {
         // Arrange
         ClientUpdateDTO updateData = new ClientUpdateDTO();
         updateData.setName("Updated Name");
@@ -290,11 +290,9 @@ public class ClientServiceImplTest {
         when(clientMapper.toDto(updatedClient)).thenReturn(expectedResult);
 
         // Act
-        ClientDTO result = clientService.updateClientByEmail(client.getEmail(), updateData);
+        clientService.updateClientByEmail(client.getEmail(), updateData);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(expectedResult, result);
         verify(clientRepository).getByEmail(client.getEmail());
         verify(clientMapper).toEntity(updateData);
         verify(clientRepository).save(argThat(c ->

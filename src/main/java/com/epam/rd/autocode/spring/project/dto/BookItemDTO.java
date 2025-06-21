@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.dto;
 
+import com.epam.rd.autocode.spring.project.annotations.BookTitle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,8 +15,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 public class BookItemDTO {
 
-    @NotBlank(message = "Book name is required")
-    @Length(max = 255, message = "Book name cannot exceed 255 characters")
+    @BookTitle
     @JsonProperty("book_name")
     private String bookName;
 

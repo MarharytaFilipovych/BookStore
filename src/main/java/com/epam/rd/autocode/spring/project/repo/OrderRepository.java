@@ -18,5 +18,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findAllByClientNotNullAndEmployeeNotNull(Pageable pageable);
 
+    Page<Order> findAllByClient_Email(String clientEmail, Pageable pageable);
+
+    Page<Order> findAllByEmployee_Email(String employeeEmail, Pageable pageable);
+
     Order findDistinctByClient_EmailAndOrderDate(String clientEmail, LocalDateTime orderDate);
 }

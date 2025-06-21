@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface ClientResetCodeRepository extends JpaRepository<ClientResetCode, UUID> {
     boolean existsByCodeAndExpiresAtAfter(UUID code, LocalDateTime expiresAtAfter);
+
+    void deleteClientResetCodesByClient_Id(Long clientId);
 }

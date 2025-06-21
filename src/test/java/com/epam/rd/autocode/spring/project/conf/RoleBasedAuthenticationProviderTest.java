@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.conf;
 
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
+import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.epam.rd.autocode.spring.project.service.MyUserDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,15 +58,12 @@ class RoleBasedAuthenticationProviderTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "employee, employee",
-            "client, client"
-    })
+    @ValueSource(strings = {"admin", "manager", "unknown", ""})
     void authenticate_WithValidRoles_ShouldRouteToCorrectService(String inputRole, String expectedServiceRole) {
         // Arrange
         authToken.setDetails(Map.of("role", inputRole));
         UserDetails expectedUser = "employee".equals(expectedServiceRole) ? employee : client;
-        when(userDetailsService.loadUserBasedOnRole(email, expectedServiceRole))
+        when(userDetailsService.loadUserBasedOnRole(email, Role.fromString(expectedServiceRole)))
                 .thenReturn(expectedUser);
         when(passwordEncoder.matches(password, expectedUser.getPassword()))
                 .thenReturn(true);
@@ -80,101 +78,91 @@ class RoleBasedAuthenticationProviderTest {
         assertNull(result.getCredentials(), "Credentials should be cleared for security");
         assertEquals(expectedUser.getAuthorities(), result.getAuthorities());
 
-        verify(userDetailsService).loadUserBasedOnRole(email, expectedServiceRole);
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.fromString(expectedServiceRole));
         verify(passwordEncoder).matches(password, expectedUser.getPassword());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"admin", "manager", "unknown", ""})
-    void authenticate_WithInvalidRoles_ShouldDefaultToClient(String invalidRole) {
+    void authenticate_WithInvalidRoles_ShouldThrowBadCredentialsException(String invalidRole) {
         // Arrange
         authToken.setDetails(Map.of("role", invalidRole));
-        when(userDetailsService.loadUserBasedOnRole(email, "client"))
+        when(userDetailsService.loadUserBasedOnRole(email, Role.CLIENT))
                 .thenReturn(client);
         when(passwordEncoder.matches(password, client.getPassword()))
                 .thenReturn(true);
 
-        // Act
-        Authentication result = authProvider.authenticate(authToken);
+        // Act & Assert
+        assertThrows(BadCredentialsException.class, () -> authProvider.authenticate(authToken));
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(client, result.getPrincipal());
-        verify(userDetailsService).loadUserBasedOnRole(email, "client");
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.CLIENT);
+        verify(passwordEncoder).matches(password, client.getPassword());
     }
 
     @Test
-    void authenticate_WithNullRole_ShouldDefaultToClient() {
+    void authenticate_WithNullRole_ShouldThrowBadCredentialsException() {
         // Arrange
         Map<String, Object> details = new HashMap<>();
         details.put("role", null);
         authToken.setDetails(details);
-        when(userDetailsService.loadUserBasedOnRole(email, "client"))
+        when(userDetailsService.loadUserBasedOnRole(email, Role.CLIENT))
                 .thenReturn(client);
         when(passwordEncoder.matches(password, client.getPassword()))
                 .thenReturn(true);
 
-        // Act
-        Authentication result = authProvider.authenticate(authToken);
+        // Act & Assert
+        assertThrows(BadCredentialsException.class, () -> authProvider.authenticate(authToken));
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(client, result.getPrincipal());
-        verify(userDetailsService).loadUserBasedOnRole(email, "client");
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.CLIENT);
+        verify(passwordEncoder).matches(password, client.getPassword());
     }
 
     @Test
-    void authenticate_WithNoRoleInDetails_ShouldDefaultToClient() {
+    void authenticate_WithNoRoleInDetails_ShouldThrowBadCredentialsException() {
         // Arrange
         authToken.setDetails(Map.of("otherField", "value"));
-        when(userDetailsService.loadUserBasedOnRole(email, "client"))
+        when(userDetailsService.loadUserBasedOnRole(email, Role.CLIENT))
                 .thenReturn(client);
         when(passwordEncoder.matches(password, client.getPassword()))
                 .thenReturn(true);
 
-        // Act
-        Authentication result = authProvider.authenticate(authToken);
+        // Act & Assert
+        assertThrows(BadCredentialsException.class, () -> authProvider.authenticate(authToken));
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(client, result.getPrincipal());
-        verify(userDetailsService).loadUserBasedOnRole(email, "client");
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.CLIENT);
+        verify(passwordEncoder).matches(password, client.getPassword());
     }
 
     @Test
-    void authenticate_WithNonMapDetails_ShouldDefaultToClient() {
+    void authenticate_WithNonMapDetails_ShouldThrowBadCredentialsException() {
         // Arrange
         authToken.setDetails("someStringDetails");
-        when(userDetailsService.loadUserBasedOnRole(email, "client"))
+        when(userDetailsService.loadUserBasedOnRole(email, Role.CLIENT))
                 .thenReturn(client);
         when(passwordEncoder.matches(password, client.getPassword()))
                 .thenReturn(true);
 
-        // Act
-        Authentication result = authProvider.authenticate(authToken);
+        // Act & Assert
+        assertThrows(BadCredentialsException.class, () -> authProvider.authenticate(authToken));
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(client, result.getPrincipal());
-        verify(userDetailsService).loadUserBasedOnRole(email, "client");
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.CLIENT);
+        verify(passwordEncoder).matches(password, client.getPassword());
     }
 
     @Test
-    void authenticate_WithNullDetails_ShouldDefaultToClient() {
+    void authenticate_WithNullDetails_ShouldThrowBadCredentialsException() {
         // Arrange
         authToken.setDetails(null);
-        when(userDetailsService.loadUserBasedOnRole(email, "client"))
+        when(userDetailsService.loadUserBasedOnRole(email, Role.CLIENT))
                 .thenReturn(client);
         when(passwordEncoder.matches(password, client.getPassword()))
                 .thenReturn(true);
 
-        // Act
-        Authentication result = authProvider.authenticate(authToken);
+        // Act & Assert
+        assertThrows(BadCredentialsException.class, () -> authProvider.authenticate(authToken));
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(client, result.getPrincipal());
-        verify(userDetailsService).loadUserBasedOnRole(email, "client");
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.CLIENT);
+        verify(passwordEncoder).matches(password, client.getPassword());
     }
 
     @Test
@@ -182,8 +170,8 @@ class RoleBasedAuthenticationProviderTest {
         // Arrange
         UsernamePasswordAuthenticationToken wrongToken =
                 new UsernamePasswordAuthenticationToken(email, "wrongPassword");
-        wrongToken.setDetails(Map.of("role", "employee"));
-        when(userDetailsService.loadUserBasedOnRole(email, "employee"))
+        wrongToken.setDetails(Map.of("role", Role.EMPLOYEE));
+        when(userDetailsService.loadUserBasedOnRole(email, Role.EMPLOYEE))
                 .thenReturn(employee);
         when(passwordEncoder.matches("wrongPassword", employee.getPassword()))
                 .thenReturn(false);
@@ -193,7 +181,7 @@ class RoleBasedAuthenticationProviderTest {
                 () -> authProvider.authenticate(wrongToken));
 
         assertEquals("Invalid credentials!", exception.getMessage());
-        verify(userDetailsService).loadUserBasedOnRole(email, "employee");
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.EMPLOYEE);
         verify(passwordEncoder).matches("wrongPassword", employee.getPassword());
     }
 
@@ -203,9 +191,9 @@ class RoleBasedAuthenticationProviderTest {
         String nonExistentEmail = "nonexistent@email.com";
         UsernamePasswordAuthenticationToken wrongToken =
                 new UsernamePasswordAuthenticationToken(nonExistentEmail, password);
-        wrongToken.setDetails(Map.of("role", "employee"));
+        wrongToken.setDetails(Map.of("role", Role.EMPLOYEE));
 
-        when(userDetailsService.loadUserBasedOnRole(nonExistentEmail, "employee"))
+        when(userDetailsService.loadUserBasedOnRole(nonExistentEmail, Role.EMPLOYEE))
                 .thenThrow(new UsernameNotFoundException("User not found"));
 
         // Act & Assert
@@ -213,7 +201,7 @@ class RoleBasedAuthenticationProviderTest {
                 () -> authProvider.authenticate(wrongToken));
 
         assertEquals("User not found", exception.getMessage());
-        verify(userDetailsService).loadUserBasedOnRole(nonExistentEmail, "employee");
+        verify(userDetailsService).loadUserBasedOnRole(nonExistentEmail, Role.EMPLOYEE);
         verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 
@@ -221,7 +209,7 @@ class RoleBasedAuthenticationProviderTest {
     void authenticate_WithBlockedClient_ShouldThrowLockedException() {
         // Arrange
         authToken.setDetails(Map.of("role", "client"));
-        when(userDetailsService.loadUserBasedOnRole(email, "client"))
+        when(userDetailsService.loadUserBasedOnRole(email, Role.CLIENT))
                 .thenThrow(new LockedException("Account is blocked!"));
 
         // Act & Assert
@@ -229,7 +217,7 @@ class RoleBasedAuthenticationProviderTest {
                 () -> authProvider.authenticate(authToken));
 
         assertEquals("Account is blocked!", exception.getMessage());
-        verify(userDetailsService).loadUserBasedOnRole(email, "client");
+        verify(userDetailsService).loadUserBasedOnRole(email, Role.CLIENT);
         verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 

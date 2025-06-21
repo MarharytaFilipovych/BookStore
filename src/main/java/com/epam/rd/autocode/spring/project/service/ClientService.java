@@ -4,7 +4,6 @@ import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.ClientUpdateDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 
 public interface ClientService {
@@ -17,7 +16,7 @@ public interface ClientService {
 
     ClientDTO updateClientByEmail(String email, ClientDTO client);
 
-    ClientDTO updateClientByEmail(String email, ClientUpdateDTO client);
+    void updateClientByEmail(String email, ClientUpdateDTO client);
 
     void deleteClientByEmail(String email);
 
@@ -30,4 +29,6 @@ public interface ClientService {
     void blockClient(String clientEmail);
 
     void unblockClient(String clientEmail);
+
+    void updateClientPassword(String email, String newPassword);
 }

@@ -9,6 +9,7 @@ import com.epam.rd.autocode.spring.project.model.Book;
 import com.epam.rd.autocode.spring.project.model.QBook;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.service.BookService;
+import com.epam.rd.autocode.spring.project.service.SortMappingService;
 import com.epam.rd.autocode.spring.project.utils.BookSearchPredicateBuilder;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,15 +24,18 @@ import org.springframework.util.StringUtils;
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private final SortMappingService sortMappingService;
 
-    public BookServiceImpl(BookRepository bookRepository, BookMapper bookMapper) {
+    public BookServiceImpl(BookRepository bookRepository, BookMapper bookMapper, SortMappingService sortMappingService) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
+        this.sortMappingService = sortMappingService;
     }
 
     @Override
     public Page<BookDTO> getAllBooks(Pageable pageable) {
-        return bookRepository.findAll(pageable).map(bookMapper::toDto);
+        Pageable mappedPageable = sortMappingService.applyMappings(pageable, "book");
+        return bookRepository.findAll(mappedPageable).map(bookMapper::toDto);
     }
 
     @Override
