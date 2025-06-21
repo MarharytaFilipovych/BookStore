@@ -21,4 +21,8 @@ public class LoginDTO {
 
     @CorrectEnum(enumClass = Role.class)
     private Role role = Role.CLIENT;
+
+    public void setEmail(String email) {
+        this.email = email != null ? email.trim() : null;
+    }
 }

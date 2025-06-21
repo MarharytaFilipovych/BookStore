@@ -32,4 +32,12 @@ public class ClientDTO {
     @NotNull(message = "Balance is required")
     @DecimalMin(value = "0.00", message = "Balance cannot be negative")
     private BigDecimal balance;
+
+    public void setEmail(String email) {
+        this.email = email != null ? email.trim() : null;
+    }
+
+    public void setName(String name) {
+        this.name = name != null ? name.trim() : null;
+    }
 }

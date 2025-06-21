@@ -9,6 +9,7 @@ import org.passay.dictionary.ArrayWordList;
 import org.passay.dictionary.WordListDictionary;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MyPasswordValidator implements ConstraintValidator<ValidPassword, String> {
@@ -45,9 +46,12 @@ public class MyPasswordValidator implements ConstraintValidator<ValidPassword, S
         rules.add(new IllegalSequenceRule(EnglishSequenceData.USQwerty, maxSequence, false));
         rules.add(new RepeatCharacterRegexRule(properties.getMaxRepeatChars() + 1));
         if (properties.getCommonPasswords().length != 0) {
+            String[] commonPasswords = properties.getCommonPasswords().clone();
+            Arrays.sort(commonPasswords);
+
             rules.add(new DictionaryRule(
                     new WordListDictionary(
-                            new ArrayWordList(properties.getCommonPasswords())
+                            new ArrayWordList(commonPasswords)
                     )
             ));
         }

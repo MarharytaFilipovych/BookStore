@@ -43,4 +43,12 @@ public class OrderDTO {
     @Valid
     @JsonProperty("book_items")
     private List<BookItemDTO> bookItems = new ArrayList<>();
+
+    public void setEmployeeEmail(String employeeEmail) {
+        this.employeeEmail = employeeEmail != null ? employeeEmail.trim() : null;
+    }
+
+    public void setClientEmail(String clientEmail) {
+        this.clientEmail = clientEmail != null ? clientEmail.trim() : null;
+    }
 }

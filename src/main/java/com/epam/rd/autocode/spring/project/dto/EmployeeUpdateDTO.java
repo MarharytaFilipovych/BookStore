@@ -27,4 +27,12 @@ public class EmployeeUpdateDTO {
     @Past(message = "Birth date must be in the past")
     @JsonProperty("birthdate")
     private LocalDate birthDate;
+
+    public void setName(String name) {
+        this.name = name != null ? name.trim() : null;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone != null ? phone.trim() : null;
+    }
 }

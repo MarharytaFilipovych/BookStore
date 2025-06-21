@@ -14,7 +14,6 @@ import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -59,4 +58,16 @@ public class BookDTO {
     @NotNull(message = "Language is required")
     @CorrectEnum(enumClass = Language.class, message = "Invalid language. Must be one of: ENGLISH, SPANISH, FRENCH, GERMAN, UKRAINIAN, JAPANESE, OTHER")
     private Language language;
+
+    public void setName(String name) {
+        this.name = name != null ? name.trim() : null;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre != null ? genre.trim() : null;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author != null ? author.trim() : null;
+    }
 }
