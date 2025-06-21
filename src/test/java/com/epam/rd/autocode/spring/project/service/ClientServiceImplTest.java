@@ -45,6 +45,9 @@ public class ClientServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private SortMappingService sortMappingService;
+
     @InjectMocks
     private ClientServiceImpl clientService;
 
@@ -67,8 +70,11 @@ public class ClientServiceImplTest {
     void getAllClients_WithPageable_ShouldReturnPageOfClientDTOs() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Client> clientPage = new PageImpl<>(clients, pageable, clients.size());
-        when(clientRepository.findAll(pageable)).thenReturn(clientPage);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
+
+        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
         for (int i = 0; i < clients.size(); i++) {
             when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
         }
@@ -80,7 +86,8 @@ public class ClientServiceImplTest {
         assertNotNull(result);
         assertEquals(clients.size(), result.getTotalElements());
         assertEquals(clientDTOs, result.getContent());
-        verify(clientRepository).findAll(pageable);
+        verify(sortMappingService).applyMappings(pageable, "client");
+        verify(clientRepository).findAll(mappedPageable);
         verify(clientMapper, times(clients.size())).toDto(any(Client.class));
     }
 
@@ -88,8 +95,11 @@ public class ClientServiceImplTest {
     void getAllClients_WithSortByNameAsc_ShouldPassCorrectSortToRepository() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Client> clientPage = new PageImpl<>(clients, pageable, clients.size());
-        when(clientRepository.findAll(any(Pageable.class))).thenReturn(clientPage);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
+
+        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
         for (int i = 0; i < clients.size(); i++) {
             when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
         }
@@ -98,22 +108,19 @@ public class ClientServiceImplTest {
         clientService.getAllClients(pageable);
 
         // Assert
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(clientRepository).findAll(pageableCaptor.capture());
-
-        Pageable capturedPageable = pageableCaptor.getValue();
-        Sort.Order nameOrder = capturedPageable.getSort().getOrderFor("name");
-        assertNotNull(nameOrder);
-        assertEquals(Sort.Direction.ASC, nameOrder.getDirection());
-        assertEquals("name", nameOrder.getProperty());
+        verify(sortMappingService).applyMappings(pageable, "client");
+        verify(clientRepository).findAll(mappedPageable);
     }
 
     @Test
-    void getAllClients_WithSortByEmailDesc_ShouldPassCorrectSortToRepository() {
+    void getAllClients_WithSortByBalanceDesc_ShouldPassCorrectSortToRepository() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10, Sort.by("balance").descending());
-        Page<Client> clientPage = new PageImpl<>(clients, pageable, clients.size());
-        when(clientRepository.findAll(any(Pageable.class))).thenReturn(clientPage);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("balance").descending());
+        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
+
+        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
         for (int i = 0; i < clients.size(); i++) {
             when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
         }
@@ -122,14 +129,8 @@ public class ClientServiceImplTest {
         clientService.getAllClients(pageable);
 
         // Assert
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(clientRepository).findAll(pageableCaptor.capture());
-
-        Pageable capturedPageable = pageableCaptor.getValue();
-        Sort.Order balanceOrder = capturedPageable.getSort().getOrderFor("balance");
-        assertNotNull(balanceOrder);
-        assertEquals(Sort.Direction.DESC, balanceOrder.getDirection());
-        assertEquals("balance", balanceOrder.getProperty());
+        verify(sortMappingService).applyMappings(pageable, "client");
+        verify(clientRepository).findAll(mappedPageable);
     }
 
     @Test
@@ -137,8 +138,11 @@ public class ClientServiceImplTest {
         // Arrange
         Sort multiSort = Sort.by("name").ascending().and(Sort.by("balance").descending());
         Pageable pageable = PageRequest.of(0, 10, multiSort);
-        Page<Client> clientPage = new PageImpl<>(clients, pageable, clients.size());
-        when(clientRepository.findAll(any(Pageable.class))).thenReturn(clientPage);
+        Pageable mappedPageable = PageRequest.of(0, 10, multiSort);
+        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
+
+        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
         for (int i = 0; i < clients.size(); i++) {
             when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
         }
@@ -147,22 +151,8 @@ public class ClientServiceImplTest {
         clientService.getAllClients(pageable);
 
         // Assert
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(clientRepository).findAll(pageableCaptor.capture());
-
-        Pageable capturedPageable = pageableCaptor.getValue();
-        Sort capturedSort = capturedPageable.getSort();
-
-        List<Sort.Order> orders = capturedSort.toList();
-        assertEquals(2, orders.size());
-
-        Sort.Order nameOrder = orders.get(0);
-        assertEquals("name", nameOrder.getProperty());
-        assertEquals(Sort.Direction.ASC, nameOrder.getDirection());
-
-        Sort.Order balanceOrder = orders.get(1);
-        assertEquals("balance", balanceOrder.getProperty());
-        assertEquals(Sort.Direction.DESC, balanceOrder.getDirection());
+        verify(sortMappingService).applyMappings(pageable, "client");
+        verify(clientRepository).findAll(mappedPageable);
     }
 
     @Test
@@ -203,8 +193,11 @@ public class ClientServiceImplTest {
     void getAllClients_WithPageable_WhenEmptyRepository_ShouldReturnEmptyPage() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Client> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(clientRepository.findAll(pageable)).thenReturn(emptyPage);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        Page<Client> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
+
+        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(emptyPage);
 
         // Act
         Page<ClientDTO> result = clientService.getAllClients(pageable);
@@ -213,7 +206,7 @@ public class ClientServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
         assertTrue(result.getContent().isEmpty());
-        verify(clientRepository).findAll(pageable);
+        verify(clientRepository).findAll(mappedPageable);
         verify(clientMapper, never()).toDto(any());
     }
 
@@ -264,30 +257,19 @@ public class ClientServiceImplTest {
     }
 
     @Test
-    void updateClientByEmailWithClientUpdateDTO_WhenClientExists_ShouldUpdateClientAndSaveNew() {
+    void updateClientByEmailWithClientUpdateDTO_WhenClientExists_ShouldUpdateClientAndSave() {
         // Arrange
         ClientUpdateDTO updateData = new ClientUpdateDTO();
         updateData.setName("Updated Name");
         updateData.setBalance(new BigDecimal("500.00"));
 
-        Client updatedClient = new Client();
-        updatedClient.setName("Updated Name");
-        updatedClient.setBalance(new BigDecimal("500.00"));
-
-        ClientDTO expectedResult = new ClientDTO();
-        expectedResult.setEmail(client.getEmail());
-        expectedResult.setName("Updated Name");
-        expectedResult.setBalance(new BigDecimal("500.00"));
+        Client mappedClient = new Client();
+        mappedClient.setName("Updated Name");
+        mappedClient.setBalance(new BigDecimal("500.00"));
 
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
-        when(clientMapper.toEntity(updateData)).thenReturn(updatedClient);
-        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> {
-            Client saved = invocation.getArgument(0);
-            assertEquals(client.getId(), saved.getId());
-            assertEquals(client.getEmail(), saved.getEmail());
-            return saved;
-        });
-        when(clientMapper.toDto(updatedClient)).thenReturn(expectedResult);
+        when(clientMapper.toEntity(updateData)).thenReturn(mappedClient);
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         clientService.updateClientByEmail(client.getEmail(), updateData);
@@ -295,11 +277,15 @@ public class ClientServiceImplTest {
         // Assert
         verify(clientRepository).getByEmail(client.getEmail());
         verify(clientMapper).toEntity(updateData);
-        verify(clientRepository).save(argThat(c ->
-                c.getId().equals(client.getId()) &&
-                        c.getEmail().equals(client.getEmail())
-        ));
-        verify(clientMapper).toDto(updatedClient);
+
+        ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
+        verify(clientRepository).save(clientCaptor.capture());
+
+        Client savedClient = clientCaptor.getValue();
+        assertEquals(client.getId(), savedClient.getId());
+        assertEquals(client.getEmail(), savedClient.getEmail());
+        assertEquals("Updated Name", savedClient.getName());
+        assertEquals(new BigDecimal("500.00"), savedClient.getBalance());
     }
 
     @Test
@@ -336,7 +322,6 @@ public class ClientServiceImplTest {
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
         when(clientMapper.toEntity(updateData)).thenReturn(mappedClient);
         when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(clientMapper.toDto(any(Client.class))).thenReturn(clientDTO);
 
         // Act
         clientService.updateClientByEmail(client.getEmail(), updateData);
@@ -353,7 +338,7 @@ public class ClientServiceImplTest {
     }
 
     @Test
-    void deleteClientByEmail_ShouldCallRepositoryDelete() {
+    void deleteClientByEmail_ShouldCallRepositoryDeleteAndUnblock() {
         // Arrange
         String clientEmail = "test@example.com";
 
@@ -368,9 +353,19 @@ public class ClientServiceImplTest {
     @Test
     void addClient_WhenClientIsValid_ShouldReturnSavedClientDTO() {
         // Arrange
-        when(clientMapper.toEntity(clientDTO)).thenReturn(client);
-        when(clientRepository.save(client)).thenReturn(client);
-        when(clientMapper.toDto(client)).thenReturn(clientDTO);
+        String rawPassword = "password123";
+        String encodedPassword = "$2a$10$encodedPassword";
+
+        Client clientToSave = getClientEntity();
+        clientToSave.setPassword(rawPassword);
+
+        Client savedClient = getClientEntity();
+        savedClient.setPassword(encodedPassword);
+
+        when(clientMapper.toEntity(clientDTO)).thenReturn(clientToSave);
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+        when(clientRepository.save(clientToSave)).thenReturn(savedClient);
+        when(clientMapper.toDto(savedClient)).thenReturn(clientDTO);
 
         // Act
         ClientDTO result = clientService.addClient(clientDTO);
@@ -379,15 +374,19 @@ public class ClientServiceImplTest {
         assertNotNull(result);
         assertEquals(clientDTO, result);
         verify(clientMapper).toEntity(clientDTO);
-        verify(clientRepository).save(client);
-        verify(clientMapper).toDto(client);
+        verify(passwordEncoder).encode(rawPassword);
+        verify(clientRepository).save(clientToSave);
+        verify(clientMapper).toDto(savedClient);
+        assertEquals(encodedPassword, clientToSave.getPassword());
     }
 
     @Test
     void addClient_WhenClientAlreadyExists_ShouldThrowAlreadyExistException() {
         // Arrange
-        when(clientMapper.toEntity(clientDTO)).thenReturn(client);
-        when(clientRepository.save(client)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
+        Client clientToSave = getClientEntity();
+        when(clientMapper.toEntity(clientDTO)).thenReturn(clientToSave);
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(clientRepository.save(clientToSave)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
 
         // Act & Assert
         AlreadyExistException exception = assertThrows(AlreadyExistException.class,
@@ -395,7 +394,8 @@ public class ClientServiceImplTest {
 
         assertTrue(exception.getMessage().contains("Client with email " + clientDTO.getEmail()));
         verify(clientMapper).toEntity(clientDTO);
-        verify(clientRepository).save(client);
+        verify(passwordEncoder).encode(anyString());
+        verify(clientRepository).save(clientToSave);
     }
 
     @Test
@@ -523,5 +523,113 @@ public class ClientServiceImplTest {
         assertTrue(result.isEmpty());
         verify(blockedClientRepository).findAll();
         verify(clientMapper, never()).toDto(any());
+    }
+
+    @Test
+    void getBlockedClients_WithPageable_WhenEmptyBlockedRepository_ShouldReturnEmptyPage() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<BlockedClient> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        when(blockedClientRepository.findAll(pageable)).thenReturn(emptyPage);
+
+        // Act
+        Page<ClientDTO> result = clientService.getBlockedClients(pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
+        verify(blockedClientRepository).findAll(pageable);
+        verify(clientMapper, never()).toDto(any());
+    }
+
+    @Test
+    void updateClientPassword_WhenClientExists_ShouldUpdatePassword() {
+        // Arrange
+        String clientEmail = client.getEmail();
+        String newPassword = "newPassword123";
+        String encodedPassword = "$2a$10$newEncodedPassword";
+
+        when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.of(client));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
+        when(clientRepository.save(client)).thenReturn(client);
+
+        // Act
+        clientService.updateClientPassword(clientEmail, newPassword);
+
+        // Assert
+        verify(clientRepository).getByEmail(clientEmail);
+        verify(passwordEncoder).encode(newPassword);
+        verify(clientRepository).save(client);
+        assertEquals(encodedPassword, client.getPassword());
+    }
+
+    @Test
+    void updateClientPassword_WhenClientDoesNotExist_ShouldThrowNotFoundException() {
+        // Arrange
+        String clientEmail = "nonexistent@example.com";
+        String newPassword = "newPassword123";
+
+        when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> clientService.updateClientPassword(clientEmail, newPassword));
+
+        assertTrue(exception.getMessage().contains("Client with email " + clientEmail));
+        verify(clientRepository).getByEmail(clientEmail);
+        verify(passwordEncoder, never()).encode(anyString());
+        verify(clientRepository, never()).save(any());
+    }
+
+    @Test
+    void addClient_ShouldEncodePasswordBeforeSaving() {
+        // Arrange
+        String rawPassword = "plainTextPassword";
+        String encodedPassword = "$2a$10$encodedHashedPassword";
+
+        ClientDTO dtoWithPlainPassword = getClientDTO();
+        dtoWithPlainPassword.setPassword(rawPassword);
+
+        Client clientEntity = getClientEntity();
+        clientEntity.setPassword(rawPassword);
+
+        when(clientMapper.toEntity(dtoWithPlainPassword)).thenReturn(clientEntity);
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> {
+            Client saved = invocation.getArgument(0);
+            assertEquals(encodedPassword, saved.getPassword());
+            return saved;
+        });
+        when(clientMapper.toDto(any(Client.class))).thenReturn(clientDTO);
+
+        // Act
+        clientService.addClient(dtoWithPlainPassword);
+
+        // Assert
+        verify(passwordEncoder).encode(rawPassword);
+        verify(clientRepository).save(argThat(c -> encodedPassword.equals(c.getPassword())));
+    }
+
+    @Test
+    void getAllClients_WithPageable_ShouldUseMappedPageable() {
+        // Arrange
+        Pageable originalPageable = PageRequest.of(0, 10, Sort.by("balance"));
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("balance"));
+        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
+
+        when(sortMappingService.applyMappings(originalPageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
+        for (int i = 0; i < clients.size(); i++) {
+            when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
+        }
+
+        // Act
+        Page<ClientDTO> result = clientService.getAllClients(originalPageable);
+
+        // Assert
+        assertNotNull(result);
+        verify(sortMappingService).applyMappings(originalPageable, "client");
+        verify(clientRepository).findAll(mappedPageable);
     }
 }

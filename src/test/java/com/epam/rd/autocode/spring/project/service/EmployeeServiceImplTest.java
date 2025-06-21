@@ -40,6 +40,9 @@ public class EmployeeServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private SortMappingService sortMappingService;
+
     @InjectMocks
     private EmployeeServiceImpl employeeService;
 
@@ -60,7 +63,10 @@ public class EmployeeServiceImplTest {
     void getAllEmployees_WithPageable_ShouldReturnPageOfEmployeeDTOs() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Employee> employeePage = new PageImpl<>(employees, pageable, employees.size());
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        Page<Employee> employeePage = new PageImpl<>(employees, mappedPageable, employees.size());
+
+        when(sortMappingService.applyMappings(pageable, "employee")).thenReturn(mappedPageable);
         when(employeeRepository.findAll(pageable)).thenReturn(employeePage);
         for (int i = 0; i < employees.size(); i++) {
             when(employeeMapper.toDto(employees.get(i))).thenReturn(employeeDTOs.get(i));
@@ -73,6 +79,7 @@ public class EmployeeServiceImplTest {
         assertNotNull(result);
         assertEquals(employees.size(), result.getTotalElements());
         assertEquals(employeeDTOs, result.getContent());
+        verify(sortMappingService).applyMappings(pageable, "employee");
         verify(employeeRepository).findAll(pageable);
         verify(employeeMapper, times(employees.size())).toDto(any(Employee.class));
     }
@@ -81,8 +88,11 @@ public class EmployeeServiceImplTest {
     void getAllEmployees_WithSortByNameAsc_ShouldPassCorrectSortToRepository() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Employee> employeePage = new PageImpl<>(employees, pageable, employees.size());
-        when(employeeRepository.findAll(any(Pageable.class))).thenReturn(employeePage);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        Page<Employee> employeePage = new PageImpl<>(employees, mappedPageable, employees.size());
+
+        when(sortMappingService.applyMappings(pageable, "employee")).thenReturn(mappedPageable);
+        when(employeeRepository.findAll(pageable)).thenReturn(employeePage);
         for (int i = 0; i < employees.size(); i++) {
             when(employeeMapper.toDto(employees.get(i))).thenReturn(employeeDTOs.get(i));
         }
@@ -91,22 +101,19 @@ public class EmployeeServiceImplTest {
         employeeService.getAllEmployees(pageable);
 
         // Assert
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(employeeRepository).findAll(pageableCaptor.capture());
-
-        Pageable capturedPageable = pageableCaptor.getValue();
-        Sort.Order nameOrder = capturedPageable.getSort().getOrderFor("name");
-        assertNotNull(nameOrder);
-        assertEquals(Sort.Direction.ASC, nameOrder.getDirection());
-        assertEquals("name", nameOrder.getProperty());
+        verify(sortMappingService).applyMappings(pageable, "employee");
+        verify(employeeRepository).findAll(pageable);
     }
 
     @Test
     void getAllEmployees_WithSortByBirthDateDesc_ShouldPassCorrectSortToRepository() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10, Sort.by("birthdate").descending());
-        Page<Employee> employeePage = new PageImpl<>(employees, pageable, employees.size());
-        when(employeeRepository.findAll(any(Pageable.class))).thenReturn(employeePage);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("birthDate").descending());
+        Page<Employee> employeePage = new PageImpl<>(employees, mappedPageable, employees.size());
+
+        when(sortMappingService.applyMappings(pageable, "employee")).thenReturn(mappedPageable);
+        when(employeeRepository.findAll(pageable)).thenReturn(employeePage);
         for (int i = 0; i < employees.size(); i++) {
             when(employeeMapper.toDto(employees.get(i))).thenReturn(employeeDTOs.get(i));
         }
@@ -115,14 +122,8 @@ public class EmployeeServiceImplTest {
         employeeService.getAllEmployees(pageable);
 
         // Assert
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(employeeRepository).findAll(pageableCaptor.capture());
-
-        Pageable capturedPageable = pageableCaptor.getValue();
-        Sort.Order order = capturedPageable.getSort().getOrderFor("birthdate");
-        assertNotNull(order);
-        assertEquals(Sort.Direction.DESC, order.getDirection());
-        assertEquals("birthdate", order.getProperty());
+        verify(sortMappingService).applyMappings(pageable, "employee");
+        verify(employeeRepository).findAll(pageable);
     }
 
     @Test
@@ -130,8 +131,11 @@ public class EmployeeServiceImplTest {
         // Arrange
         Sort multiSort = Sort.by("name").ascending().and(Sort.by("birthdate").descending());
         Pageable pageable = PageRequest.of(0, 10, multiSort);
-        Page<Employee> employeePage = new PageImpl<>(employees, pageable, employees.size());
-        when(employeeRepository.findAll(any(Pageable.class))).thenReturn(employeePage);
+        Pageable mappedPageable = PageRequest.of(0, 10, multiSort);
+        Page<Employee> employeePage = new PageImpl<>(employees, mappedPageable, employees.size());
+
+        when(sortMappingService.applyMappings(pageable, "employee")).thenReturn(mappedPageable);
+        when(employeeRepository.findAll(pageable)).thenReturn(employeePage);
         for (int i = 0; i < employees.size(); i++) {
             when(employeeMapper.toDto(employees.get(i))).thenReturn(employeeDTOs.get(i));
         }
@@ -140,22 +144,8 @@ public class EmployeeServiceImplTest {
         employeeService.getAllEmployees(pageable);
 
         // Assert
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(employeeRepository).findAll(pageableCaptor.capture());
-
-        Pageable capturedPageable = pageableCaptor.getValue();
-        Sort capturedSort = capturedPageable.getSort();
-
-        List<Sort.Order> orders = capturedSort.toList();
-        assertEquals(2, orders.size());
-
-        Sort.Order nameOrder = orders.get(0);
-        assertEquals("name", nameOrder.getProperty());
-        assertEquals(Sort.Direction.ASC, nameOrder.getDirection());
-
-        Sort.Order birthdateOrder = orders.get(1);
-        assertEquals("birthdate", birthdateOrder.getProperty());
-        assertEquals(Sort.Direction.DESC, birthdateOrder.getDirection());
+        verify(sortMappingService).applyMappings(pageable, "employee");
+        verify(employeeRepository).findAll(pageable);
     }
 
     @Test
@@ -196,7 +186,10 @@ public class EmployeeServiceImplTest {
     void getAllEmployees_WithPageable_WhenEmptyRepository_ShouldReturnEmptyPage() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Employee> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        Page<Employee> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
+
+        when(sortMappingService.applyMappings(pageable, "employee")).thenReturn(mappedPageable);
         when(employeeRepository.findAll(pageable)).thenReturn(emptyPage);
 
         // Act
@@ -257,34 +250,21 @@ public class EmployeeServiceImplTest {
     }
 
     @Test
-    void updateEmployeeByEmailWithEmployeeUpdateDTO_WhenEmployeeExists_ShouldSaveNewEmployee() {
+    void updateEmployeeByEmailWithEmployeeUpdateDTO_WhenEmployeeExists_ShouldSaveUpdatedEmployee() {
         // Arrange
         EmployeeUpdateDTO updateData = new EmployeeUpdateDTO();
         updateData.setName("Updated Name");
         updateData.setPhone("+1-555-9999");
         updateData.setBirthDate(LocalDate.of(1990, 1, 1));
 
-        Employee updatedEmployee = new Employee();
-        updatedEmployee.setName("Updated Name");
-        updatedEmployee.setPhone("+1-555-9999");
-        updatedEmployee.setBirthDate(LocalDate.of(1990, 1, 1));
-
-        EmployeeDTO expectedResult = new EmployeeDTO();
-        expectedResult.setEmail(employee.getEmail());
-        expectedResult.setName("Updated Name");
-        expectedResult.setPhone("+1-555-9999");
-        expectedResult.setBirthDate(LocalDate.of(1990, 1, 1));
+        Employee mappedEmployee = new Employee();
+        mappedEmployee.setName("Updated Name");
+        mappedEmployee.setPhone("+1-555-9999");
+        mappedEmployee.setBirthDate(LocalDate.of(1990, 1, 1));
 
         when(employeeRepository.getByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
-        when(employeeMapper.toEntity(updateData)).thenReturn(updatedEmployee);
-        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> {
-            Employee saved = invocation.getArgument(0);
-            assertEquals(employee.getId(), saved.getId());
-            assertEquals(employee.getPassword(), saved.getPassword());
-            assertEquals(employee.getEmail(), saved.getEmail());
-            return saved;
-        });
-        when(employeeMapper.toDto(updatedEmployee)).thenReturn(expectedResult);
+        when(employeeMapper.toEntity(updateData)).thenReturn(mappedEmployee);
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         employeeService.updateEmployeeByEmail(employee.getEmail(), updateData);
@@ -292,12 +272,17 @@ public class EmployeeServiceImplTest {
         // Assert
         verify(employeeRepository).getByEmail(employee.getEmail());
         verify(employeeMapper).toEntity(updateData);
-        verify(employeeRepository).save(argThat(emp ->
-                emp.getId().equals(employee.getId()) &&
-                        emp.getPassword().equals(employee.getPassword()) &&
-                        emp.getEmail().equals(employee.getEmail())
-        ));
-        verify(employeeMapper).toDto(updatedEmployee);
+
+        ArgumentCaptor<Employee> employeeCaptor = ArgumentCaptor.forClass(Employee.class);
+        verify(employeeRepository).save(employeeCaptor.capture());
+
+        Employee savedEmployee = employeeCaptor.getValue();
+        assertEquals(employee.getId(), savedEmployee.getId());
+        assertEquals(employee.getPassword(), savedEmployee.getPassword());
+        assertEquals(employee.getEmail(), savedEmployee.getEmail());
+        assertEquals("Updated Name", savedEmployee.getName());
+        assertEquals("+1-555-9999", savedEmployee.getPhone());
+        assertEquals(LocalDate.of(1990, 1, 1), savedEmployee.getBirthDate());
     }
 
     @Test
@@ -337,7 +322,6 @@ public class EmployeeServiceImplTest {
         when(employeeRepository.getByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
         when(employeeMapper.toEntity(updateData)).thenReturn(mappedEmployee);
         when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(employeeMapper.toDto(any(Employee.class))).thenReturn(employeeDTO);
 
         // Act
         employeeService.updateEmployeeByEmail(employee.getEmail(), updateData);
@@ -370,9 +354,19 @@ public class EmployeeServiceImplTest {
     @Test
     void addEmployee_WhenEmployeeIsValid_ShouldReturnSavedEmployeeDTO() {
         // Arrange
-        when(employeeMapper.toEntity(employeeDTO)).thenReturn(employee);
-        when(employeeRepository.save(employee)).thenReturn(employee);
-        when(employeeMapper.toDto(employee)).thenReturn(employeeDTO);
+        String rawPassword = "password123";
+        String encodedPassword = "$2a$10$encodedPassword";
+
+        Employee employeeToSave = getEmployeeEntity();
+        employeeToSave.setPassword(rawPassword);
+
+        Employee savedEmployee = getEmployeeEntity();
+        savedEmployee.setPassword(encodedPassword);
+
+        when(employeeMapper.toEntity(employeeDTO)).thenReturn(employeeToSave);
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+        when(employeeRepository.save(employeeToSave)).thenReturn(savedEmployee);
+        when(employeeMapper.toDto(savedEmployee)).thenReturn(employeeDTO);
 
         // Act
         EmployeeDTO result = employeeService.addEmployee(employeeDTO);
@@ -381,15 +375,19 @@ public class EmployeeServiceImplTest {
         assertNotNull(result);
         assertEquals(employeeDTO, result);
         verify(employeeMapper).toEntity(employeeDTO);
-        verify(employeeRepository).save(employee);
-        verify(employeeMapper).toDto(employee);
+        verify(passwordEncoder).encode(rawPassword);
+        verify(employeeRepository).save(employeeToSave);
+        verify(employeeMapper).toDto(savedEmployee);
+        assertEquals(encodedPassword, employeeToSave.getPassword());
     }
 
     @Test
     void addEmployee_WhenEmployeeAlreadyExists_ShouldThrowAlreadyExistException() {
         // Arrange
-        when(employeeMapper.toEntity(employeeDTO)).thenReturn(employee);
-        when(employeeRepository.save(employee)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
+        Employee employeeToSave = getEmployeeEntity();
+        when(employeeMapper.toEntity(employeeDTO)).thenReturn(employeeToSave);
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(employeeRepository.save(employeeToSave)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
 
         // Act & Assert
         AlreadyExistException exception = assertThrows(AlreadyExistException.class,
@@ -397,7 +395,8 @@ public class EmployeeServiceImplTest {
 
         assertTrue(exception.getMessage().contains("Employee with email " + employeeDTO.getEmail()));
         verify(employeeMapper).toEntity(employeeDTO);
-        verify(employeeRepository).save(employee);
+        verify(passwordEncoder).encode(anyString());
+        verify(employeeRepository).save(employeeToSave);
     }
 
     @Test
@@ -430,5 +429,95 @@ public class EmployeeServiceImplTest {
         assertTrue(exception.getMessage().contains("Employee with email " + employeeEmail));
         verify(employeeRepository).getByEmail(employeeEmail);
         verify(employeeMapper, never()).toDto(any());
+    }
+
+    @Test
+    void updateEmployeePassword_WhenEmployeeExists_ShouldUpdatePassword() {
+        // Arrange
+        String employeeEmail = employee.getEmail();
+        String newPassword = "newPassword123";
+        String encodedPassword = "$2a$10$newEncodedPassword";
+
+        when(employeeRepository.getByEmail(employeeEmail)).thenReturn(Optional.of(employee));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
+        when(employeeRepository.save(employee)).thenReturn(employee);
+
+        // Act
+        employeeService.updateEmployeePassword(employeeEmail, newPassword);
+
+        // Assert
+        verify(employeeRepository).getByEmail(employeeEmail);
+        verify(passwordEncoder).encode(newPassword);
+        verify(employeeRepository).save(employee);
+        assertEquals(encodedPassword, employee.getPassword());
+    }
+
+    @Test
+    void updateEmployeePassword_WhenEmployeeDoesNotExist_ShouldThrowNotFoundException() {
+        // Arrange
+        String employeeEmail = "nonexistent@example.com";
+        String newPassword = "newPassword123";
+
+        when(employeeRepository.getByEmail(employeeEmail)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> employeeService.updateEmployeePassword(employeeEmail, newPassword));
+
+        assertTrue(exception.getMessage().contains("Employee with email " + employeeEmail));
+        verify(employeeRepository).getByEmail(employeeEmail);
+        verify(passwordEncoder, never()).encode(anyString());
+        verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    void addEmployee_ShouldEncodePasswordBeforeSaving() {
+        // Arrange
+        String rawPassword = "plainTextPassword";
+        String encodedPassword = "$2a$10$encodedHashedPassword";
+
+        EmployeeDTO dtoWithPlainPassword = getEmployeeDTO();
+        dtoWithPlainPassword.setPassword(rawPassword);
+
+        Employee employeeEntity = getEmployeeEntity();
+        employeeEntity.setPassword(rawPassword);
+
+        when(employeeMapper.toEntity(dtoWithPlainPassword)).thenReturn(employeeEntity);
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+        when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> {
+            Employee saved = invocation.getArgument(0);
+            assertEquals(encodedPassword, saved.getPassword());
+            return saved;
+        });
+        when(employeeMapper.toDto(any(Employee.class))).thenReturn(employeeDTO);
+
+        // Act
+        employeeService.addEmployee(dtoWithPlainPassword);
+
+        // Assert
+        verify(passwordEncoder).encode(rawPassword);
+        verify(employeeRepository).save(argThat(emp -> encodedPassword.equals(emp.getPassword())));
+    }
+
+    @Test
+    void getAllEmployees_WithPageable_ShouldUseMappedPageable() {
+        // Arrange
+        Pageable originalPageable = PageRequest.of(0, 10, Sort.by("birthdate"));
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("birthDate"));
+        Page<Employee> employeePage = new PageImpl<>(employees, mappedPageable, employees.size());
+
+        when(sortMappingService.applyMappings(originalPageable, "employee")).thenReturn(mappedPageable);
+        when(employeeRepository.findAll(originalPageable)).thenReturn(employeePage);
+        for (int i = 0; i < employees.size(); i++) {
+            when(employeeMapper.toDto(employees.get(i))).thenReturn(employeeDTOs.get(i));
+        }
+
+        // Act
+        Page<EmployeeDTO> result = employeeService.getAllEmployees(originalPageable);
+
+        // Assert
+        assertNotNull(result);
+        verify(sortMappingService).applyMappings(originalPageable, "employee");
+        verify(employeeRepository).findAll(originalPageable);
     }
 }

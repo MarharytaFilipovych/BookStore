@@ -3,6 +3,7 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.annotations.CorrectSortFields;
 import com.epam.rd.autocode.spring.project.dto.*;
 import com.epam.rd.autocode.spring.project.service.ClientService;
+import com.epam.rd.autocode.spring.project.service.OrderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import org.springframework.data.domain.Page;
@@ -16,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/clients")
 public class ClientController {
     private final ClientService clientService;
+    private final OrderService orderService;
 
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, OrderService orderService) {
         this.clientService = clientService;
+        this.orderService = orderService;
     }
 
     private PaginatedResponseDTO<ClientDTO> getPaginatedResponse(Page<ClientDTO> page){
@@ -40,6 +43,19 @@ public class ClientController {
     @GetMapping("/{email}")
     public ResponseEntity<ClientDTO> getClientByEmail(@PathVariable @Email String email){
         return ResponseEntity.ok(clientService.getClientByEmail(email));
+    }
+
+    @GetMapping("{email}/orders")
+    public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByClient
+            (@PathVariable @Email String email,
+             @RequestParam(required = false)
+             @CorrectSortFields(entityType = "order")
+             @PageableDefault(sort = "orderDate") Pageable pageable){
+        Page<OrderDTO> page = orderService.getOrdersByClient(email, pageable);
+        PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();
+        response.setOrders(page.getContent());
+        response.setMeta(new MetaDTO(page));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

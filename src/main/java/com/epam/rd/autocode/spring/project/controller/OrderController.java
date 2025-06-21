@@ -6,7 +6,6 @@ import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.dto.PaginatedResponseDTO;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,13 +21,13 @@ public class OrderController {
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
-
-    private PaginatedResponseDTO<OrderDTO> getPaginatedResponse(Page<OrderDTO> page){
-        PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();
-        response.setOrders(page.getContent());
-        response.setMeta(new MetaDTO(page));
-        return response;
-    }
+//
+//    private PaginatedResponseDTO<OrderDTO> getPaginatedResponse(Page<OrderDTO> page){
+//        PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();
+//        response.setOrders(page.getContent());
+//        response.setMeta(new MetaDTO(page));
+//        return response;
+//    }
 
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getAllOrders
@@ -36,27 +35,10 @@ public class OrderController {
              @CorrectSortFields(entityType = "order")
              @PageableDefault(sort = "orderDate") Pageable pageable){
         Page<OrderDTO> page = orderService.getAllOrders(pageable);
-        return ResponseEntity.ok(getPaginatedResponse(page));
-    }
-
-    @GetMapping("/{email}")
-    public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByClient
-            (@PathVariable @Email String email,
-             @RequestParam(required = false)
-             @CorrectSortFields(entityType = "order")
-             @PageableDefault(sort = "orderDate") Pageable pageable){
-        Page<OrderDTO> page = orderService.getOrdersByClient(email, pageable);
-        return ResponseEntity.ok(getPaginatedResponse(page));
-    }
-
-    @GetMapping("/{email}")
-    public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByEmployee
-            (@PathVariable @Email String email,
-             @RequestParam(required = false)
-             @CorrectSortFields(entityType = "order")
-             @PageableDefault(sort = "orderDate") Pageable pageable){
-        Page<OrderDTO> page = orderService.getOrdersByEmployee(email, pageable);
-        return ResponseEntity.ok(getPaginatedResponse(page));
+        PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();
+        response.setOrders(page.getContent());
+        response.setMeta(new MetaDTO(page));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
