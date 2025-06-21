@@ -20,12 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import static com.epam.rd.autocode.spring.project.testdata.ClientData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -33,20 +31,11 @@ import java.util.Optional;
 @ExtendWith(MockitoExtension.class)
 public class ClientServiceImplTest {
 
-    @Mock
-    private ClientRepository clientRepository;
-
-    @Mock
-    private ClientMapper clientMapper;
-
-    @Mock
-    private BlockedClientRepository blockedClientRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private SortMappingService sortMappingService;
+    @Mock private ClientRepository clientRepository;
+    @Mock private ClientMapper clientMapper;
+    @Mock private BlockedClientRepository blockedClientRepository;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private SortMappingService sortMappingService;
 
     @InjectMocks
     private ClientServiceImpl clientService;
@@ -58,7 +47,7 @@ public class ClientServiceImplTest {
     private BlockedClient blockedClient;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         client = getClientEntity();
         clientDTO = getClientDTO();
         clients = getClientEnities();
@@ -66,110 +55,209 @@ public class ClientServiceImplTest {
         blockedClient = new BlockedClient(client);
     }
 
+    private void mockPageableClientOperations(Pageable pageable, Pageable mappedPageable,
+                                              List<Client> clientList, List<ClientDTO> clientDTOList) {
+        Page<Client> clientPage = new PageImpl<>(clientList, mappedPageable, clientList.size());
+
+        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
+
+        for (int i = 0; i < clientList.size(); i++) {
+            when(clientMapper.toDto(clientList.get(i))).thenReturn(clientDTOList.get(i));
+        }
+    }
+
+    private void mockSimpleClientListOperations(List<Client> clientList, List<ClientDTO> clientDTOList) {
+        when(clientRepository.findAll()).thenReturn(clientList);
+        for (int i = 0; i < clientList.size(); i++) {
+            when(clientMapper.toDto(clientList.get(i))).thenReturn(clientDTOList.get(i));
+        }
+    }
+
+    private void mockEmptyPageableRepository(Pageable pageable, Pageable mappedPageable) {
+        Page<Client> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
+        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
+        when(clientRepository.findAll(mappedPageable)).thenReturn(emptyPage);
+    }
+
+    private void mockSuccessfulClientUpdate(ClientDTO updateData, Client updatedClient) {
+        when(clientMapper.toEntity(updateData)).thenReturn(updatedClient);
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> {
+            Client saved = invocation.getArgument(0);
+            assertEquals(client.getId(), saved.getId());
+            return saved;
+        });
+        when(clientMapper.toDto(updatedClient)).thenReturn(updateData);
+    }
+
+    private void mockSuccessfulClientUpdateDTO(ClientUpdateDTO updateData, Client mappedClient) {
+        when(clientMapper.toEntity(updateData)).thenReturn(mappedClient);
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private void mockClientCreation(ClientDTO dto, Client clientToSave, Client savedClient,
+                                    String rawPassword, String encodedPassword) {
+        when(clientMapper.toEntity(dto)).thenReturn(clientToSave);
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+
+        when(clientRepository.save(clientToSave)).thenReturn(savedClient);
+        when(clientMapper.toDto(savedClient)).thenReturn(dto);
+    }
+
+    private void mockClientCreationFailure(ClientDTO dto, Client clientToSave) {
+        when(clientMapper.toEntity(dto)).thenReturn(clientToSave);
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(clientRepository.save(clientToSave)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
+    }
+
+    private void mockBlockedClientOperations(List<BlockedClient> blockedClients, List<ClientDTO> expectedDTOs) {
+        when(blockedClientRepository.findAll()).thenReturn(blockedClients);
+        for (int i = 0; i < blockedClients.size(); i++) {
+            when(clientMapper.toDto(blockedClients.get(i).getClient())).thenReturn(expectedDTOs.get(i));
+        }
+    }
+
+    private void mockPageableBlockedClientOperations(Pageable pageable, List<BlockedClient> blockedClients,
+                                                     List<ClientDTO> expectedDTOs) {
+        Page<BlockedClient> blockedPage = new PageImpl<>(blockedClients, pageable, blockedClients.size());
+        when(blockedClientRepository.findAll(pageable)).thenReturn(blockedPage);
+        for (int i = 0; i < blockedClients.size(); i++) {
+            when(clientMapper.toDto(blockedClients.get(i).getClient())).thenReturn(expectedDTOs.get(i));
+        }
+    }
+
+    private void mockEmptyPageableBlockedClientRepository(Pageable pageable) {
+        Page<BlockedClient> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        when(blockedClientRepository.findAll(pageable)).thenReturn(emptyPage);
+    }
+
+    private void verifyPageableOperations(Pageable originalPageable, Pageable mappedPageable) {
+        verify(sortMappingService).applyMappings(originalPageable, "client");
+        verify(clientRepository).findAll(mappedPageable);
+    }
+
+    private void verifyPagedResults(Page<ClientDTO> result, List<ClientDTO> expectedContent, int expectedTotalElements) {
+        assertNotNull(result);
+        assertEquals(expectedTotalElements, result.getTotalElements());
+        assertEquals(expectedContent, result.getContent());
+    }
+
+    private void verifyListResults(List<ClientDTO> result, List<ClientDTO> expectedContent) {
+        assertNotNull(result);
+        assertEquals(expectedContent.size(), result.size());
+        assertEquals(expectedContent, result);
+    }
+
+    private void verifyEmptyResults(Page<ClientDTO> result) {
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
+    }
+
+    private void verifyEmptyListResults(List<ClientDTO> result) {
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    private void verifyClientUpdateOperations(String email, ClientDTO updateData, Client updatedClient) {
+        verify(clientRepository).getByEmail(email);
+        verify(clientMapper).toEntity(updateData);
+        verify(clientRepository).save(argThat(c -> c.getId().equals(client.getId())));
+        verify(clientMapper).toDto(updatedClient);
+    }
+
+    private void verifyClientUpdateDTOOperations(String email, ClientUpdateDTO updateData,
+                                                 String expectedName, BigDecimal expectedBalance) {
+        verify(clientRepository).getByEmail(email);
+        verify(clientMapper).toEntity(updateData);
+
+        ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
+        verify(clientRepository).save(clientCaptor.capture());
+
+        Client savedClient = clientCaptor.getValue();
+        assertEquals(client.getId(), savedClient.getId());
+        assertEquals(client.getEmail(), savedClient.getEmail());
+        assertEquals(expectedName, savedClient.getName());
+        assertEquals(expectedBalance, savedClient.getBalance());
+    }
+
+    private void verifyNotFoundScenario(String email) {
+        Exception exception = assertThrows(NotFoundException.class,
+                () -> clientService.getClientByEmail(email));
+        assertTrue(exception.getMessage().contains("Client with email " + email));
+        verify(clientRepository).getByEmail(email);
+        verify(clientMapper, never()).toDto(any());
+    }
+
+    private void verifyClientCreationOperations(ClientDTO dto, String rawPassword) {
+        verify(clientMapper).toEntity(dto);
+        verify(passwordEncoder).encode(rawPassword);
+        verify(clientRepository).save(any(Client.class));
+        verify(clientMapper).toDto(any(Client.class));
+    }
+
+    private void verifyPasswordUpdateOperations(String email, String newPassword, String encodedPassword) {
+        verify(clientRepository).getByEmail(email);
+        verify(passwordEncoder).encode(newPassword);
+        verify(clientRepository).save(client);
+        assertEquals(encodedPassword, client.getPassword());
+    }
+
+    private void testSortingScenario(Sort sort) {
+        Pageable pageable = PageRequest.of(0, 10, sort);
+        Pageable mappedPageable = PageRequest.of(0, 10, sort);
+
+        mockPageableClientOperations(pageable, mappedPageable, clients, clientDTOs);
+
+        // Act
+        clientService.getAllClients(pageable);
+
+        // Assert
+        verifyPageableOperations(pageable, mappedPageable);
+    }
+
     @Test
     void getAllClients_WithPageable_ShouldReturnPageOfClientDTOs() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
-
-        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
-        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
-        for (int i = 0; i < clients.size(); i++) {
-            when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
-        }
+        mockPageableClientOperations(pageable, mappedPageable, clients, clientDTOs);
 
         // Act
         Page<ClientDTO> result = clientService.getAllClients(pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(clients.size(), result.getTotalElements());
-        assertEquals(clientDTOs, result.getContent());
-        verify(sortMappingService).applyMappings(pageable, "client");
-        verify(clientRepository).findAll(mappedPageable);
+        verifyPagedResults(result, clientDTOs, clients.size());
+        verifyPageableOperations(pageable, mappedPageable);
         verify(clientMapper, times(clients.size())).toDto(any(Client.class));
     }
 
     @Test
     void getAllClients_WithSortByNameAsc_ShouldPassCorrectSortToRepository() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("name"));
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
-
-        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
-        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
-        for (int i = 0; i < clients.size(); i++) {
-            when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
-        }
-
-        // Act
-        clientService.getAllClients(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "client");
-        verify(clientRepository).findAll(mappedPageable);
+        testSortingScenario(Sort.by("name"));
     }
 
     @Test
     void getAllClients_WithSortByBalanceDesc_ShouldPassCorrectSortToRepository() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("balance").descending());
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("balance").descending());
-        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
-
-        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
-        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
-        for (int i = 0; i < clients.size(); i++) {
-            when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
-        }
-
-        // Act
-        clientService.getAllClients(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "client");
-        verify(clientRepository).findAll(mappedPageable);
+        testSortingScenario(Sort.by("balance").descending());
     }
 
     @Test
     void getAllClients_WithMultipleSort_ShouldPassCorrectSortToRepository() {
-        // Arrange
         Sort multiSort = Sort.by("name").ascending().and(Sort.by("balance").descending());
-        Pageable pageable = PageRequest.of(0, 10, multiSort);
-        Pageable mappedPageable = PageRequest.of(0, 10, multiSort);
-        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
-
-        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
-        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
-        for (int i = 0; i < clients.size(); i++) {
-            when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
-        }
-
-        // Act
-        clientService.getAllClients(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "client");
-        verify(clientRepository).findAll(mappedPageable);
+        testSortingScenario(multiSort);
     }
 
     @Test
     void getAllClients_WithoutPageable_ShouldReturnListOfClientDTOs() {
         // Arrange
-        when(clientRepository.findAll()).thenReturn(clients);
-        for (int i = 0; i < clients.size(); i++) {
-            when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
-        }
+        mockSimpleClientListOperations(clients, clientDTOs);
 
         // Act
         List<ClientDTO> result = clientService.getAllClients();
 
         // Assert
-        assertNotNull(result);
-        assertEquals(clients.size(), result.size());
-        assertEquals(clientDTOs, result);
+        verifyListResults(result, clientDTOs);
         verify(clientRepository).findAll();
         verify(clientMapper, times(clients.size())).toDto(any(Client.class));
     }
@@ -183,8 +271,7 @@ public class ClientServiceImplTest {
         List<ClientDTO> result = clientService.getAllClients();
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        verifyEmptyListResults(result);
         verify(clientRepository).findAll();
         verify(clientMapper, never()).toDto(any());
     }
@@ -194,18 +281,13 @@ public class ClientServiceImplTest {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Client> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
-
-        when(sortMappingService.applyMappings(pageable, "client")).thenReturn(mappedPageable);
-        when(clientRepository.findAll(mappedPageable)).thenReturn(emptyPage);
+        mockEmptyPageableRepository(pageable, mappedPageable);
 
         // Act
         Page<ClientDTO> result = clientService.getAllClients(pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
-        assertTrue(result.getContent().isEmpty());
+        verifyEmptyResults(result);
         verify(clientRepository).findAll(mappedPageable);
         verify(clientMapper, never()).toDto(any());
     }
@@ -215,18 +297,11 @@ public class ClientServiceImplTest {
         // Arrange
         ClientDTO updateData = getClientDTO();
         updateData.setName("New Name");
-
         Client updatedClient = getClientEntity();
         updatedClient.setName("New Name");
 
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
-        when(clientMapper.toEntity(updateData)).thenReturn(updatedClient);
-        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> {
-            Client saved = invocation.getArgument(0);
-            assertEquals(client.getId(), saved.getId());
-            return saved;
-        });
-        when(clientMapper.toDto(updatedClient)).thenReturn(updateData);
+        mockSuccessfulClientUpdate(updateData, updatedClient);
 
         // Act
         ClientDTO result = clientService.updateClientByEmail(client.getEmail(), updateData);
@@ -234,14 +309,11 @@ public class ClientServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(updateData, result);
-        verify(clientRepository).getByEmail(client.getEmail());
-        verify(clientMapper).toEntity(updateData);
-        verify(clientRepository).save(argThat(c -> c.getId().equals(client.getId())));
-        verify(clientMapper).toDto(updatedClient);
+        verifyClientUpdateOperations(client.getEmail(), updateData, updatedClient);
     }
 
     @Test
-    void updateClientByEmailWithClientDTO_WhenClientDoesNotExist_ShouldThrowNotFoundException(){
+    void updateClientByEmailWithClientDTO_WhenClientDoesNotExist_ShouldThrowNotFoundException() {
         // Arrange
         String clientEmail = "nonexistent@example.com";
         when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.empty());
@@ -268,24 +340,13 @@ public class ClientServiceImplTest {
         mappedClient.setBalance(new BigDecimal("500.00"));
 
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
-        when(clientMapper.toEntity(updateData)).thenReturn(mappedClient);
-        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        mockSuccessfulClientUpdateDTO(updateData, mappedClient);
 
         // Act
         clientService.updateClientByEmail(client.getEmail(), updateData);
 
         // Assert
-        verify(clientRepository).getByEmail(client.getEmail());
-        verify(clientMapper).toEntity(updateData);
-
-        ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
-        verify(clientRepository).save(clientCaptor.capture());
-
-        Client savedClient = clientCaptor.getValue();
-        assertEquals(client.getId(), savedClient.getId());
-        assertEquals(client.getEmail(), savedClient.getEmail());
-        assertEquals("Updated Name", savedClient.getName());
-        assertEquals(new BigDecimal("500.00"), savedClient.getBalance());
+        verifyClientUpdateDTOOperations(client.getEmail(), updateData, "Updated Name", new BigDecimal("500.00"));
     }
 
     @Test
@@ -295,7 +356,6 @@ public class ClientServiceImplTest {
         ClientUpdateDTO updateData = new ClientUpdateDTO();
         updateData.setName("Updated Name");
         updateData.setBalance(new BigDecimal("500.00"));
-
         when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -320,21 +380,13 @@ public class ClientServiceImplTest {
         mappedClient.setBalance(new BigDecimal("999.99"));
 
         when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
-        when(clientMapper.toEntity(updateData)).thenReturn(mappedClient);
-        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        mockSuccessfulClientUpdateDTO(updateData, mappedClient);
 
         // Act
         clientService.updateClientByEmail(client.getEmail(), updateData);
 
         // Assert
-        ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
-        verify(clientRepository).save(clientCaptor.capture());
-
-        Client savedClient = clientCaptor.getValue();
-        assertEquals(client.getId(), savedClient.getId());
-        assertEquals(client.getEmail(), savedClient.getEmail());
-        assertEquals("New Name", savedClient.getName());
-        assertEquals(new BigDecimal("999.99"), savedClient.getBalance());
+        verifyClientUpdateDTOOperations(client.getEmail(), updateData, "New Name", new BigDecimal("999.99"));
     }
 
     @Test
@@ -358,14 +410,10 @@ public class ClientServiceImplTest {
 
         Client clientToSave = getClientEntity();
         clientToSave.setPassword(rawPassword);
-
         Client savedClient = getClientEntity();
         savedClient.setPassword(encodedPassword);
 
-        when(clientMapper.toEntity(clientDTO)).thenReturn(clientToSave);
-        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
-        when(clientRepository.save(clientToSave)).thenReturn(savedClient);
-        when(clientMapper.toDto(savedClient)).thenReturn(clientDTO);
+        mockClientCreation(clientDTO, clientToSave, savedClient, rawPassword, encodedPassword);
 
         // Act
         ClientDTO result = clientService.addClient(clientDTO);
@@ -373,10 +421,7 @@ public class ClientServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(clientDTO, result);
-        verify(clientMapper).toEntity(clientDTO);
-        verify(passwordEncoder).encode(rawPassword);
-        verify(clientRepository).save(clientToSave);
-        verify(clientMapper).toDto(savedClient);
+        verifyClientCreationOperations(clientDTO, rawPassword);
         assertEquals(encodedPassword, clientToSave.getPassword());
     }
 
@@ -384,9 +429,7 @@ public class ClientServiceImplTest {
     void addClient_WhenClientAlreadyExists_ShouldThrowAlreadyExistException() {
         // Arrange
         Client clientToSave = getClientEntity();
-        when(clientMapper.toEntity(clientDTO)).thenReturn(clientToSave);
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(clientRepository.save(clientToSave)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
+        mockClientCreationFailure(clientDTO, clientToSave);
 
         // Act & Assert
         AlreadyExistException exception = assertThrows(AlreadyExistException.class,
@@ -402,7 +445,7 @@ public class ClientServiceImplTest {
     void getClientByEmail_WhenClientExists_ShouldReturnClientDTO() {
         // Arrange
         String clientEmail = client.getEmail();
-        when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.of(client));
+        when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
         when(clientMapper.toDto(client)).thenReturn(clientDTO);
 
         // Act
@@ -422,19 +465,14 @@ public class ClientServiceImplTest {
         when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> clientService.getClientByEmail(clientEmail));
-
-        assertTrue(exception.getMessage().contains("Client with email " + clientEmail));
-        verify(clientRepository).getByEmail(clientEmail);
-        verify(clientMapper, never()).toDto(any());
+        verifyNotFoundScenario(clientEmail);
     }
 
     @Test
     void blockClient_WhenClientExists_ShouldCreateBlockedClient() {
         // Arrange
         String clientEmail = client.getEmail();
-        when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.of(client));
+        when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
         when(blockedClientRepository.save(any(BlockedClient.class))).thenReturn(blockedClient);
 
         // Act
@@ -476,8 +514,7 @@ public class ClientServiceImplTest {
     void getBlockedClients_WithoutPageable_ShouldReturnListOfClientDTOs() {
         // Arrange
         List<BlockedClient> blockedClients = List.of(blockedClient);
-        when(blockedClientRepository.findAll()).thenReturn(blockedClients);
-        when(clientMapper.toDto(client)).thenReturn(clientDTO);
+        mockBlockedClientOperations(blockedClients, List.of(clientDTO));
 
         // Act
         List<ClientDTO> result = clientService.getBlockedClients();
@@ -495,9 +532,7 @@ public class ClientServiceImplTest {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         List<BlockedClient> blockedClients = List.of(blockedClient);
-        Page<BlockedClient> blockedPage = new PageImpl<>(blockedClients, pageable, 1);
-        when(blockedClientRepository.findAll(pageable)).thenReturn(blockedPage);
-        when(clientMapper.toDto(client)).thenReturn(clientDTO);
+        mockPageableBlockedClientOperations(pageable, blockedClients, List.of(clientDTO));
 
         // Act
         Page<ClientDTO> result = clientService.getBlockedClients(pageable);
@@ -519,8 +554,7 @@ public class ClientServiceImplTest {
         List<ClientDTO> result = clientService.getBlockedClients();
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        verifyEmptyListResults(result);
         verify(blockedClientRepository).findAll();
         verify(clientMapper, never()).toDto(any());
     }
@@ -529,16 +563,13 @@ public class ClientServiceImplTest {
     void getBlockedClients_WithPageable_WhenEmptyBlockedRepository_ShouldReturnEmptyPage() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-        Page<BlockedClient> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(blockedClientRepository.findAll(pageable)).thenReturn(emptyPage);
+        mockEmptyPageableBlockedClientRepository(pageable);
 
         // Act
         Page<ClientDTO> result = clientService.getBlockedClients(pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
-        assertTrue(result.getContent().isEmpty());
+        verifyEmptyResults(result);
         verify(blockedClientRepository).findAll(pageable);
         verify(clientMapper, never()).toDto(any());
     }
@@ -550,7 +581,7 @@ public class ClientServiceImplTest {
         String newPassword = "newPassword123";
         String encodedPassword = "$2a$10$newEncodedPassword";
 
-        when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.of(client));
+        when(clientRepository.getByEmail(client.getEmail())).thenReturn(Optional.of(client));
         when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
         when(clientRepository.save(client)).thenReturn(client);
 
@@ -558,10 +589,7 @@ public class ClientServiceImplTest {
         clientService.updateClientPassword(clientEmail, newPassword);
 
         // Assert
-        verify(clientRepository).getByEmail(clientEmail);
-        verify(passwordEncoder).encode(newPassword);
-        verify(clientRepository).save(client);
-        assertEquals(encodedPassword, client.getPassword());
+        verifyPasswordUpdateOperations(clientEmail, newPassword, encodedPassword);
     }
 
     @Test
@@ -569,7 +597,6 @@ public class ClientServiceImplTest {
         // Arrange
         String clientEmail = "nonexistent@example.com";
         String newPassword = "newPassword123";
-
         when(clientRepository.getByEmail(clientEmail)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -590,7 +617,6 @@ public class ClientServiceImplTest {
 
         ClientDTO dtoWithPlainPassword = getClientDTO();
         dtoWithPlainPassword.setPassword(rawPassword);
-
         Client clientEntity = getClientEntity();
         clientEntity.setPassword(rawPassword);
 
@@ -616,20 +642,13 @@ public class ClientServiceImplTest {
         // Arrange
         Pageable originalPageable = PageRequest.of(0, 10, Sort.by("balance"));
         Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("balance"));
-        Page<Client> clientPage = new PageImpl<>(clients, mappedPageable, clients.size());
-
-        when(sortMappingService.applyMappings(originalPageable, "client")).thenReturn(mappedPageable);
-        when(clientRepository.findAll(mappedPageable)).thenReturn(clientPage);
-        for (int i = 0; i < clients.size(); i++) {
-            when(clientMapper.toDto(clients.get(i))).thenReturn(clientDTOs.get(i));
-        }
+        mockPageableClientOperations(originalPageable, mappedPageable, clients, clientDTOs);
 
         // Act
         Page<ClientDTO> result = clientService.getAllClients(originalPageable);
 
         // Assert
         assertNotNull(result);
-        verify(sortMappingService).applyMappings(originalPageable, "client");
-        verify(clientRepository).findAll(mappedPageable);
+        verifyPageableOperations(originalPageable, mappedPageable);
     }
 }

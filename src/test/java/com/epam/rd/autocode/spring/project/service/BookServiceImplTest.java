@@ -20,26 +20,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.math.BigDecimal;
 import java.time.Year;
 import java.util.List;
 import java.util.Optional;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static com.epam.rd.autocode.spring.project.testdata.BookData.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BookServiceImplTest {
-    @Mock
-    private BookRepository bookRepository;
 
-    @Mock
-    private BookMapper bookMapper;
-
-    @Mock
-    private SortMappingService sortMappingService;
+    @Mock private BookRepository bookRepository;
+    @Mock private BookMapper bookMapper;
+    @Mock private SortMappingService sortMappingService;
 
     @InjectMocks
     private BookServiceImpl bookService;
@@ -50,117 +46,237 @@ public class BookServiceImplTest {
     private List<BookDTO> bookDTOs;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         book = getBookEntity();
         bookDTO = getBookDTO();
         books = getBookEntities();
         bookDTOs = getBookDTOs();
     }
 
-    @Test
-    void getAllBooks_WithPageable_ShouldReturnPageOfBookDTOs(){
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10);
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Book> bookPage = new PageImpl<>(books, mappedPageable, books.size());
+    private void mockPageableBookOperations(Pageable pageable, Pageable mappedPageable,
+                                            List<Book> bookList, List<BookDTO> bookDTOList) {
+        Page<Book> bookPage = new PageImpl<>(bookList, mappedPageable, bookList.size());
 
         when(sortMappingService.applyMappings(pageable, "book")).thenReturn(mappedPageable);
         when(bookRepository.findAll(mappedPageable)).thenReturn(bookPage);
-        for (int i = 0; i < books.size(); i++) {
-            when(bookMapper.toDto(books.get(i))).thenReturn(bookDTOs.get(i));
+
+        for (int i = 0; i < bookList.size(); i++) {
+            when(bookMapper.toDto(bookList.get(i))).thenReturn(bookDTOList.get(i));
         }
+    }
+
+    private void mockSimpleBookListOperations(List<Book> bookList, List<BookDTO> bookDTOList) {
+        when(bookRepository.findAll()).thenReturn(bookList);
+        for (int i = 0; i < bookList.size(); i++) {
+            when(bookMapper.toDto(bookList.get(i))).thenReturn(bookDTOList.get(i));
+        }
+    }
+
+    private void mockEmptyPageableRepository(Pageable pageable, Pageable mappedPageable) {
+        Page<Book> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
+        when(sortMappingService.applyMappings(pageable, "book")).thenReturn(mappedPageable);
+        when(bookRepository.findAll(mappedPageable)).thenReturn(emptyPage);
+    }
+
+    private void mockSuccessfulBookUpdate(String bookName, BookDTO updateData, Book updatedBook) {
+        when(bookRepository.findByName(bookName)).thenReturn(Optional.of(book));
+        when(bookMapper.toEntity(updateData)).thenReturn(updatedBook);
+        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> {
+            Book saved = invocation.getArgument(0);
+            assertEquals(book.getId(), saved.getId());
+            return saved;
+        });
+        when(bookMapper.toDto(updatedBook)).thenReturn(updateData);
+    }
+
+    private void mockSuccessfulBookCreation(BookDTO dto, Book bookEntity) {
+        when(bookMapper.toEntity(dto)).thenReturn(bookEntity);
+        when(bookRepository.save(bookEntity)).thenReturn(bookEntity);
+        when(bookMapper.toDto(bookEntity)).thenReturn(dto);
+    }
+
+    private void mockBookCreationFailure(BookDTO dto, Book bookEntity) {
+        when(bookMapper.toEntity(dto)).thenReturn(bookEntity);
+        when(bookRepository.save(bookEntity)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
+    }
+
+    private SearchBookDTO createFullSearchCriteria() {
+        SearchBookDTO searchCriteria = new SearchBookDTO();
+        searchCriteria.setName("Adventure");
+        searchCriteria.setGenre("Fantasy");
+        searchCriteria.setAuthor("John");
+        searchCriteria.setAgeGroup(AgeGroup.CHILD);
+        searchCriteria.setLanguage(Language.ENGLISH);
+        searchCriteria.setMinPrice(new BigDecimal("10.00"));
+        searchCriteria.setMaxPrice(new BigDecimal("20.00"));
+        searchCriteria.setMinPages(200);
+        searchCriteria.setMaxPages(300);
+        searchCriteria.setPublicationYear(Year.of(2023));
+        return searchCriteria;
+    }
+
+    private SearchBookDTO createPartialSearchCriteria() {
+        SearchBookDTO partialCriteria = new SearchBookDTO();
+        partialCriteria.setName("Adventure");
+        partialCriteria.setLanguage(Language.ENGLISH);
+        return partialCriteria;
+    }
+
+    private SearchBookDTO createPriceRangeCriteria() {
+        SearchBookDTO priceCriteria = new SearchBookDTO();
+        priceCriteria.setMinPrice(new BigDecimal("15.00"));
+        priceCriteria.setMaxPrice(new BigDecimal("20.00"));
+        return priceCriteria;
+    }
+
+    private SearchBookDTO createPageRangeCriteria() {
+        SearchBookDTO pageCriteria = new SearchBookDTO();
+        pageCriteria.setMinPages(200);
+        pageCriteria.setMaxPages(300);
+        return pageCriteria;
+    }
+
+    private SearchBookDTO createEmptyResultCriteria() {
+        SearchBookDTO searchCriteria = new SearchBookDTO();
+        searchCriteria.setName("NonExistentBook");
+        searchCriteria.setMinPrice(new BigDecimal("1000.00"));
+        return searchCriteria;
+    }
+
+    private void mockSearchOperation(Pageable pageable, List<Book> resultBooks, List<BookDTO> resultDTOs) {
+        Page<Book> bookPage = new PageImpl<>(resultBooks, pageable, resultBooks.size());
+        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
+
+        for (int i = 0; i < resultBooks.size(); i++) {
+            when(bookMapper.toDto(resultBooks.get(i))).thenReturn(resultDTOs.get(i));
+        }
+    }
+
+    private void mockEmptySearchOperation(Pageable pageable) {
+        Page<Book> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(emptyPage);
+    }
+
+    private void verifyPageableOperations(Pageable originalPageable, Pageable mappedPageable) {
+        verify(sortMappingService).applyMappings(originalPageable, "book");
+        verify(bookRepository).findAll(mappedPageable);
+    }
+
+    private void verifyPagedResults(Page<BookDTO> result, List<BookDTO> expectedContent, int expectedTotalElements) {
+        assertNotNull(result);
+        assertEquals(expectedTotalElements, result.getTotalElements());
+        assertEquals(expectedContent, result.getContent());
+    }
+
+    private void verifyListResults(List<BookDTO> result, List<BookDTO> expectedContent) {
+        assertNotNull(result);
+        assertEquals(expectedContent.size(), result.size());
+        assertEquals(expectedContent, result);
+    }
+
+    private void verifyEmptyResults(Page<BookDTO> result) {
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
+    }
+
+    private void verifyEmptyListResults(List<BookDTO> result) {
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    private void verifyBookUpdateOperations(String bookName, BookDTO updateData, Book updatedBook) {
+        verify(bookRepository).findByName(bookName);
+        verify(bookMapper).toEntity(updateData);
+        verify(bookRepository).save(argThat(b -> b.getId().equals(book.getId())));
+        verify(bookMapper).toDto(updatedBook);
+    }
+
+    private void verifyNotFoundScenario(String bookName, Class<? extends Exception> expectedExceptionType) {
+        Exception exception = assertThrows(expectedExceptionType,
+                () -> bookService.getBookByName(bookName));
+        assertTrue(exception.getMessage().contains("The book with a name " + bookName));
+        verify(bookRepository).findByName(bookName);
+        verify(bookMapper, never()).toDto(any());
+    }
+
+    private void verifyBookCreationOperations(BookDTO dto, Book bookEntity) {
+        verify(bookMapper).toEntity(dto);
+        verify(bookRepository).save(bookEntity);
+        verify(bookMapper).toDto(bookEntity);
+    }
+
+    private void verifySearchOperations(Pageable pageable, int expectedResults) {
+        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
+        if (expectedResults > 0) {
+            verify(bookMapper, times(expectedResults)).toDto(any(Book.class));
+        } else {
+            verify(bookMapper, never()).toDto(any());
+        }
+    }
+
+    private void verifyPredicateCapture(Pageable pageable) {
+        ArgumentCaptor<BooleanBuilder> predicateCaptor = ArgumentCaptor.forClass(BooleanBuilder.class);
+        verify(bookRepository).findAll(predicateCaptor.capture(), eq(pageable));
+        BooleanBuilder capturedPredicate = predicateCaptor.getValue();
+        assertNotNull(capturedPredicate);
+    }
+
+    private void testSortingScenario(Sort sort, String testDescription) {
+        Pageable pageable = PageRequest.of(0, 10, sort);
+        Pageable mappedPageable = PageRequest.of(0, 10, sort);
+
+        mockPageableBookOperations(pageable, mappedPageable, books, bookDTOs);
+
+        // Act
+        bookService.getAllBooks(pageable);
+
+        // Assert
+        verifyPageableOperations(pageable, mappedPageable);
+    }
+
+    @Test
+    void getAllBooks_WithPageable_ShouldReturnPageOfBookDTOs() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        mockPageableBookOperations(pageable, mappedPageable, books, bookDTOs);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooks(pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(books.size(), result.getTotalElements());
-        assertEquals(bookDTOs, result.getContent());
-        verify(sortMappingService).applyMappings(pageable, "book");
-        verify(bookRepository).findAll(mappedPageable);
+        verifyPagedResults(result, bookDTOs, books.size());
+        verifyPageableOperations(pageable, mappedPageable);
         verify(bookMapper, times(books.size())).toDto(any(Book.class));
     }
 
     @Test
     void getAllBooks_WithSortByNameAsc_ShouldPassCorrectSortToRepository() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("name"));
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Book> bookPage = new PageImpl<>(books, mappedPageable, books.size());
-
-        when(sortMappingService.applyMappings(pageable, "book")).thenReturn(mappedPageable);
-        when(bookRepository.findAll(mappedPageable)).thenReturn(bookPage);
-        for (int i = 0; i < books.size(); i++) {
-            when(bookMapper.toDto(books.get(i))).thenReturn(bookDTOs.get(i));
-        }
-
-        // Act
-        bookService.getAllBooks(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "book");
-        verify(bookRepository).findAll(mappedPageable);
+        testSortingScenario(Sort.by("name"), "name ascending");
     }
 
     @Test
     void getAllBooks_WithSortByPriceDesc_ShouldPassCorrectSortToRepository() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("price").descending());
-        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("price").descending());
-        Page<Book> bookPage = new PageImpl<>(books, mappedPageable, books.size());
-
-        when(sortMappingService.applyMappings(pageable, "book")).thenReturn(mappedPageable);
-        when(bookRepository.findAll(mappedPageable)).thenReturn(bookPage);
-        for (int i = 0; i < books.size(); i++) {
-            when(bookMapper.toDto(books.get(i))).thenReturn(bookDTOs.get(i));
-        }
-
-        // Act
-        bookService.getAllBooks(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "book");
-        verify(bookRepository).findAll(mappedPageable);
+        testSortingScenario(Sort.by("price").descending(), "price descending");
     }
 
     @Test
     void getAllBooks_WithMultipleSort_ShouldPassCorrectSortToRepository() {
-        // Arrange
         Sort multiSort = Sort.by("name").and(Sort.by("price").descending());
-        Pageable pageable = PageRequest.of(0, 10, multiSort);
-        Pageable mappedPageable = PageRequest.of(0, 10, multiSort);
-        Page<Book> bookPage = new PageImpl<>(books, mappedPageable, books.size());
-
-        when(sortMappingService.applyMappings(pageable, "book")).thenReturn(mappedPageable);
-        when(bookRepository.findAll(mappedPageable)).thenReturn(bookPage);
-        for (int i = 0; i < books.size(); i++) {
-            when(bookMapper.toDto(books.get(i))).thenReturn(bookDTOs.get(i));
-        }
-
-        // Act
-        bookService.getAllBooks(pageable);
-
-        // Assert
-        verify(sortMappingService).applyMappings(pageable, "book");
-        verify(bookRepository).findAll(mappedPageable);
+        testSortingScenario(multiSort, "multiple sort");
     }
 
     @Test
     void getAllBooks_WithoutPageable_ShouldReturnListOfBookDTOs() {
         // Arrange
-        when(bookRepository.findAll()).thenReturn(books);
-        for (int i = 0; i < books.size(); i++) {
-            when(bookMapper.toDto(books.get(i))).thenReturn(bookDTOs.get(i));
-        }
+        mockSimpleBookListOperations(books, bookDTOs);
 
         // Act
         List<BookDTO> result = bookService.getAllBooks();
 
         // Assert
-        assertNotNull(result);
-        assertEquals(books.size(), result.size());
-        assertEquals(bookDTOs, result, "Result should equal expected DTOs");
+        verifyListResults(result, bookDTOs);
         verify(bookRepository).findAll();
         verify(bookMapper, times(books.size())).toDto(any(Book.class));
     }
@@ -174,8 +290,7 @@ public class BookServiceImplTest {
         List<BookDTO> result = bookService.getAllBooks();
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        verifyEmptyListResults(result);
         verify(bookRepository).findAll();
         verify(bookMapper, never()).toDto(any());
     }
@@ -185,18 +300,13 @@ public class BookServiceImplTest {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<Book> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
-
-        when(sortMappingService.applyMappings(pageable, "book")).thenReturn(mappedPageable);
-        when(bookRepository.findAll(mappedPageable)).thenReturn(emptyPage);
+        mockEmptyPageableRepository(pageable, mappedPageable);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooks(pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
-        assertTrue(result.getContent().isEmpty());
+        verifyEmptyResults(result);
         verify(bookRepository).findAll(mappedPageable);
         verify(bookMapper, never()).toDto(any());
     }
@@ -225,11 +335,7 @@ public class BookServiceImplTest {
         when(bookRepository.findByName(bookName)).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> bookService.getBookByName(bookName));
-        assertTrue(exception.getMessage().contains("The book with a name " + bookName));
-        verify(bookRepository).findByName(bookName);
-        verify(bookMapper, never()).toDto(any());
+        verifyNotFoundScenario(bookName, NotFoundException.class);
     }
 
     @Test
@@ -237,18 +343,10 @@ public class BookServiceImplTest {
         // Arrange
         BookDTO updateData = getBookDTO();
         updateData.setName("New Name");
-
         Book updatedBook = getBookEntity();
         updatedBook.setName("New Name");
 
-        when(bookRepository.findByName(book.getName())).thenReturn(Optional.of(book));
-        when(bookMapper.toEntity(updateData)).thenReturn(updatedBook);
-        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> {
-            Book saved = invocation.getArgument(0);
-            assertEquals(book.getId(), saved.getId());
-            return saved;
-        });
-        when(bookMapper.toDto(updatedBook)).thenReturn(updateData);
+        mockSuccessfulBookUpdate(book.getName(), updateData, updatedBook);
 
         // Act
         BookDTO result = bookService.updateBookByName(book.getName(), updateData);
@@ -256,22 +354,19 @@ public class BookServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(updateData, result);
-        verify(bookRepository).findByName(book.getName());
-        verify(bookMapper).toEntity(updateData);
-        verify(bookRepository).save(argThat(b -> b.getId().equals(book.getId())));
-        verify(bookMapper).toDto(updatedBook);
+        verifyBookUpdateOperations(book.getName(), updateData, updatedBook);
     }
 
     @Test
-    void updateBookByName_WhenBookDoesNotExist_ShouldThrowNotFoundException(){
+    void updateBookByName_WhenBookDoesNotExist_ShouldThrowNotFoundException() {
         // Arrange
         String bookName = "Non-existent Book";
         when(bookRepository.findByName(bookName)).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException e = assertThrows(NotFoundException.class,
-                ()-> bookService.updateBookByName(bookName, any(BookDTO.class)));
-        assertEquals("The book with a name " + bookName + " was not found!", e.getMessage());
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> bookService.updateBookByName(bookName, any(BookDTO.class)));
+        assertEquals("The book with a name " + bookName + " was not found!", exception.getMessage());
         verify(bookRepository).findByName(bookName);
         verify(bookMapper, never()).toEntity(any());
         verify(bookRepository, never()).save(any());
@@ -292,9 +387,7 @@ public class BookServiceImplTest {
     @Test
     void addBook_WhenBookIsValid_ShouldReturnSavedBookDTO() {
         // Arrange
-        when(bookMapper.toEntity(bookDTO)).thenReturn(book);
-        when(bookRepository.save(book)).thenReturn(book);
-        when(bookMapper.toDto(book)).thenReturn(bookDTO);
+        mockSuccessfulBookCreation(bookDTO, book);
 
         // Act
         BookDTO result = bookService.addBook(bookDTO);
@@ -302,16 +395,13 @@ public class BookServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(bookDTO, result);
-        verify(bookMapper).toEntity(bookDTO);
-        verify(bookRepository).save(book);
-        verify(bookMapper).toDto(book);
+        verifyBookCreationOperations(bookDTO, book);
     }
 
     @Test
     void addBook_WhenBookAlreadyExists_ShouldThrowAlreadyExistException() {
         // Arrange
-        when(bookMapper.toEntity(bookDTO)).thenReturn(book);
-        when(bookRepository.save(book)).thenThrow(new DataIntegrityViolationException("Duplicate entry"));
+        mockBookCreationFailure(bookDTO, book);
 
         // Act & Assert
         AlreadyExistException exception = assertThrows(AlreadyExistException.class,
@@ -325,59 +415,34 @@ public class BookServiceImplTest {
     @Test
     void getAllBooksWithSearchCondition_WithValidCriteria_ShouldReturnMatchingBooks() {
         // Arrange
-        SearchBookDTO searchCriteria = new SearchBookDTO();
-        searchCriteria.setName("Adventure");
-        searchCriteria.setGenre("Fantasy");
-        searchCriteria.setAuthor("John");
-        searchCriteria.setAgeGroup(AgeGroup.CHILD);
-        searchCriteria.setLanguage(Language.ENGLISH);
-        searchCriteria.setMinPrice(new BigDecimal("10.00"));
-        searchCriteria.setMaxPrice(new BigDecimal("20.00"));
-        searchCriteria.setMinPages(200);
-        searchCriteria.setMaxPages(300);
-        searchCriteria.setPublicationYear(Year.of(2023));
-
-        List<Book> filteredBooks = List.of(book); // Mock filtered result
+        SearchBookDTO searchCriteria = createFullSearchCriteria();
+        List<Book> filteredBooks = List.of(book);
         List<BookDTO> filteredDTOs = List.of(bookDTO);
-
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Book> bookPage = new PageImpl<>(filteredBooks, pageable, filteredBooks.size());
 
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
-        when(bookMapper.toDto(book)).thenReturn(bookDTO);
+        mockSearchOperation(pageable, filteredBooks, filteredDTOs);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(searchCriteria, pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(filteredBooks.size(), result.getTotalElements());
-        assertEquals(filteredDTOs, result.getContent());
-        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
-        verify(bookMapper).toDto(book);
+        verifyPagedResults(result, filteredDTOs, filteredBooks.size());
+        verifySearchOperations(pageable, 1);
     }
 
     @Test
     void getAllBooksWithSearchCondition_WithEmptyResults_ShouldReturnEmptyPage() {
         // Arrange
-        SearchBookDTO searchCriteria = new SearchBookDTO();
-        searchCriteria.setName("NonExistentBook");
-        searchCriteria.setMinPrice(new BigDecimal("1000.00"));
-
+        SearchBookDTO searchCriteria = createEmptyResultCriteria();
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Book> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(emptyPage);
+        mockEmptySearchOperation(pageable);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(searchCriteria, pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
-        assertTrue(result.getContent().isEmpty());
-        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
-        verify(bookMapper, never()).toDto(any());
+        verifyEmptyResults(result);
+        verifySearchOperations(pageable, 0);
     }
 
     @Test
@@ -385,36 +450,24 @@ public class BookServiceImplTest {
         // Arrange
         SearchBookDTO emptyCriteria = new SearchBookDTO(); // All fields null
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
-
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
-        for (int i = 0; i < books.size(); i++) {
-            when(bookMapper.toDto(books.get(i))).thenReturn(bookDTOs.get(i));
-        }
+        mockSearchOperation(pageable, books, bookDTOs);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(emptyCriteria, pageable);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(books.size(), result.getTotalElements());
+        verifyPagedResults(result, bookDTOs, books.size());
         verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
     }
 
     @Test
     void getAllBooksWithSearchCondition_WithPartialCriteria_ShouldUseOnlyProvidedFilters() {
         // Arrange
-        SearchBookDTO partialCriteria = new SearchBookDTO();
-        partialCriteria.setName("Adventure");
-        partialCriteria.setLanguage(Language.ENGLISH);
-        // Other fields remain null
-
+        SearchBookDTO partialCriteria = createPartialSearchCriteria();
         List<Book> filteredBooks = List.of(book);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Book> bookPage = new PageImpl<>(filteredBooks, pageable, filteredBooks.size());
 
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
-        when(bookMapper.toDto(book)).thenReturn(bookDTO);
+        mockSearchOperation(pageable, filteredBooks, List.of(bookDTO));
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(partialCriteria, pageable);
@@ -423,22 +476,17 @@ public class BookServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals(bookDTO, result.getContent().get(0));
-        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
+        verifySearchOperations(pageable, 1);
     }
 
     @Test
     void getAllBooksWithSearchCondition_WithPriceRangeOnly_ShouldFilterByPrice() {
         // Arrange
-        SearchBookDTO priceCriteria = new SearchBookDTO();
-        priceCriteria.setMinPrice(new BigDecimal("15.00"));
-        priceCriteria.setMaxPrice(new BigDecimal("20.00"));
-
+        SearchBookDTO priceCriteria = createPriceRangeCriteria();
         List<Book> filteredBooks = List.of(book);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Book> bookPage = new PageImpl<>(filteredBooks, pageable, filteredBooks.size());
 
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
-        when(bookMapper.toDto(book)).thenReturn(bookDTO);
+        mockSearchOperation(pageable, filteredBooks, List.of(bookDTO));
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(priceCriteria, pageable);
@@ -446,27 +494,18 @@ public class BookServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
-
-        ArgumentCaptor<BooleanBuilder> predicateCaptor = ArgumentCaptor.forClass(BooleanBuilder.class);
-        verify(bookRepository).findAll(predicateCaptor.capture(), eq(pageable));
-        BooleanBuilder capturedPredicate = predicateCaptor.getValue();
-        assertNotNull(capturedPredicate);
+        verifySearchOperations(pageable, 1);
+        verifyPredicateCapture(pageable);
     }
 
     @Test
     void getAllBooksWithSearchCondition_WithPageRangeOnly_ShouldFilterByPages() {
         // Arrange
-        SearchBookDTO pageCriteria = new SearchBookDTO();
-        pageCriteria.setMinPages(200);
-        pageCriteria.setMaxPages(300);
-
+        SearchBookDTO pageCriteria = createPageRangeCriteria();
         List<Book> filteredBooks = List.of(book);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Book> bookPage = new PageImpl<>(filteredBooks, pageable, filteredBooks.size());
 
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
-        when(bookMapper.toDto(book)).thenReturn(bookDTO);
+        mockSearchOperation(pageable, filteredBooks, List.of(bookDTO));
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(pageCriteria, pageable);
@@ -474,6 +513,6 @@ public class BookServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
+        verifySearchOperations(pageable, 1);
     }
 }

@@ -30,7 +30,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import static com.epam.rd.autocode.spring.project.testdata.ClientData.getClientEntity;
