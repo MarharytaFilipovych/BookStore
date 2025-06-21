@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.annotations.CorrectSortFields;
 import com.epam.rd.autocode.spring.project.dto.*;
+import com.epam.rd.autocode.spring.project.model.enums.SortableEntity;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import jakarta.validation.Valid;
@@ -26,7 +27,7 @@ public class EmployeeController {
 
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<EmployeeDTO>> getAllEmployees
-            (@CorrectSortFields(entityType = "employee")
+            (@CorrectSortFields(entityType = SortableEntity.EMPLOYEE)
              @RequestParam(required = false)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<EmployeeDTO> page = employeeService.getAllEmployees(pageable);
@@ -45,7 +46,7 @@ public class EmployeeController {
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByEmployee
             (@PathVariable @Email String email,
              @RequestParam(required = false)
-             @CorrectSortFields(entityType = "order")
+             @CorrectSortFields(entityType = SortableEntity.ORDER)
              @PageableDefault(sort = "orderDate") Pageable pageable){
         Page<OrderDTO> page = orderService.getOrdersByEmployee(email, pageable);
         PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();

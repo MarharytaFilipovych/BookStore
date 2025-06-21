@@ -3,6 +3,7 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.annotations.BookTitle;
 import com.epam.rd.autocode.spring.project.annotations.CorrectSortFields;
 import com.epam.rd.autocode.spring.project.dto.*;
+import com.epam.rd.autocode.spring.project.model.enums.SortableEntity;
 import com.epam.rd.autocode.spring.project.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,7 @@ public class BookController {
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<BookDTO>> getAllBooks
             (@RequestParam(required = false)
-             @CorrectSortFields(entityType = "book")
+             @CorrectSortFields(entityType = SortableEntity.BOOK)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<BookDTO> page = bookService.getAllBooks(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));
@@ -42,7 +43,7 @@ public class BookController {
     public ResponseEntity<PaginatedResponseDTO<BookDTO>> getAllBooksWithSearchCondition
             (@RequestParam @Valid SearchBookDTO search,
              @RequestParam(required = false)
-             @CorrectSortFields(entityType = "book")
+             @CorrectSortFields(entityType = SortableEntity.BOOK)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<BookDTO> page = bookService.getAllBooksWithSearchCondition(search, pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));

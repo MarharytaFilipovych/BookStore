@@ -4,6 +4,7 @@ import com.epam.rd.autocode.spring.project.annotations.CorrectSortFields;
 import com.epam.rd.autocode.spring.project.dto.MetaDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.dto.PaginatedResponseDTO;
+import com.epam.rd.autocode.spring.project.model.enums.SortableEntity;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -21,18 +22,11 @@ public class OrderController {
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
-//
-//    private PaginatedResponseDTO<OrderDTO> getPaginatedResponse(Page<OrderDTO> page){
-//        PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();
-//        response.setOrders(page.getContent());
-//        response.setMeta(new MetaDTO(page));
-//        return response;
-//    }
 
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getAllOrders
             (@RequestParam(required = false)
-             @CorrectSortFields(entityType = "order")
+             @CorrectSortFields(entityType = SortableEntity.ORDER)
              @PageableDefault(sort = "orderDate") Pageable pageable){
         Page<OrderDTO> page = orderService.getAllOrders(pageable);
         PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();

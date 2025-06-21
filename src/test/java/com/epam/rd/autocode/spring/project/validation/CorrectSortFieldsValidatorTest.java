@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.validation;
 
 import com.epam.rd.autocode.spring.project.annotations.CorrectSortFields;
 import com.epam.rd.autocode.spring.project.conf.SortOptionsSettings;
+import com.epam.rd.autocode.spring.project.model.enums.SortableEntity;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ class CorrectSortFieldsValidatorTest {
 
     @BeforeEach
     void setUp() {
-        when(annotation.entityType()).thenReturn("book");
+        when(annotation.entityType()).thenReturn(SortableEntity.BOOK);
         when(annotation.sortMappings()).thenReturn(new CorrectSortFields.SortMapping[0]);
 
         when(sortOptionsSettings.getEntitySortOptions("book"))

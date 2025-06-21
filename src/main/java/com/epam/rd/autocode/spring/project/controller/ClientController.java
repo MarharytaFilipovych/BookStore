@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.annotations.CorrectSortFields;
 import com.epam.rd.autocode.spring.project.dto.*;
+import com.epam.rd.autocode.spring.project.model.enums.SortableEntity;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class ClientController {
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getAllClients
             (@RequestParam(required = false)
-             @CorrectSortFields(entityType = "client")
+             @CorrectSortFields(entityType = SortableEntity.CLIENT)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<ClientDTO> page = clientService.getAllClients(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));
@@ -49,7 +50,7 @@ public class ClientController {
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByClient
             (@PathVariable @Email String email,
              @RequestParam(required = false)
-             @CorrectSortFields(entityType = "order")
+             @CorrectSortFields(entityType = SortableEntity.ORDER)
              @PageableDefault(sort = "orderDate") Pageable pageable){
         Page<OrderDTO> page = orderService.getOrdersByClient(email, pageable);
         PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();
@@ -79,7 +80,7 @@ public class ClientController {
 
     @GetMapping("/blocked")
     public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getBlockedClients(@RequestParam(required = false)
-                                                                             @CorrectSortFields(entityType = "client")
+                                                                             @CorrectSortFields(entityType = SortableEntity.CLIENT)
                                                                              @PageableDefault(sort = "name") Pageable pageable){
         Page<ClientDTO> page = clientService.getBlockedClients(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));

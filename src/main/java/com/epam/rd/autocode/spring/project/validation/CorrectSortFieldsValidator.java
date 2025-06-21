@@ -33,7 +33,7 @@ public class CorrectSortFieldsValidator implements ConstraintValidator<CorrectSo
     @Override
     public void initialize(CorrectSortFields constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
-        String entityType = constraintAnnotation.entityType();
+        String entityType = constraintAnnotation.entityType().toString();
         this.sortOptions = new HashSet<>(sortOptionsSettings.getEntitySortOptions(entityType));
         Map<String, String> propertiesMappings = sortOptionsSettings.getEntityMappings(entityType);
         Map<String, String> annotationMappings = parseSortMappings(constraintAnnotation.sortMappings());
