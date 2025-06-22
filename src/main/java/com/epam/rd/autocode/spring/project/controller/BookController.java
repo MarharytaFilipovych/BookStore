@@ -42,7 +42,7 @@ public class BookController {
 
     @GetMapping("/search")
     public ResponseEntity<PaginatedResponseDTO<BookDTO>> getAllBooksWithSearchCondition
-            (@RequestParam @Valid SearchBookDTO search,
+            (@ModelAttribute @Valid SearchBookDTO search,
              @RequestParam(required = false)
              @CorrectSortFields(entityType = SortableEntity.BOOK)
              @PageableDefault(sort = "name") Pageable pageable){

@@ -26,7 +26,7 @@ public class MetaDTO {
     private final boolean hasPrevious;
 
     public MetaDTO(Page<?> page) {
-        this.page = page.getNumber() + 1;
+        this.page = page.getNumber();
         this.totalCount = page.getTotalElements();
         this.pageSize = page.getSize();
         this.totalPages = page.getTotalPages();

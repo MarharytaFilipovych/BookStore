@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/books/**").hasAnyRole("EMPLOYEE", "CLIENT")
                         .requestMatchers("/books/**").hasRole("EMPLOYEE")
                         .requestMatchers("/clients/blocked/**").hasRole("EMPLOYEE")

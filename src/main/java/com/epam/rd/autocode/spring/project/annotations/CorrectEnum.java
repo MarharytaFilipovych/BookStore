@@ -13,5 +13,6 @@ public @interface CorrectEnum {
     Class<? extends Enum<?>> enumClass();
     String message() default "Incorrect enum value! Must be any of {enumClass}";
     Class<?>[] groups() default {};
+    boolean required() default true;
     Class<? extends Payload>[] payload() default {};
 }

@@ -26,7 +26,7 @@ public class BlockedClient {
     @JoinColumn(name = "client_id")
     private Client client;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name = "blocked_when")
     @CreatedDate
     private LocalDateTime when;
 

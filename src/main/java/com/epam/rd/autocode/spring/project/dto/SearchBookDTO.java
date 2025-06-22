@@ -21,7 +21,7 @@ public class SearchBookDTO {
     @CorrectName(required = false, message = "Genre must contain only letters, spaces, hyphens, and apostrophes")
     private String genre;
 
-    @CorrectEnum(enumClass = AgeGroup.class, message = "Invalid age group. Must be one of: CHILD, TEEN, ADULT, OTHER")
+    @CorrectEnum(enumClass = AgeGroup.class, message = "Invalid age group. Must be one of: CHILD, TEEN, ADULT, OTHER", required = false)
     @JsonProperty("age_group")
     private AgeGroup ageGroup;
 
@@ -48,6 +48,6 @@ public class SearchBookDTO {
     @JsonProperty("max_pages")
     private Integer maxPages;
 
-    @CorrectEnum(enumClass = Language.class, message = "Invalid language. Must be one of: ENGLISH, SPANISH, FRENCH, GERMAN, UKRAINIAN, JAPANESE, OTHER")
+    @CorrectEnum(required = false, enumClass = Language.class, message = "Invalid language. Must be one of: ENGLISH, SPANISH, FRENCH, GERMAN, UKRAINIAN, JAPANESE, OTHER")
     private Language language;
 }
