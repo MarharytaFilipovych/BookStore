@@ -6,6 +6,8 @@ import com.epam.rd.autocode.spring.project.dto.request.LogoutDTO;
 import com.epam.rd.autocode.spring.project.dto.request.ResetPasswordDto;
 import com.epam.rd.autocode.spring.project.dto.request.RefreshTokenDTO;
 import com.epam.rd.autocode.spring.project.dto.TokenResponseDTO;
+import org.springframework.security.core.Authentication;
+
 import java.util.UUID;
 
 public interface AuthService {

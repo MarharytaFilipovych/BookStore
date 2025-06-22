@@ -15,7 +15,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "orders")
+@Table(name = "orders", indexes = {@Index(name = "idx_order_date", columnList = "order_date"),
+        @Index(name = "idx_order_client_date", columnList = "client_id, order_date")})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

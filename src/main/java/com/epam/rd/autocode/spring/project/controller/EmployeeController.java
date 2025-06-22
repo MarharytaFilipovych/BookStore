@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,6 +43,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getEmployeeByEmail(email));
     }
 
+
     @GetMapping("/{email}/orders")
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByEmployee
             (@PathVariable @Email String email,
@@ -55,17 +57,14 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
-    public ResponseEntity<EmployeeDTO> addEmployee(@Valid @RequestBody EmployeeDTO dto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.addEmployee(dto));
-    }
-
+    @PreAuthorize("#email == authentication.name and hasRole('EMPLOYEE')")
     @PutMapping("/{email}")
     public ResponseEntity<Void> updateEmployee(@PathVariable @Email String email, @Valid @RequestBody EmployeeUpdateDTO dto){
         employeeService.updateEmployeeByEmail(email, dto);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("#email == authentication.name and hasRole('EMPLOYEE')")
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable @Email String email){
         employeeService.deleteEmployeeByEmail(email);

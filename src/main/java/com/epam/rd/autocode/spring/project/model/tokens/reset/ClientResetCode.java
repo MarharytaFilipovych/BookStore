@@ -1,10 +1,7 @@
 package com.epam.rd.autocode.spring.project.model.tokens.reset;
 
 import com.epam.rd.autocode.spring.project.model.Client;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "client_reset_codes")
+@Table(name = "client_reset_codes", indexes = {@Index(name = "idx_client_reset_expires", columnList = "expires_at")})
 @NoArgsConstructor
 public class ClientResetCode extends ResetCode {
     @ManyToOne(optional = false)

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,7 @@ public class OrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getAllOrders
             (@RequestParam(required = false)
              @CorrectSortFields(entityType = SortableEntity.ORDER)
@@ -35,12 +37,14 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('CLIENT')")
     @PostMapping
     public ResponseEntity<OrderDTO> addOrder(@Valid @RequestBody OrderDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.addOrder(dto));
     }
 
-    @PutMapping()
+    @PutMapping
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<Void> confirmOrder(@Valid @RequestBody OrderDTO dto){
         orderService.confirmOrder(dto);
         return ResponseEntity.noContent().build();

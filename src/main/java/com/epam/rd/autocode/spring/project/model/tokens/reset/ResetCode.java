@@ -15,7 +15,7 @@ import java.util.UUID;
 @MappedSuperclass
 public abstract class ResetCode {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID code;
 
     @Column(nullable = false, name = "expires_at")

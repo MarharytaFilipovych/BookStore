@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,6 +33,7 @@ public class ClientController {
         return response;
     }
 
+    @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getAllClients
             (@RequestParam(required = false)
@@ -41,11 +43,13 @@ public class ClientController {
         return ResponseEntity.ok(getPaginatedResponse(page));
     }
 
+    @PreAuthorize("#email == authentication.name and hasRole('CLIENT')")
     @GetMapping("/{email}")
     public ResponseEntity<ClientDTO> getClientByEmail(@PathVariable @Email String email){
         return ResponseEntity.ok(clientService.getClientByEmail(email));
     }
 
+    @PreAuthorize("#email == authentication.name and hasRole('CLIENT')")
     @GetMapping("{email}/orders")
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByClient
             (@PathVariable @Email String email,
@@ -59,11 +63,7 @@ public class ClientController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
-    public ResponseEntity<ClientDTO> addClient(@Valid @RequestBody ClientDTO dto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(clientService.addClient(dto));
-    }
-
+    @PreAuthorize("#email == authentication.name and hasRole('CLIENT')")
     @PutMapping("/{email}")
     public ResponseEntity<Void> updateClient
             (@PathVariable @Email String email,
@@ -72,6 +72,7 @@ public class ClientController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("#email == authentication.name and hasRole('CLIENT')")
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteClient(@PathVariable @Email String email){
         clientService.deleteClientByEmail(email);

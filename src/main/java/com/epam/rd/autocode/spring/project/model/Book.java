@@ -15,7 +15,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 @AllArgsConstructor
-@Table(name = "books", indexes = {@Index(name = "unique_book_name", columnList = "name", unique = true)})
+@Table(name = "books", indexes = {@Index(name = "unique_book_name", columnList = "name", unique = true),
+        @Index(name = "idx_book_author", columnList = "author"),
+        @Index(name = "idx_book_genre", columnList = "genre")})
 public class Book {
 
     @Id
