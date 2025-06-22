@@ -33,8 +33,7 @@ public class BookController {
 
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<BookDTO>> getAllBooks
-            (@RequestParam(required = false)
-             @CorrectSortFields(entityType = SortableEntity.BOOK)
+            (@CorrectSortFields(entityType = SortableEntity.BOOK)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<BookDTO> page = bookService.getAllBooks(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));
@@ -43,7 +42,6 @@ public class BookController {
     @GetMapping("/search")
     public ResponseEntity<PaginatedResponseDTO<BookDTO>> getAllBooksWithSearchCondition
             (@ModelAttribute @Valid SearchBookDTO search,
-             @RequestParam(required = false)
              @CorrectSortFields(entityType = SortableEntity.BOOK)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<BookDTO> page = bookService.getAllBooksWithSearchCondition(search, pageable);

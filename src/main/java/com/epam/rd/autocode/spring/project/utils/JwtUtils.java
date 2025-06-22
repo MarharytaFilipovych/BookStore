@@ -24,9 +24,21 @@ public class JwtUtils {
     }
 
     public String generateToken(Authentication authentication) {
+        // Extract username from UserDetails object instead of casting to String
+        String username;
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        } else if (principal instanceof String) {
+            username = (String) principal;
+        } else {
+            throw new IllegalArgumentException("Principal must be either UserDetails or String");
+        }
+
         return Jwts.builder()
                 .issuer(settings.getIssuer())
-                .subject((String) authentication.getPrincipal())
+                .subject(username)  // Use extracted username, not the cast
                 .claim("roles", authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList())
@@ -63,7 +75,18 @@ public class JwtUtils {
 
     public boolean isTokenValid(String token, Authentication authentication) {
         String username = getUserName(token);
-        String principal = (String) authentication.getPrincipal();
+        // Also fix this method to handle UserDetails properly
+        String principal;
+        Object authPrincipal = authentication.getPrincipal();
+
+        if (authPrincipal instanceof UserDetails userDetails) {
+            principal = userDetails.getUsername();
+        } else if (authPrincipal instanceof String) {
+            principal = (String) authPrincipal;
+        } else {
+            return false;
+        }
+
         return username != null &&
                 username.equals(principal) &&
                 !isTokenExpired(token);

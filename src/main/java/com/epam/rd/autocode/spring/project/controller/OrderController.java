@@ -27,8 +27,7 @@ public class OrderController {
     @GetMapping
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getAllOrders
-            (@RequestParam(required = false)
-             @CorrectSortFields(entityType = SortableEntity.ORDER)
+            (@CorrectSortFields(entityType = SortableEntity.ORDER)
              @PageableDefault(sort = "orderDate") Pageable pageable){
         Page<OrderDTO> page = orderService.getAllOrders(pageable);
         PaginatedResponseDTO<OrderDTO> response = new PaginatedResponseDTO<>();

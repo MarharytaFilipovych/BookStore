@@ -35,15 +35,15 @@ public class AuthController {
     }
 
     @PostMapping("/register/employee")
-    public ResponseEntity<Void> register(@Valid @RequestBody EmployeeDTO employee){
+    public ResponseEntity<String> register(@Valid @RequestBody EmployeeDTO employee){
         employeeService.addEmployee(employee);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body("Successfully registered!");
     }
 
     @PostMapping("/register/client")
-    public ResponseEntity<Void> register(@Valid @RequestBody ClientDTO client){
+    public ResponseEntity<String> register(@Valid @RequestBody ClientDTO client){
         clientService.addClient(client);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body("Successfully registered!");
     }
 
     @PostMapping("/refresh-token")

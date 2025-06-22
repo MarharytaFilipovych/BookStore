@@ -43,6 +43,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Page<BookDTO> getAllBooksWithSearchCondition(SearchBookDTO criteria, Pageable pageable) {
+        Pageable mappedPageable = sortMappingService.applyMappings(pageable, "book");
         BooleanBuilder predicate = BookSearchPredicateBuilder.create()
                 .withName(criteria.getName())
                 .withGenre(criteria.getGenre())
@@ -53,7 +54,7 @@ public class BookServiceImpl implements BookService {
                 .withPageRange(criteria.getMinPages(), criteria.getMaxPages())
                 .withPublicationYear(criteria.getPublicationYear())
                 .build();
-        return bookRepository.findAll(predicate, pageable).map(bookMapper::toDto);
+        return bookRepository.findAll(predicate, mappedPageable).map(bookMapper::toDto);
     }
 
     @Override

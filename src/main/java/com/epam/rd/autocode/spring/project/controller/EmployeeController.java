@@ -29,7 +29,6 @@ public class EmployeeController {
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<EmployeeDTO>> getAllEmployees
             (@CorrectSortFields(entityType = SortableEntity.EMPLOYEE)
-             @RequestParam(required = false)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<EmployeeDTO> page = employeeService.getAllEmployees(pageable);
         PaginatedResponseDTO<EmployeeDTO> response = new PaginatedResponseDTO<>();
@@ -47,7 +46,6 @@ public class EmployeeController {
     @GetMapping("/{email}/orders")
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByEmployee
             (@PathVariable @Email String email,
-             @RequestParam(required = false)
              @CorrectSortFields(entityType = SortableEntity.ORDER)
              @PageableDefault(sort = "orderDate") Pageable pageable){
         Page<OrderDTO> page = orderService.getOrdersByEmployee(email, pageable);

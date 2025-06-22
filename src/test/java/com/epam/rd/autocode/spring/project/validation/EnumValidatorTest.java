@@ -33,15 +33,28 @@ class EnumValidatorTest {
     void setUp() {
         when(annotation.enumClass()).thenReturn((Class) AgeGroup.class);
         validator.initialize(annotation);
+        validator.required=true;
     }
 
     @Test
-    void isValid_WithNullValue_ShouldReturnFalse() {
+    void isValid_WithNullValueWhenRequired_ShouldReturnFalse() {
         // Act
         boolean result = validator.isValid(null, context);
 
         // Assert
         assertFalse(result);
+    }
+
+    @Test
+    void isValid_WithNullValueWhenNotRequired_ShouldReturnTrue() {
+        // Arrange
+        validator.required=false;
+
+        // Act
+        boolean result = validator.isValid(null, context);
+
+        // Assert
+        assertTrue(result);
     }
 
     @ParameterizedTest

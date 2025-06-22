@@ -30,4 +30,24 @@ public class PaginatedResponseDTO<T> {
     public void setOrders(List<T> orders) {
         this.entities = orders;
     }
+
+    @JsonProperty("clients")
+    public List<T> getClients() {
+        return this.entities;
+    }
+
+    @JsonProperty("books")
+    public List<T> getBooks() {
+        return this.entities;
+    }
+
+    @JsonProperty("employees")
+    public List<T> getEmployees() {
+        return this.entities;
+    }
+
+    @JsonProperty("orders")
+    public List<T> getOrders() {
+        return this.entities;
+    }
 }

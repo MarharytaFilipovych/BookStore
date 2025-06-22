@@ -28,7 +28,7 @@ public class ClientController {
 
     private PaginatedResponseDTO<ClientDTO> getPaginatedResponse(Page<ClientDTO> page){
         PaginatedResponseDTO<ClientDTO> response = new PaginatedResponseDTO<>();
-        response.setBooks(page.getContent());
+        response.setClients(page.getContent());
         response.setMeta(new MetaDTO(page));
         return response;
     }
@@ -36,8 +36,7 @@ public class ClientController {
     @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping
     public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getAllClients
-            (@RequestParam(required = false)
-             @CorrectSortFields(entityType = SortableEntity.CLIENT)
+            (@CorrectSortFields(entityType = SortableEntity.CLIENT)
              @PageableDefault(sort = "name") Pageable pageable){
         Page<ClientDTO> page = clientService.getAllClients(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));
@@ -53,7 +52,6 @@ public class ClientController {
     @GetMapping("{email}/orders")
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByClient
             (@PathVariable @Email String email,
-             @RequestParam(required = false)
              @CorrectSortFields(entityType = SortableEntity.ORDER)
              @PageableDefault(sort = "orderDate") Pageable pageable){
         Page<OrderDTO> page = orderService.getOrdersByClient(email, pageable);
@@ -80,8 +78,7 @@ public class ClientController {
     }
 
     @GetMapping("/blocked")
-    public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getBlockedClients(@RequestParam(required = false)
-                                                                             @CorrectSortFields(entityType = SortableEntity.CLIENT)
+    public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getBlockedClients(@CorrectSortFields(entityType = SortableEntity.CLIENT)
                                                                              @PageableDefault(sort = "name") Pageable pageable){
         Page<ClientDTO> page = clientService.getBlockedClients(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));
