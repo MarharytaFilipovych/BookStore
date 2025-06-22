@@ -3,7 +3,6 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
 import com.epam.rd.autocode.spring.project.dto.EmployeeUpdateDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
-import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
@@ -19,10 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
-
 import static com.epam.rd.autocode.spring.project.testdata.EmployeeData.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
@@ -84,14 +82,16 @@ class EmployeeControllerTest {
     void getAllEmployees_ShouldReturnPaginatedEmployees() throws Exception {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10).withSort(Sort.by("name"));
-        Page<EmployeeDTO> page = new PageImpl<>(employeeDTOs, pageable, employeeDTOs.size());
+        List<EmployeeDTO> filteredEmployees = employeeDTOs.stream()
+                .limit(10).sorted(Comparator.comparing(EmployeeDTO::getName)).toList();
+        Page<EmployeeDTO> page = new PageImpl<>(filteredEmployees, pageable, filteredEmployees.size());
         when(employeeService.getAllEmployees(pageable)).thenReturn(page);
 
         // Act & Assert
         ResultActions resultActions = mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk());
-        verifyPaginatedMetadata(resultActions, employeeDTOs.size(), 0, employeeDTOs.size());
-        verifyAllEmployeesInPaginatedResponse(resultActions, employeeDTOs);
+        verifyPaginatedMetadata(resultActions, filteredEmployees.size(), 0, filteredEmployees.size());
+        verifyAllEmployeesInPaginatedResponse(resultActions, filteredEmployees);
         verify(employeeService).getAllEmployees(pageable);
     }
 
@@ -100,8 +100,9 @@ class EmployeeControllerTest {
     void getAllEmployees_WithPagination_ShouldReturnCorrectPage() throws Exception {
         // Arrange
         Pageable pageable = PageRequest.of(1, 2).withSort(Sort.by("name"));
-        List<EmployeeDTO> secondPageEmployees = employeeDTOs.subList(2, 3);
-        Page<EmployeeDTO> page = new PageImpl<>(secondPageEmployees, pageable, employeeDTOs.size());
+        List<EmployeeDTO> filteredEmployees = employeeDTOs.stream().skip(2)
+                .limit(2).sorted(Comparator.comparing(EmployeeDTO::getName)).toList();
+        Page<EmployeeDTO> page = new PageImpl<>(filteredEmployees, pageable, filteredEmployees.size());
         when(employeeService.getAllEmployees(pageable)).thenReturn(page);
 
         // Act & Assert
@@ -109,8 +110,8 @@ class EmployeeControllerTest {
                         .param("page", "1")
                         .param("size", "2"))
                 .andExpect(status().isOk());
-        verifyPaginatedMetadata(resultActions, employeeDTOs.size(), 1, secondPageEmployees.size());
-        verifyAllEmployeesInPaginatedResponse(resultActions, secondPageEmployees);
+        verifyPaginatedMetadata(resultActions, employeeDTOs.size(), 1, filteredEmployees.size());
+        verifyAllEmployeesInPaginatedResponse(resultActions, filteredEmployees);
         verify(employeeService).getAllEmployees(pageable);
     }
 
@@ -118,16 +119,18 @@ class EmployeeControllerTest {
     @WithMockUser(roles = {"EMPLOYEE"})
     void getAllEmployees_WithSorting_ShouldReturnSortedEmployees() throws Exception {
         // Arrange
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("name"));
-        Page<EmployeeDTO> page = new PageImpl<>(employeeDTOs, pageable, employeeDTOs.size());
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("birthDate"));
+        List<EmployeeDTO> filteredEmployees = employeeDTOs.stream()
+                .limit(10).sorted(Comparator.comparing(EmployeeDTO::getBirthDate)).toList();
+        Page<EmployeeDTO> page = new PageImpl<>(filteredEmployees, pageable, filteredEmployees.size());
         when(employeeService.getAllEmployees(pageable)).thenReturn(page);
 
         // Act & Assert
         ResultActions resultActions = mockMvc.perform(get("/employees")
-                        .param("sort", "name"))
+                        .param("sort", "birthDate"))
                 .andExpect(status().isOk());
-        verifyPaginatedMetadata(resultActions, employeeDTOs.size(), 0, employeeDTOs.size());
-        verifyAllEmployeesInPaginatedResponse(resultActions, employeeDTOs);
+        verifyPaginatedMetadata(resultActions, filteredEmployees.size(), 0, filteredEmployees.size());
+        verifyAllEmployeesInPaginatedResponse(resultActions, filteredEmployees);
         verify(employeeService).getAllEmployees(pageable);
     }
 

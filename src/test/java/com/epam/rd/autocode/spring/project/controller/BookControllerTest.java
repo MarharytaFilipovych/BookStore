@@ -186,7 +186,7 @@ class BookControllerTest {
         searchBookDTO.setLanguage(Language.ENGLISH);
         List<BookDTO> filteredBooks = bookDTOs.stream()
                 .filter(b -> b.getLanguage() == Language.ENGLISH)
-                .sorted(Comparator.comparing(BookDTO::getAuthor)) // Sort by author ascending
+                .sorted(Comparator.comparing(BookDTO::getAuthor))
                 .limit(5)
                 .toList();
         Page<BookDTO> page = new PageImpl<>(filteredBooks, pageable, filteredBooks.size());
