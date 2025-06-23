@@ -46,8 +46,8 @@ public class GlobalExceptionController {
 
     @ExceptionHandler(UserDetailsAreNullException.class)
     public ResponseEntity<ErrorResponseDTO> handleUserDetailsAreNullException(UserDetailsAreNullException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponseDTO("Authentication error occurred"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponseDTO(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
