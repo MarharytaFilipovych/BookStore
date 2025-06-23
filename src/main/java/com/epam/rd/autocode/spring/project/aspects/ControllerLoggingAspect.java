@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class ControllerLoggingAspect {
 
     @Pointcut("execution(* com.epam.rd.autocode.spring.project.controller.*.*(..)) && " +
-            "!execution(* com.epam.rd.autocode.spring.project.controller.GlobalExceptionHandler.*(..))")
+            "!execution(* com.epam.rd.autocode.spring.project.controller.GlobalExceptionController.*(..))")
     public void controllerMethod() {}
 
     @Around("controllerMethod()")

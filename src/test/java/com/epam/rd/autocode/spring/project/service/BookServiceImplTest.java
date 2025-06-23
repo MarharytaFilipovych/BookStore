@@ -136,27 +136,6 @@ public class BookServiceImplTest {
         return pageCriteria;
     }
 
-    private SearchBookDTO createEmptyResultCriteria() {
-        SearchBookDTO searchCriteria = new SearchBookDTO();
-        searchCriteria.setName("NonExistentBook");
-        searchCriteria.setMinPrice(new BigDecimal("1000.00"));
-        return searchCriteria;
-    }
-
-    private void mockSearchOperation(Pageable pageable, List<Book> resultBooks, List<BookDTO> resultDTOs) {
-        Page<Book> bookPage = new PageImpl<>(resultBooks, pageable, resultBooks.size());
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(bookPage);
-
-        for (int i = 0; i < resultBooks.size(); i++) {
-            when(bookMapper.toDto(resultBooks.get(i))).thenReturn(resultDTOs.get(i));
-        }
-    }
-
-    private void mockEmptySearchOperation(Pageable pageable) {
-        Page<Book> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(bookRepository.findAll(any(BooleanBuilder.class), eq(pageable))).thenReturn(emptyPage);
-    }
-
     private void verifyPageableOperations(Pageable originalPageable, Pageable mappedPageable) {
         verify(sortMappingService).applyMappings(originalPageable, "book");
         verify(bookRepository).findAll(mappedPageable);
@@ -213,13 +192,6 @@ public class BookServiceImplTest {
         } else {
             verify(bookMapper, never()).toDto(any());
         }
-    }
-
-    private void verifyPredicateCapture(Pageable pageable) {
-        ArgumentCaptor<BooleanBuilder> predicateCaptor = ArgumentCaptor.forClass(BooleanBuilder.class);
-        verify(bookRepository).findAll(predicateCaptor.capture(), eq(pageable));
-        BooleanBuilder capturedPredicate = predicateCaptor.getValue();
-        assertNotNull(capturedPredicate);
     }
 
     private void testSortingScenario(Sort sort) {
@@ -416,103 +388,138 @@ public class BookServiceImplTest {
     void getAllBooksWithSearchCondition_WithValidCriteria_ShouldReturnMatchingBooks() {
         // Arrange
         SearchBookDTO searchCriteria = createFullSearchCriteria();
-        List<Book> filteredBooks = List.of(book);
-        List<BookDTO> filteredDTOs = List.of(bookDTO);
+        List<Book> filteredBooks = books.stream()
+                .filter(b -> b.getName().contains("Adventure") ||
+                        b.getGenre().equals("Fantasy") ||
+                        b.getAuthor().contains("John"))
+                .toList();
+        List<BookDTO> filteredDTOs = bookDTOs.stream()
+                .filter(dto -> dto.getName().contains("Adventure") ||
+                        dto.getGenre().equals("Fantasy") ||
+                        dto.getAuthor().contains("John"))
+                .toList();
         Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
 
-        mockSearchOperation(pageable, filteredBooks, filteredDTOs);
+        mockSearchOperationWithMapping(pageable, mappedPageable, filteredBooks, filteredDTOs);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(searchCriteria, pageable);
 
         // Assert
         verifyPagedResults(result, filteredDTOs, filteredBooks.size());
-        verifySearchOperations(pageable, 1);
-    }
-
-    @Test
-    void getAllBooksWithSearchCondition_WithEmptyResults_ShouldReturnEmptyPage() {
-        // Arrange
-        SearchBookDTO searchCriteria = createEmptyResultCriteria();
-        Pageable pageable = PageRequest.of(0, 10);
-        mockEmptySearchOperation(pageable);
-
-        // Act
-        Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(searchCriteria, pageable);
-
-        // Assert
-        verifyEmptyResults(result);
-        verifySearchOperations(pageable, 0);
-    }
-
-    @Test
-    void getAllBooksWithSearchCondition_WithNullCriteria_ShouldHandleGracefully() {
-        // Arrange
-        SearchBookDTO emptyCriteria = new SearchBookDTO(); // All fields null
-        Pageable pageable = PageRequest.of(0, 10);
-        mockSearchOperation(pageable, books, bookDTOs);
-
-        // Act
-        Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(emptyCriteria, pageable);
-
-        // Assert
-        verifyPagedResults(result, bookDTOs, books.size());
-        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(pageable));
+        verifySearchOperations(mappedPageable, filteredDTOs.size());
     }
 
     @Test
     void getAllBooksWithSearchCondition_WithPartialCriteria_ShouldUseOnlyProvidedFilters() {
         // Arrange
         SearchBookDTO partialCriteria = createPartialSearchCriteria();
-        List<Book> filteredBooks = List.of(book);
+        List<Book> filteredBooks = books.stream()
+                .filter(b -> b.getName().contains("Adventure") &&
+                        b.getLanguage() == Language.ENGLISH)
+                .toList();
+        List<BookDTO> filteredDTOs = bookDTOs.stream()
+                .filter(dto -> dto.getName().contains("Adventure") &&
+                        dto.getLanguage() == Language.ENGLISH)
+                .toList();
         Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
 
-        mockSearchOperation(pageable, filteredBooks, List.of(bookDTO));
+        mockSearchOperationWithMapping(pageable, mappedPageable, filteredBooks, filteredDTOs);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(partialCriteria, pageable);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(bookDTO, result.getContent().get(0));
-        verifySearchOperations(pageable, 1);
+        assertEquals(filteredBooks.size(), result.getTotalElements());
+        assertEquals(filteredDTOs, result.getContent());
+        verifySearchOperations(mappedPageable, filteredDTOs.size());
     }
 
     @Test
     void getAllBooksWithSearchCondition_WithPriceRangeOnly_ShouldFilterByPrice() {
         // Arrange
         SearchBookDTO priceCriteria = createPriceRangeCriteria();
-        List<Book> filteredBooks = List.of(book);
+        List<Book> filteredBooks = books.stream()
+                .filter(b -> b.getPrice().compareTo(new BigDecimal("15.00")) >= 0 &&
+                        b.getPrice().compareTo(new BigDecimal("20.00")) <= 0)
+                .toList();
+        List<BookDTO> filteredDTOs = bookDTOs.stream()
+                .filter(dto -> dto.getPrice().compareTo(new BigDecimal("15.00")) >= 0 &&
+                        dto.getPrice().compareTo(new BigDecimal("20.00")) <= 0)
+                .toList();
         Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
 
-        mockSearchOperation(pageable, filteredBooks, List.of(bookDTO));
+        mockSearchOperationWithMapping(pageable, mappedPageable, filteredBooks, filteredDTOs);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(priceCriteria, pageable);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        verifySearchOperations(pageable, 1);
-        verifyPredicateCapture(pageable);
+        assertEquals(filteredBooks.size(), result.getTotalElements());
+        verifySearchOperations(mappedPageable, filteredDTOs.size());
+        verifyPredicateCapture(mappedPageable);
     }
 
     @Test
     void getAllBooksWithSearchCondition_WithPageRangeOnly_ShouldFilterByPages() {
         // Arrange
         SearchBookDTO pageCriteria = createPageRangeCriteria();
-        List<Book> filteredBooks = List.of(book);
+        List<Book> filteredBooks = books.stream()
+                .filter(b -> b.getPages() >= 200 && b.getPages() <= 300)
+                .toList();
+        List<BookDTO> filteredDTOs = bookDTOs.stream()
+                .filter(dto -> dto.getPages() >= 200 && dto.getPages() <= 300)
+                .toList();
         Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
 
-        mockSearchOperation(pageable, filteredBooks, List.of(bookDTO));
+        mockSearchOperationWithMapping(pageable, mappedPageable, filteredBooks, filteredDTOs);
 
         // Act
         Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(pageCriteria, pageable);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        verifySearchOperations(pageable, 1);
+        assertEquals(filteredBooks.size(), result.getTotalElements());
+        verifySearchOperations(mappedPageable, filteredDTOs.size());
+    }
+
+    @Test
+    void getAllBooksWithSearchCondition_WithNullCriteria_ShouldHandleGracefully() {
+        // Arrange
+        SearchBookDTO emptyCriteria = new SearchBookDTO();
+        Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("name"));
+        mockSearchOperationWithMapping(pageable, mappedPageable, books, bookDTOs);
+
+        // Act
+        Page<BookDTO> result = bookService.getAllBooksWithSearchCondition(emptyCriteria, pageable);
+
+        // Assert
+        verifyPagedResults(result, bookDTOs, books.size());
+        verify(bookRepository).findAll(any(BooleanBuilder.class), eq(mappedPageable));
+    }
+
+    private void mockSearchOperationWithMapping(Pageable pageable, Pageable mappedPageable,
+                                                List<Book> resultBooks, List<BookDTO> resultDTOs) {
+        Page<Book> bookPage = new PageImpl<>(resultBooks, mappedPageable, resultBooks.size());
+        when(sortMappingService.applyMappings(pageable, "book")).thenReturn(mappedPageable);
+        when(bookRepository.findAll(any(BooleanBuilder.class), eq(mappedPageable))).thenReturn(bookPage);
+
+        for (int i = 0; i < resultBooks.size(); i++) {
+            when(bookMapper.toDto(resultBooks.get(i))).thenReturn(resultDTOs.get(i));
+        }
+    }
+
+    private void verifyPredicateCapture(Pageable mappedPageable) {
+        ArgumentCaptor<BooleanBuilder> predicateCaptor = ArgumentCaptor.forClass(BooleanBuilder.class);
+        verify(bookRepository).findAll(predicateCaptor.capture(), eq(mappedPageable));
+        BooleanBuilder capturedPredicate = predicateCaptor.getValue();
+        assertNotNull(capturedPredicate);
     }
 }

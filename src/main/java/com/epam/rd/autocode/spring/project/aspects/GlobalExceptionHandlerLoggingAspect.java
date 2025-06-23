@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Slf4j
 public class GlobalExceptionHandlerLoggingAspect {
 
-    @Pointcut("execution(* com.epam.rd.autocode.spring.project.controller.GlobalExceptionHandler.*(..))")
+    @Pointcut("execution(* com.epam.rd.autocode.spring.project.controller.GlobalExceptionController.*(..))")
     public void globalExceptionHandlerMethod() {}
 
     @Around("globalExceptionHandlerMethod()")
