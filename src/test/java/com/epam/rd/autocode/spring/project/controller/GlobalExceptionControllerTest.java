@@ -48,16 +48,46 @@ class GlobalExceptionControllerTest {
         assertEquals(expectedMessage, response.getBody().message());
     }
 
+    // Test individual not found exceptions
     @Test
     void handleNotFoundException_ShouldReturn404WithErrorMessage() {
         // Arrange
         NotFoundException exception = new NotFoundException("Resource not found");
 
         // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleNotFoundException(exception);
+        ResponseEntity<String> response = globalExceptionController.handleNotFoundExceptions(exception);
 
         // Assert
-        verifyErrorMessage(exception.getMessage(), response, 404);
+        assertEquals(404, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(exception.getMessage(), response.getBody());
+    }
+
+    @Test
+    void handleNoHandlerFoundException_ShouldReturn404WithErrorMessage() {
+        // Arrange
+        NoHandlerFoundException exception = new NoHandlerFoundException("GET", "/unknown", new HttpHeaders());
+
+        // Act
+        ResponseEntity<String> response = globalExceptionController.handleNotFoundExceptions(exception);
+
+        // Assert
+        assertEquals(404, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(exception.getMessage(), response.getBody());
+    }
+
+    // Test conflict exceptions
+    @Test
+    void handleDataIntegrityViolationException_ShouldReturn409WithErrorMessage() {
+        // Arrange
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("Constraint violation");
+
+        // Act
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleConflictExceptions(exception);
+
+        // Assert
+        verifyErrorMessage(exception.getMessage(), response, 409);
     }
 
     @Test
@@ -66,10 +96,23 @@ class GlobalExceptionControllerTest {
         AlreadyExistException exception = new AlreadyExistException("Resource already exists");
 
         // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleAlreadyExistException(exception);
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleConflictExceptions(exception);
 
         // Assert
         verifyErrorMessage(exception.getMessage(), response, 409);
+    }
+
+    // Test bad request exceptions
+    @Test
+    void handleIllegalArgumentException_ShouldReturn400WithErrorMessage() {
+        // Arrange
+        IllegalArgumentException exception = new IllegalArgumentException("Invalid argument provided");
+
+        // Act
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleBadRequestExceptions(exception);
+
+        // Assert
+        verifyErrorMessage(exception.getMessage(), response, 400);
     }
 
     @Test
@@ -78,10 +121,35 @@ class GlobalExceptionControllerTest {
         OrderMustContainClientException exception = new OrderMustContainClientException();
 
         // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleOrderMustContainClientException(exception);
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleBadRequestExceptions(exception);
 
         // Assert
         verifyErrorMessage(exception.getMessage(), response, 400);
+    }
+
+    // Test unauthorized exceptions
+    @Test
+    void handleUsernameNotFoundException_ShouldReturn401WithErrorMessage() {
+        // Arrange
+        UsernameNotFoundException exception = new UsernameNotFoundException("User not found");
+
+        // Act
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleUnauthorizedExceptions(exception);
+
+        // Assert
+        verifyErrorMessage(exception.getMessage(), response, 401);
+    }
+
+    @Test
+    void handleSecurityException_ShouldReturn401WithErrorMessage() {
+        // Arrange
+        SecurityException exception = new SecurityException("Invalid or expired token");
+
+        // Act
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleUnauthorizedExceptions(exception);
+
+        // Assert
+        verifyErrorMessage(exception.getMessage(), response, 401);
     }
 
     @Test
@@ -90,10 +158,22 @@ class GlobalExceptionControllerTest {
         UserDetailsAreNullException exception = new UserDetailsAreNullException("User details are null");
 
         // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleUserDetailsAreNullException(exception);
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleUnauthorizedExceptions(exception);
 
         // Assert
         verifyErrorMessage(exception.getMessage(), response, 401);
+    }
+
+    @Test
+    void handleAccessDeniedException_ShouldReturn403WithErrorMessage() {
+        // Arrange
+        AccessDeniedException exception = new AccessDeniedException("Access denied");
+
+        // Act
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleAccessDeniedException(exception);
+
+        // Assert
+        verifyErrorMessage(exception.getMessage(), response, 403);
     }
 
     @Test
@@ -116,7 +196,6 @@ class GlobalExceptionControllerTest {
         assertEquals(400, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().message().contains("Validation failed"));
-        System.out.println(response.getBody().message());
         assertTrue(response.getBody().message().contains(fieldError1.getField() + ": " + fieldError1.getDefaultMessage()));
         assertTrue(response.getBody().message().contains(fieldError2.getField() + ": " + fieldError2.getDefaultMessage()));
     }
@@ -149,11 +228,10 @@ class GlobalExceptionControllerTest {
         assertEquals(400, response.getStatusCode().value());
         assertNotNull(response.getBody());
 
-        String expectedMessage = "Validation failed: "+ error1.getDefaultMessage() +
-                "; "+ error2.getDefaultMessage() + "; "+ error3.getDefaultMessage();
+        String expectedMessage = "Validation failed: " + error1.getDefaultMessage() +
+                "; " + error2.getDefaultMessage() + "; " + error3.getDefaultMessage();
         assertEquals(expectedMessage, response.getBody().message());
     }
-
 
     @Test
     void handleConstraintViolationException_ShouldReturn400WithViolationMessages() {
@@ -183,27 +261,15 @@ class GlobalExceptionControllerTest {
     }
 
     @Test
-    void handleDataIntegrityViolationException_ShouldReturn409WithGenericMessage() {
-        // Arrange
-        DataIntegrityViolationException exception = new DataIntegrityViolationException("Constraint violation");
-
-        // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleDataIntegrityViolationException(exception);
-
-        // Assert
-        verifyErrorMessage("Data integrity constraint violation", response, 409);
-    }
-
-    @Test
     void handleHttpMessageNotReadableException_ShouldReturn400WithGenericMessage() {
         // Arrange
         HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
 
         // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleHttpMessageNotReadableException(exception);
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleBadRequestExceptions(exception);
 
         // Assert
-        verifyErrorMessage("Invalid request body format", response, 400);
+        verifyErrorMessage(exception.getMessage(), response, 400);
     }
 
     @Test
@@ -220,62 +286,9 @@ class GlobalExceptionControllerTest {
     }
 
     @Test
-    void handleIllegalArgumentException_ShouldReturn400WithErrorMessage() {
-        // Arrange
-        IllegalArgumentException exception = new IllegalArgumentException("Invalid argument provided");
-
-        // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleIllegalArgumentException(exception);
-
-        // Assert
-        verifyErrorMessage(exception.getMessage(), response, 400);
-    }
-
-    @Test
-    void handleUsernameNotFoundException_ShouldReturn401WithErrorMessage() {
-        // Arrange
-        UsernameNotFoundException exception = new UsernameNotFoundException( "User not found");
-
-        // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleUsernameNotFoundException(exception);
-
-        // Assert
-        verifyErrorMessage(exception.getMessage(), response, 401);
-    }
-
-    @Test
-    void handleAccessDeniedException_ShouldReturn403WithErrorMessage() {
-        // Arrange
-        AccessDeniedException exception = new AccessDeniedException("Access denied");
-
-        // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleAccessDeniedException(exception);
-
-        // Assert
-        verifyErrorMessage(exception.getMessage(), response, 403);
-    }
-
-    @Test
-    void handleNotFound_ShouldReturn404WithSpecificMessage() {
-        // Arrange
-        NoHandlerFoundException exception = new NoHandlerFoundException("GET", "/unknown", new HttpHeaders());
-
-        // Act
-        ResponseEntity<String> response = globalExceptionController.handleNotFound(exception);
-
-        // Assert
-        assertEquals(404, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals("Such path url is not supported!", response.getBody());
-    }
-
-    @Test
     void handleGenericException_ShouldReturn500WithGenericMessage() {
-        // Arrange
-        Exception exception = new RuntimeException("Unexpected error");
-
         // Act
-        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleGenericException(exception);
+        ResponseEntity<ErrorResponseDTO> response = globalExceptionController.handleGenericException();
 
         // Assert
         verifyErrorMessage("An unexpected error occurred", response, 500);

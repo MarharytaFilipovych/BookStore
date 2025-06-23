@@ -5,6 +5,7 @@ import com.epam.rd.autocode.spring.project.model.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ public class ResetPasswordDto {
     @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "Reset code is required")
+    @NotNull(message = "Reset code is required")
     @JsonProperty("reset_code")
     private UUID resetCode;
 

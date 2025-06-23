@@ -15,30 +15,30 @@ public class EmployeeData {
     public static List<Employee> getEmployeeEntities() {
         return new ArrayList<>(List.of(
                 getEmployeeEntity(),
-                new Employee(2L, EMPLOYEE_EMAIL_2, "password123", "Lisa Rodriguez",
+                new Employee(2L, EMPLOYEE_EMAIL_2, "passwREord1*", "Lisa Rodriguez",
                         "+380971578786", LocalDate.of(1990, 7, 22)),
-                new Employee(3L, EMPLOYEE_EMAIL_3, "password123", "Anna Thompson",
+                new Employee(3L, EMPLOYEE_EMAIL_3, "paSword1*3", "Anna Thompson",
                         "+380971518786", LocalDate.of(1988, 12, 3))
         ));
     }
 
     public static Employee getEmployeeEntity(){
-        return new Employee(1L, EMPLOYEE_EMAIL_1, "password123", "Mike Stevens",
+        return new Employee(1L, EMPLOYEE_EMAIL_1, "pA*ssword3", "Mike Stevens",
                 "+380971567786", LocalDate.of(1985, 3, 15));
     }
 
     public static List<EmployeeDTO> getEmployeeDTOs() {
         return new ArrayList<>(List.of(
                 getEmployeeDTO(),
-                new EmployeeDTO(EMPLOYEE_EMAIL_2, "password123", "Lisa Rodriguez",
+                new EmployeeDTO(EMPLOYEE_EMAIL_2, "passwREord1*", "Lisa Rodriguez",
                         "+380971578786", LocalDate.of(1990, 7, 22)),
-                new EmployeeDTO(EMPLOYEE_EMAIL_3, "password123", "Anna Thompson",
+                new EmployeeDTO(EMPLOYEE_EMAIL_3, "paSword1*3", "Anna Thompson",
                         "+380971518786", LocalDate.of(1988, 12, 3))
         ));
     }
 
     public static EmployeeDTO getEmployeeDTO() {
-        return new EmployeeDTO(EMPLOYEE_EMAIL_1, "password123", "Mike Stevens",
+        return new EmployeeDTO(EMPLOYEE_EMAIL_1, "pA*ssword3", "Mike Stevens",
                 "+380971518786", LocalDate.of(1985, 3, 15));
     }
 

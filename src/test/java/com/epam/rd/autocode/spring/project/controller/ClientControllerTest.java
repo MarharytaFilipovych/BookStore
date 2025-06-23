@@ -59,13 +59,6 @@ class ClientControllerTest {
         orderDTOs = getOrderDTOs();
     }
 
-    private ClientUpdateDTO getClientUpdateDTO() {
-        ClientUpdateDTO updateDTO = new ClientUpdateDTO();
-        updateDTO.setName("Updated Client Name");
-        updateDTO.setBalance(new BigDecimal("500.00"));
-        return updateDTO;
-    }
-
     private void verifyClientJsonResponse(ResultActions resultActions, String jsonPath, ClientDTO expectedClient) throws Exception {
         resultActions
                 .andExpect(jsonPath(jsonPath + ".email").value(expectedClient.getEmail()))

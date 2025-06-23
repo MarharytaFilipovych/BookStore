@@ -405,14 +405,12 @@ public class ClientServiceImplTest {
     @Test
     void addClient_WhenClientIsValid_ShouldReturnSavedClientDTO() {
         // Arrange
-        String rawPassword = "password123";
+        String rawPassword = clientDTO.getPassword();
         String encodedPassword = "$2a$10$encodedPassword";
-
         Client clientToSave = getClientEntity();
         clientToSave.setPassword(rawPassword);
         Client savedClient = getClientEntity();
         savedClient.setPassword(encodedPassword);
-
         mockClientCreation(clientDTO, clientToSave, savedClient, rawPassword, encodedPassword);
 
         // Act

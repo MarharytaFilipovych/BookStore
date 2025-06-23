@@ -26,30 +26,6 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionController {
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleNotFoundException(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponseDTO(ex.getMessage()));
-    }
-
-    @ExceptionHandler(AlreadyExistException.class)
-    public ResponseEntity<ErrorResponseDTO> handleAlreadyExistException(AlreadyExistException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponseDTO(ex.getMessage()));
-    }
-
-    @ExceptionHandler(OrderMustContainClientException.class)
-    public ResponseEntity<ErrorResponseDTO> handleOrderMustContainClientException(OrderMustContainClientException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO(ex.getMessage()));
-    }
-
-    @ExceptionHandler(UserDetailsAreNullException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserDetailsAreNullException(UserDetailsAreNullException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponseDTO(ex.getMessage()));
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleValidationException(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
@@ -70,16 +46,10 @@ public class GlobalExceptionController {
                 .body(new ErrorResponseDTO("Validation failed: " + errorMessage));
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    @ExceptionHandler({DataIntegrityViolationException.class, AlreadyExistException.class})
+    public ResponseEntity<ErrorResponseDTO> handleConflictExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponseDTO("Data integrity constraint violation"));
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponseDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO("Invalid request body format"));
+                .body(new ErrorResponseDTO(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -88,14 +58,14 @@ public class GlobalExceptionController {
                 .body(new ErrorResponseDTO("Invalid parameter type for: " + ex.getName()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(IllegalArgumentException ex) {
+    @ExceptionHandler({IllegalArgumentException.class, OrderMustContainClientException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<ErrorResponseDTO> handleBadRequestExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO(ex.getMessage()));
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+    @ExceptionHandler({UsernameNotFoundException.class, SecurityException.class, UserDetailsAreNullException.class})
+    public ResponseEntity<ErrorResponseDTO> handleUnauthorizedExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponseDTO(ex.getMessage()));
     }
@@ -106,10 +76,10 @@ public class GlobalExceptionController {
                 .body(new ErrorResponseDTO(ex.getMessage()));
     }
 
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<String> handleNotFound(NoHandlerFoundException ex) {
+    @ExceptionHandler({NoHandlerFoundException.class, NotFoundException.class})
+    public ResponseEntity<String> handleNotFoundExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Such path url is not supported!");
+                .body(ex.getMessage());
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
@@ -123,7 +93,7 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleGenericException(Exception ex) {
+    public ResponseEntity<ErrorResponseDTO> handleGenericException() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponseDTO("An unexpected error occurred"));
     }
