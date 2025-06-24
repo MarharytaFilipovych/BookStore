@@ -1,0 +1,38 @@
+.form{
+    background-color: rgba(148, 186, 227, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.2rem;
+    gap: 2rem;
+    width:50%;
+    border: 0.2rem solid #6762b7;
+    margin: 2rem auto;
+}
+.errorMessage{
+    color: #1a0221;
+    font-size: 1.4rem;
+}
+.form input{
+    background-color: #ACDFEE;
+    border: 0.2rem solid #6762b7;
+    outline: none;
+    font-size: 1.3rem;
+    width: 90%;
+    height: 2.6rem;
+    color: #244650;
+    padding: 0 0.5rem;
+    font-family: "Indie Flower", cursive;
+    font-weight: bold;
+
+}
+
+input::placeholder{
+    font-weight: normal;
+}
+@media only screen and (max-width: 768px) {
+    .form {
+        width: 85%;
+    }
+}

@@ -1,0 +1,32 @@
+.pages{
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+    align-items: center;
+}
+
+.page{
+    font-size: 1.5rem;
+    border: 0.1rem solid #5FB8D4;
+    padding: 0.5rem;
+    background-color: rgba(88, 218, 224, 0.39);
+    text-decoration: none;
+    color: #222253;
+}
+
+.active{
+    background-color: rgba(88, 218, 224, 0.99);
+
+}
+.page:hover{
+    background-color: rgba(88, 218, 224, 0.99);
+    text-decoration: none;
+
+}
+
+@media only screen and (max-width: 768px) {
+    .page{
+        font-size: 1.4rem;
+        padding: 0.3rem;
+    }
+}

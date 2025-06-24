@@ -1,0 +1,51 @@
+.menu {
+    background-color: #0B3B4A;
+    width: 30%;
+    height: max-content;
+    box-shadow: 2px 2px 2px 2px rgba(39, 169, 169, 0.96);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+
+}
+
+.menu-top {
+    background-color: #00161C;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    padding:1rem 1.5rem;
+    font-size: 1.5rem;
+}
+
+.menu-top h3 {
+    margin: 0;
+    font-family: 'Joti One', serif;
+}
+
+
+
+
+.auth{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.5rem;
+    gap: 1.2rem;
+}
+
+.pers{
+    border-top: 0.5rem solid rgba(163, 118, 208, 0.72);
+}
+@media only screen and (max-width: 768px) {
+    .menu {
+        width: 100%;
+    }
+    .menu-top {
+        padding:0.7rem 1.5rem;
+        font-size: 1.3rem;
+    }
+
+}

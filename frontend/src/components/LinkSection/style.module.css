@@ -1,0 +1,53 @@
+.menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.footer .link {
+    list-style-type: disc;
+    list-style-position: inside;
+    color: white;
+
+}
+
+.menu .link {
+    position: relative;
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem 0.5rem 2rem;
+}
+
+.menu .link::before {
+    content: '•';
+    color: white;
+    position: absolute;
+    left: 0.7rem;
+    top: 0.5rem;
+}
+
+.menu .link:nth-child(even) {
+    background-color: #072933;
+}
+
+@media only screen and (max-width: 768px) {
+    .footer {
+        flex-direction: column;
+        gap: 0.4rem;
+        list-style-type: none;
+    }
+
+    .menu .link li{
+        font-size: 1rem;
+    }
+}

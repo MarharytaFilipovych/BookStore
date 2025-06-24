@@ -1,0 +1,59 @@
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(95, 184, 212, 0.82);
+    font-family: "Joti One", cursive;
+    color: #00161C;
+    font-weight: bold;
+    height:auto;
+    align-items: center;
+    padding: 1rem 2rem;
+    position: sticky;
+    z-index: 10000000;
+}
+
+
+.header h1{
+    font-size: 3rem;
+    text-shadow: 0.5px 0.5px 1px #040d17;
+
+}
+.header-left-part{
+    display: flex;
+    align-items: center;
+    width: 30%;
+}
+.header-right-part {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    width: 30%;
+    justify-content: end;
+}
+
+h2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media only screen and (max-width: 1200px) {
+    .header{
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        gap: 1rem;
+    }
+    .header h1{
+        margin-top: 0;
+        font-size: 2rem;
+    }
+    .header-left-part{
+        width: auto;
+    }
+    .header-right-part{
+        width: auto;
+    }
+
+}

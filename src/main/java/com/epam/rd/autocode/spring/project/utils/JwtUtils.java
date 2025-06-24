@@ -24,7 +24,6 @@ public class JwtUtils {
     }
 
     public String generateToken(Authentication authentication) {
-        // Extract username from UserDetails object instead of casting to String
         String username;
         Object principal = authentication.getPrincipal();
 
@@ -38,7 +37,7 @@ public class JwtUtils {
 
         return Jwts.builder()
                 .issuer(settings.getIssuer())
-                .subject(username)  // Use extracted username, not the cast
+                .subject(username)
                 .claim("roles", authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList())
@@ -75,7 +74,6 @@ public class JwtUtils {
 
     public boolean isTokenValid(String token, Authentication authentication) {
         String username = getUserName(token);
-        // Also fix this method to handle UserDetails properly
         String principal;
         Object authPrincipal = authentication.getPrincipal();
 
