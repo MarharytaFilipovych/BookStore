@@ -6,12 +6,12 @@ import {Link} from 'react-router';
 import {LinksSection} from '../LinkSection/LinkSection';
 import {Warning} from '../Warning/Warning';
 //import {AppContext} from '../../context';
-import {Links, User} from '../../types';
+import {Links, Role} from '../../types';
 
 type MenuExtendedProps ={
     links: Links,
     onClose: ()=>void,
-    user: User
+    user: Role
 }
 
 

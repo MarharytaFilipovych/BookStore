@@ -1,77 +1,205 @@
+export type Language = 'ENGLISH' | 'SPANISH' | 'FRENCH' | 'GERMAN' | 'UKRAINIAN' | 'JAPANESE' | 'OTHER';
+export type AgeGroup = 'CHILD' | 'TEEN' | 'ADULT' | 'OTHER';
+export type Role = 'CLIENT' | 'EMPLOYEE';
+export type BookSortField = 'name' | 'author' | 'genre' | 'price' | 'publication_date' | 'age_group' | 'pages';
+export type SortOrder = 'asc' | 'desc';
+export type EmployeeSortField = 'name' | 'email' | 'birthdate';
+export type ClientSortField = 'name' | 'email' | 'balance';
+export type User = ClientDTO | EmployeeDTO;
+export type OrderSortField = 'order_date' | 'price' | 'client_email' | 'employee_email' | 'client_name' | 'employee_name';
+export type Book = {
+    name: string;
+    genre: string;
+    age_group: AgeGroup;
+    price: number;
+    publication_date: string;
+    author: string;
+    pages: number;
+    characteristics: string;
+    description: string;
+    language: Language;
+}
 
-export type IconTopic =  'search' | 'tick' | 'star' | 'vote'
+export type BookItem = {
+    bookName: string;
+    quantity: number;
+}
+
+export type Basket = BookItem[]
+
+export type ClientDTO = {
+    name: string;
+    email: string;
+    balance: number;
+}
+
+export type EmployeeDTO = {
+    name: string;
+    email: string;
+    phone: string;
+    birthdate: string;
+}
+
+export type OrderDTO = {
+    employee_email?: string;
+    client_email: string;
+    order_date: string;
+    price: number;
+    book_items: BookItem[];
+}
+
+export type LoginDTO = {
+    email: string;
+    password: string;
+    role: Role;
+}
+
+export type RefreshTokenDTO = {
+    refreshToken: string;
+    email: string;
+    role: Role;
+}
+
+export type TokenResponseDTO = {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+}
+
+export type ForgotPasswordDTO = {
+    email: string;
+    role: Role;
+}
+
+export type ResetPasswordDTO = {
+    email: string;
+    password: string;
+    reset_code: string;
+}
+
+export type LogoutDTO = {
+    email: string;
+    role: Role;
+}
+
+export type SearchBookDTO = {
+    name?: string;
+    genre?: string;
+    author?: string;
+    language?: Language;
+    ageGroup?: AgeGroup;
+    minPrice?: number;
+    maxPrice?: number;
+    minPages?: number;
+    maxPages?: number;
+    publicationYear?: number;
+}
+
+export type MetaDTO = {
+    page: number;
+    page_size: number;
+    total_count: number;
+    totalPages: number;
+    has_next: boolean;
+    has_previous: boolean;
+}
+
+export type PaginatedResponseDTO<T> = {
+    meta: MetaDTO;
+    books?: T[];
+    orders?: T[];
+    employees?: T[];
+    clients?: T[];
+}
+
+
+export interface UpdateBookRequest extends Partial<Book> {}
+
+
+
+export type IconTopic = 'search' | 'tick' | 'star' | 'vote'
     | 'cross' | 'envelope' | 'call' | 'empty-star'
     | 'black-cross' | 'caret' | 'heart' | 'empty-heart'
     | 'empty-circle' | 'circle' | 'loading' | 'error'
     | 'direction' | 'hidden' | 'plus';
 
 export type ContactProp = {
-    typeOfContact: 'email' | 'call',
-    contact: string
+    typeOfContact: 'email' | 'call';
+    contact: string;
 }
 
 export type LinkItem = {
-    name: string,
-    request_type: requestType
+    name: string;
+    request_type: requestType;
 }
 
 export type Links = {
-    employeeLinks: LinkItem[],
-    clientLinks: LinkItem[]
-}
-
-
-export type FilterState = {
-    genre: string,
-    language: string,
-    country: string,
-    sortOption: string,
-    year: string,
-    name: string
+    employeeLinks: LinkItem[];
+    clientLinks: LinkItem[];
 }
 
 export type ConfigurationData = {
-    countries: Map<string, string>,
-    languages: Map<string, string>,
-    genres: Map<string, string>,
-    code_languages: Map<string, string>
+    countries: Map<string, string>;
+    languages: Map<string, string>;
+    genres: Map<string, string>;
+    code_languages: Map<string, string>;
 }
 
 export type requestType = 'clients' | 'orders' | 'books' | 'colleagues' | 'profile';
 
-
 export type UserCollections = {
-    favorites: Map<number, string>,
-    future: Map<number, string>,
-    watched: Map<number, string>
+    favorites: Map<number, string>;
+    future: Map<number, string>;
+    watched: Map<number, string>;
 }
 
 export type State = {
-    loading: boolean,
-    error: boolean
+    loading: boolean;
+    error: boolean;
 }
 
 export type StateWithPagination = State & {
-    pageToFetch: number,
-    currentPage: number
+    pageToFetch: number;
+    currentPage: number;
 }
 
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
-export type User = 'CLIENT' | 'EMPLOYEE';
+export const API_ENDPOINTS = {
+    books: {
+        getAll: '/books',
+        getByName: (name: string) => `/books/${encodeURIComponent(name)}`,
+        create: '/books',
+        update: (name: string) => `/books/${encodeURIComponent(name)}`,
+        delete: (name: string) => `/books/${encodeURIComponent(name)}`,
+        search: '/books/search',
+    },
+    orders: {
+        getAll: '/orders',
+        getByClient: (email: string) => `/clients/${encodeURIComponent(email)}/orders`,
+        getByEmployee: (email: string) => `/employees/${encodeURIComponent(email)}/orders`,
+        create: '/orders',
+    },
+    clients: {
+        getAll: '/clients',
+        getByEmail: (email: string) => `/clients/${encodeURIComponent(email)}`,
+        update: (email: string) => `/clients/${encodeURIComponent(email)}`,
+        delete: (email: string) => `/clients/${encodeURIComponent(email)}`,
+    },
+    employees: {
+        getAll: '/employees',
+        getByEmail: (email: string) => `/employees/${encodeURIComponent(email)}`,
+        update: (email: string) => `/employees/${encodeURIComponent(email)}`,
+        delete: (email: string) => `/employees/${encodeURIComponent(email)}`,
+    },
+    auth: {
+        login: '/auth/login',
+        refresh: '/auth/refresh',
+        logout: '/auth/logout',
+        forgotPassword: '/auth/forgot-password',
+        resetPassword: '/auth/reset-password',
+    },
+} as const;
 
-export type Language = 'ENGLISH'| 'SPANISH'| 'FRENCH'| 'GERMAN'| 'UKRAINIAN'| 'JAPANESE'| 'OTHER';
-
-export type AgeGroup = 'CHILD'| 'TEEN'| 'ADULT'| 'OTHER';
-
-export type Book = {
-    name: string,
-    genre: string,
-    ageGroup: AgeGroup,
-    price: number,
-    publicationDate: Date,
-    author: string,
-    pages: number,
-    characteristics: string,
-    description: string,
-    language: Language
-}
+export type EndpointsType = typeof API_ENDPOINTS;

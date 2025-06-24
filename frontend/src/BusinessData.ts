@@ -22,9 +22,9 @@ export const myContacts: ContactProp[] = [
 ];
 
 
-export const sortOptions: Map<string, string> = new Map([
-    ['first air date (from oldest)', 'first_air_date.asc'],
-    ['first air date (from newest)', 'first_air_date.desc'],
+export const bookSortOptions: Map<string, string> = new Map([
+    ['year (from oldest)', 'year.asc'],
+    ['year (from newest)', 'year.desc'],
     ['name (A-Z)', 'name.asc'],
     ['name (Z-A)', 'name.desc'],
     ['popularity (low to high)', 'popularity.asc'],

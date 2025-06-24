@@ -2,10 +2,10 @@ import React from 'react';
 import styles from './style.module.css';
 import {Icon} from '../Icon/Icon';
 import {LinksSection} from '../LinkSection/LinkSection';
-import {ContactProp, Links, User} from '../../types';
+import {ContactProp, Links, Role} from '../../types';
 
 type FooterProps = {
-    user: User,
+    user: Role,
     contacts: ContactProp[],
     links: Links
 }

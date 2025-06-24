@@ -3,12 +3,12 @@ import React, {useContext, useState, useEffect} from 'react';
 import {useNavigate} from 'react-router';
 import {LogInForm} from "../../components/AuthForm/LogInForm";
 import {useParams} from "react-router-dom";
-import {User} from "../../types";
+import {Role, User} from "../../types";
 
 
 export const LoginPage: React.FC = () => {
     const { user } = useParams<{ user: string }>();
-    const userType: User = user?.toUpperCase() === 'EMPLOYEE' ? 'EMPLOYEE' : 'CLIENT';
+    const userType: Role = user?.toUpperCase() === 'EMPLOYEE' ? 'EMPLOYEE' : 'CLIENT';
     const navigate = useNavigate();
     //const context = useContext(AppContext);
     const [loginError, setLoginError] = useState<boolean>(false);
@@ -18,7 +18,7 @@ export const LoginPage: React.FC = () => {
     //     if (context.user?._id)navigate('/');
     // }, [context.user, navigate]);
 
-    const login = async (email: string, password: string, user: User) => {
+    const login = async (email: string, password: string, user: Role) => {
         setLoginError(false);
         setProcessing(true);
         // try {

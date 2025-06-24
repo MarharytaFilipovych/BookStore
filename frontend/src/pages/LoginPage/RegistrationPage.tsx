@@ -15,7 +15,7 @@ export const RegistrationPage: React.FC = ()=>{
         try{
             //await context.userAPI.registerUser(username, email, password);
             alert('Registration was successful!!!');
-            navigate('/login?user=client');
+            navigate('/login/client');
         }catch(e){
             setRegisterError(e instanceof Error ? e.message : String(e));
         }finally {

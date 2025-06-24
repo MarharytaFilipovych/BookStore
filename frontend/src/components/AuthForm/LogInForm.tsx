@@ -1,13 +1,13 @@
 import React, {FormEvent, useRef} from 'react';
 import styles from './style.module.css';
 import {AuthorizationButton} from '../AuthorizationButton/AuthorizationButton';
-import {User} from "../../types";
+import {Role} from "../../types";
 
 export const LogInForm: React.FC<{
-    onSubmit: (email: string, password: string, user: User) => void,
+    onSubmit: (email: string, password: string, user: Role) => void,
     passError: boolean,
     processing: boolean,
-    user: User
+    user: Role
 }> = ({onSubmit, passError, processing, user}) => {
     const formRef = useRef<HTMLFormElement>(null);
 

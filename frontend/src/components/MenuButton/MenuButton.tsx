@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import styles from './style.module.css';
 import {MenuExtended} from '../MenuExtended/MenuExtended';
-import {Links, User} from '../../types';
+import {Links, Role} from '../../types';
 
 
-export const MenuButton: React.FC<{user: User, links: Links}> = ({user, links})=>{
+export const MenuButton: React.FC<{user: Role, links: Links}> = ({user, links})=>{
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return <><button className={styles.menuComponent} onClick={()=>setIsMenuOpen(true)}>
