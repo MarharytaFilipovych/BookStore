@@ -5,7 +5,7 @@ export type BookSortField = 'name' | 'author' | 'genre' | 'price' | 'publication
 export type SortOrder = 'asc' | 'desc';
 export type EmployeeSortField = 'name' | 'email' | 'birthdate';
 export type ClientSortField = 'name' | 'email' | 'balance';
-export type User = ClientDTO | EmployeeDTO;
+export type User = Client | EmployeeDTO;
 export type OrderSortField = 'order_date' | 'price' | 'client_email' | 'employee_email' | 'client_name' | 'employee_name';
 export type Book = {
     name: string;
@@ -27,9 +27,10 @@ export type BookItem = {
 
 export type Basket = BookItem[]
 
-export type ClientDTO = {
+export type Client = {
     name: string;
     email: string;
+    password?: string;
     balance: number;
 }
 
@@ -37,6 +38,7 @@ export type EmployeeDTO = {
     name: string;
     email: string;
     phone: string;
+    password?: string;
     birthdate: string;
 }
 
@@ -48,7 +50,7 @@ export type OrderDTO = {
     book_items: BookItem[];
 }
 
-export type LoginDTO = {
+export type LoginRequest = {
     email: string;
     password: string;
     role: Role;
@@ -199,6 +201,7 @@ export const API_ENDPOINTS = {
         logout: '/auth/logout',
         forgotPassword: '/auth/forgot-password',
         resetPassword: '/auth/reset-password',
+        registerClient: '/auth/register/client',
     },
 } as const;
 

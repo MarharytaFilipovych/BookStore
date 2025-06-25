@@ -6,7 +6,7 @@ import {State} from "../../types";
 import {Icon} from "../../components/Icon/Icon";
 
 
-const WelcomePage: React.FC = ()=>{
+export const WelcomePage: React.FC = ()=>{
     return <>
         <div className='page'>
             <h1>Welcome to the bookstore!</h1>

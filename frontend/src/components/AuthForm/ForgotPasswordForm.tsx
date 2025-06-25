@@ -4,7 +4,7 @@ import {AuthorizationButton} from '../AuthorizationButton/AuthorizationButton';
 import {Role} from "../../types";
 import {useNavigate} from "react-router";
 
-export const LogInForm: React.FC<{
+export const ForgotPasswordForm: React.FC<{
     onSubmit: (email: string, password: string, user: Role) => void,
     passError: boolean,
     processing: boolean,

@@ -1,17 +1,16 @@
 import  { createContext} from 'react';
-import { Role, User, Basket, BookItem, Book } from "./types";
+import {Role, User, Basket, BookItem, Book, Client, LoginRequest, LogoutDTO, ForgotPasswordDTO} from "./types";
 
 export type AppContext = {
     user: User | null;
     role: Role | null;
-    isAuthenticated: boolean;
     setUser: (user: User | null) => void;
     setRole: (role: Role) => void;
-    cleanUser: () => void;
 
-    login: (email: string, password: string, role: Role) => Promise<void>;
+    registerClient: (clientData: Client) => Promise<void>;
+    login: (request: LoginRequest) => Promise<void>;
     logout: () => Promise<void>;
-
+    forgotPassword: (data: ForgotPasswordDTO) => Promise<void>
     basket: Basket;
     addToBasket: (bookItem: BookItem) => void;
     removeFromBasket: (bookName: string) => void;
@@ -22,12 +21,12 @@ export type AppContext = {
 const defaultContext: AppContext = {
     user: null,
     role: null,
-    isAuthenticated: false,
     setUser: () => {},
     setRole: () => {},
-    cleanUser: () => {},
+    registerClient: async () => {},
     login: async () => {},
     logout: async () => {},
+    forgotPassword: async  () => {},
     basket: [],
     addToBasket: () => {},
     removeFromBasket: () => {},
@@ -45,7 +44,7 @@ export const createBookItem = (book: Book, quantity: number = 1): BookItem => {
     };
 };
 
-export const isClient = (user: User | null): user is import('./types').ClientDTO => {
+export const isClient = (user: User | null): user is import('./types').Client => {
     return user !== null && 'balance' in user;
 };
 

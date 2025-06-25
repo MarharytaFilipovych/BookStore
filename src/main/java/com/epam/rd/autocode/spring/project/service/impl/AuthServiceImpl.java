@@ -122,14 +122,6 @@ public class AuthServiceImpl implements AuthService {
         else clientRefreshTokenRepository.deleteClientRefreshTokensByClient_Email(request.getEmail());
     }
 
-    public boolean canAccessOwnData(Authentication authentication, String email) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-        String authenticatedEmail = authentication.getName();
-        return email.equals(authenticatedEmail);
-    }
-
     private boolean isValidRefreshToken(RefreshTokenDTO request){
         return request.getRole() == Role.EMPLOYEE
                 ? employeeRefreshTokenRepository.existsByTokenAndExpiresAtAfter(request.getRefreshToken(), LocalDateTime.now())

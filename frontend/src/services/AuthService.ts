@@ -1,6 +1,6 @@
 import { apiClient } from '../config/ApiClient';
 import {
-    LoginDTO,
+    LoginRequest,
     TokenResponseDTO,
     ForgotPasswordDTO,
     ResetPasswordDTO,
@@ -10,7 +10,7 @@ import {
 
 export class AuthService {
 
-    static async login(credentials: LoginDTO): Promise<TokenResponseDTO> {
+    static async login(credentials: LoginRequest): Promise<TokenResponseDTO> {
         console.log('🔐 AuthService: Starting login process...', {
             email: credentials.email,
             role: credentials.role,
