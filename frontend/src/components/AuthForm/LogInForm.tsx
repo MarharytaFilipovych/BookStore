@@ -23,6 +23,9 @@ export const LogInForm: React.FC<{
 
     return (
         <form className={styles.form} onSubmit={submit} ref={formRef}>
+            <div className={styles.instructions}>
+                <h2>Login!</h2>
+            </div>
             {passError && (<p className={styles.errorMessage}>Login or password is incorrect!</p>)}
             <input
                 name='email'
@@ -41,19 +44,21 @@ export const LogInForm: React.FC<{
                 required
                 aria-label='Password'
             />
-            <AuthorizationButton
-                warning={false}
-                type='log-in'
-                form={true}
-                disabled={processing}
-            />
-            <AuthorizationButton
-                warning={false}
-                type='forgot'
-                form={true}
-                disabled={processing}
-                onClick={()=> navigate('/forgot')}
-            />
+            <div className={styles.buttons}>
+                <AuthorizationButton
+                    warning={false}
+                    type='log-in'
+                    form={true}
+                    disabled={processing}
+                />
+                <AuthorizationButton
+                    warning={false}
+                    type='forgot'
+                    form={true}
+                    disabled={processing}
+                    onClick={() => navigate('/forgot', { state: { role: user } })}
+                />
+            </div>
         </form>
     );
 };

@@ -2,12 +2,14 @@ body{
     padding: 0;
     margin: 0;
     font-family: "Joti One", cursive;
-    background-color: rgba(196, 201, 204, 0.79);
+    background-color: black;
     height: 100vh;
-    color: #080809;
+    color: #f5f5fa;
 }
 
 .wrapper{
+    margin: 0;
+    padding: 0;
     width: 100%;
     height: 100vh;
     display: flex;

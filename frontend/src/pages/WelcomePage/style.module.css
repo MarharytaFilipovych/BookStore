@@ -1,6 +1,62 @@
-.page{
+.page {
+    color: white;
+    min-height: 100vh;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
 }
 
+.heading{
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    font-size: 3rem;
+    padding: 2rem;
+    box-shadow: 2px 2px 2px 2px rgba(39, 169, 169, 0.96);
+}
+
+.buttons{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3rem;
+}
+
+.sections {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
+}
+.sections h2{
+    font-size: 2rem;
+    padding-bottom: 2rem;
+    font-weight: bold;
+
+}
+.employee {
+    background: white;
+    color: black;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 1rem 1rem 1rem 1rem rgba(0, 10, 10, 0.96);
+
+}
+
+.customer {
+    background-color: #353738;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow:  1rem 1rem 1rem 1rem rgba(0, 3, 3, 0.96);
+}

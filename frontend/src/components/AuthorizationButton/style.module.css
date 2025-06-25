@@ -2,8 +2,8 @@
     font-family: Inter;
     font-weight: bold;
     color: #171616;
-    width: 5.9rem;
-    height: 2.6rem;
+    width: 8rem;
+    height: 3rem;
     border-radius: 10%;
     text-shadow: 1px 1px 2px #040d17;
     cursor: pointer;
@@ -13,16 +13,17 @@
     text-align: center;
 }
 
-.log-in{
-    background-color: #ADE0F0;
-    border: 0.3rem solid #338AA4;
+.logIn{
+    background-color: rgb(33, 32, 32);
+    border: 0.3rem solid #0c0c0c;
+    color: white;
 }
 
-.sign-in{
-    background-color: rgba(183, 223, 243, 0.75);
-    border: 0.6rem solid #00161C;
+.signIn{
+    background-color: rgba(207, 225, 234, 0.75);
+    border: 0.6rem solid #0e0e0e;
 }
-.log-out{
+.logOut{
     background-color: rgba(159, 153, 255, 0.75);
     border: 0.3rem solid #222253;
     color: #06061a;
@@ -43,7 +44,7 @@
 .forgot{
     background-color: rgba(193, 245, 239, 0.68);
     border: 0.3rem solid #2a3549;
-    color: #648580;
+    color: #101111;
 }
 
 .reset{
@@ -52,7 +53,7 @@
     color: #0a2824;
 }
 
-.send-again{
+.sendAgain{
     background-color: rgb(97, 74, 103);
     border: 0.3rem solid #2a3549;
     color: #2a3549;
@@ -66,14 +67,14 @@
 }
 .button:hover{
     transform: scale(1.1);
-    box-shadow: inset 0 0 0 100px rgba(2, 1, 19, 0.8);
+    box-shadow: inset 0 0 0 100px rgba(81, 81, 87, 0.8);
 
 }
 .warning:hover{
     box-shadow: inset 0 0 0 100px rgba(149, 67, 238, 0.53);
 
 }
-.error-message{
+.errorMessage{
     color: #36053b;
 }
 

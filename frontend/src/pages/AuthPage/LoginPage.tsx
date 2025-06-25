@@ -4,11 +4,10 @@ import {LogInForm} from "../../components/AuthForm/LogInForm";
 import {useParams} from "react-router-dom";
 import {Role} from "../../types";
 import {AppContext} from "../../context";
-
+import styles from './style.module.css';
 
 export const LoginPage: React.FC = () => {
-    const { user } = useParams<{ user: string }>();
-    const userType: Role = user?.toUpperCase() === 'EMPLOYEE' ? 'EMPLOYEE' : 'CLIENT';
+    const userType: Role = useParams().user === 'employee' ? 'EMPLOYEE' : 'CLIENT';
     const navigate = useNavigate();
     const context = useContext(AppContext);
     const [loginError, setLoginError] = useState<boolean>(false);
@@ -29,7 +28,15 @@ export const LoginPage: React.FC = () => {
             setProcessing(false);
         }
     };
-    return <>
-        <LogInForm onSubmit={login} passError={loginError} processing={processing} user={userType}/>
-    </>;
+
+
+    console.log('Final userType:', userType);
+    return (
+        <div className={styles.formContainer}>
+            <div className={styles.roleInfo}>
+                <p>Logging in as ... <strong>{ userType === 'CLIENT' ? 'client' : 'employee'}</strong> </p>
+            </div>
+                <LogInForm onSubmit={login} passError={loginError} processing={processing} user={userType}/>
+        </div>
+    );
 };

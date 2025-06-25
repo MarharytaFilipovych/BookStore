@@ -3,6 +3,7 @@ import {Role} from "../../types";
 import {AppContext} from "../../context";
 import {useLocation, useNavigate} from "react-router";
 import {ForgotPasswordForm} from "../../components/AuthForm/ForgotPasswordForm";
+import styles from './style.module.css';
 
 export const ForgotPasswordPage: React.FC = () => {
     const [processing, setProcessing] = useState(false);
@@ -34,17 +35,17 @@ export const ForgotPasswordPage: React.FC = () => {
     };
 
     return (
-        <div>
-            <div className="role-info">
-                <p>Resetting password for: <strong>{currentRole === 'CLIENT' ? 'Client' : 'Employee'}</strong> account</p>
-            </div>
+        <div className={styles.formContainer}>
+                <div className={styles.roleInfo}>
+                    <p>Resetting password for... <strong>{currentRole === 'CLIENT' ? 'client' : 'employee'}</strong></p>
+                </div>
 
-            <ForgotPasswordForm
-                onSubmit={handleForgotPassword}
-                error={error}
-                processing={processing}
-                role={currentRole}
-            />
+                <ForgotPasswordForm
+                    onSubmit={handleForgotPassword}
+                    error={error}
+                    processing={processing}
+                    role={currentRole}
+                />
         </div>
     );
 };

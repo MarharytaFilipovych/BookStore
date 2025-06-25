@@ -25,8 +25,10 @@ export const ForgotPasswordForm: React.FC<{
         <form className={styles.form} onSubmit={submit} ref={formRef}>
             {error && (<p className={styles.errorMessage}>{error}</p>)}
 
-            <h2>Reset your password!</h2>
-            <p>Enter your email address and we'll redirect you to the change password form:)</p>
+            <div className={styles.instructions}>
+                <h2>Reset your password!</h2>
+                <p>Enter your email address and we'll redirect you to the change password form:)</p>
+            </div>
 
             <input
                 name='email'
@@ -37,20 +39,22 @@ export const ForgotPasswordForm: React.FC<{
                 aria-label='Email'
             />
 
-            <AuthorizationButton
-                warning={false}
-                type='forgot'
-                form={true}
-                disabled={processing}
-            />
+            <div className={styles.buttons}>
+                <AuthorizationButton
+                    warning={false}
+                    type='reset'
+                    form={true}
+                    disabled={processing}
+                />
 
-            <AuthorizationButton
-                warning={false}
-                type='cancel'
-                form={false}
-                disabled={processing}
-                onClick={() => navigate('/login')}
-            />
+                <AuthorizationButton
+                    warning={false}
+                    type='cancel'
+                    form={false}
+                    disabled={processing}
+                    onClick={() => navigate(`/login/${role === 'EMPLOYEE' ? 'employee' : 'client'}`)}
+                />
+            </div>
         </form>
     );
 };

@@ -1,6 +1,7 @@
 import React, {FormEvent, useEffect, useRef, useState} from 'react';
 import styles from './style.module.css';
 import { AuthorizationButton } from '../AuthorizationButton/AuthorizationButton';
+import {useNavigate} from "react-router";
 
 type RegisterFormProps = {
     onSubmit: (username: string, email: string, balance: number, password: string)=>void,
@@ -10,7 +11,7 @@ type RegisterFormProps = {
 export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing, error}) => {
     const formRef = useRef<HTMLFormElement>(null);
     const [passwordError, setPasswordError] = useState(error || '');
-
+    const navigate = useNavigate();
     const submit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if(!formRef.current) return;
@@ -44,6 +45,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing,
 
     return (
         <form className={styles.form} onSubmit={submit} ref={formRef}>
+            <div className={styles.instructions}>
+                <h2>Register!</h2>
+            </div>
+
             {passwordError && (<p className={styles.errorMessage}>{passwordError}</p>)}
             <input
                 type='text'
@@ -64,7 +69,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing,
                 id='balance'
                 name='balance'
                 placeholder='balance...'
-                defaultValue={0}
+                min={0}
             />
             <input
                 type='password'
@@ -82,12 +87,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing,
                 minLength={8}
                 required
             />
-            <AuthorizationButton
-                warning={false}
-                type='sign'
-                form={true}
-                disabled={processing}
-            />
+            <div className={styles.buttons}>
+                <AuthorizationButton
+                    warning={false}
+                    type='sign'
+                    form={true}
+                    disabled={processing}
+                />
+                <AuthorizationButton
+                    warning={false}
+                    type='cancel'
+                    form={false}
+                    disabled={processing}
+                    onClick={() => navigate(`/`)}
+                />
+            </div>
+
         </form>
     );
 };

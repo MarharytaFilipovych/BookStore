@@ -1,6 +1,5 @@
 import React, {ReactNode, useEffect, useState} from "react";
 import {
-    API_ENDPOINTS,
     Basket,
     BookItem,
     Client,
@@ -145,7 +144,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
     const registerClient = async (client: Client): Promise<void> => {
         try {
-            await apiClient.post(API_ENDPOINTS.auth.registerClient, client);
+            await AuthService.registerClient(client);
         } catch (error) {
             console.error('Client registration failed:', error);
             throw new Error('Registration failed. Please try again.');

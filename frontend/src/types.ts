@@ -7,7 +7,7 @@ export type EmployeeSortField = 'name' | 'email' | 'birthdate';
 export type ClientSortField = 'name' | 'email' | 'balance';
 export type User = Client | EmployeeDTO;
 export type OrderSortField = 'order_date' | 'price' | 'client_email' | 'employee_email' | 'client_name' | 'employee_name';
-export type Book = {
+export type BookType = {
     name: string;
     genre: string;
     age_group: AgeGroup;
@@ -87,7 +87,7 @@ export type PaginatedResponseDTO<T> = {
 }
 
 
-export interface UpdateBookRequest extends Partial<Book> {}
+export interface UpdateBookRequest extends Partial<BookType> {}
 
 
 
@@ -95,7 +95,7 @@ export type IconTopic = 'search' | 'tick' | 'star' | 'vote'
     | 'cross' | 'envelope' | 'call' | 'empty-star'
     | 'black-cross' | 'caret' | 'heart' | 'empty-heart'
     | 'empty-circle' | 'circle' | 'loading' | 'error'
-    | 'direction' | 'hidden' | 'plus';
+    | 'direction' | 'hidden' | 'plus' | 'basket';
 
 export type ContactProp = {
     typeOfContact: 'email' | 'call';

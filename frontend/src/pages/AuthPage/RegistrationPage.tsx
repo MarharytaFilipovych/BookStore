@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import {useNavigate} from 'react-router';
 import {AppContext} from '../../context';
 import {RegisterForm} from "../../components/AuthForm/RegisterForm";
-
+import styles from './style.module.css';
 
 export const RegistrationPage: React.FC = ()=>{
     const navigate = useNavigate();
@@ -22,7 +22,9 @@ export const RegistrationPage: React.FC = ()=>{
             setProcessing(false);
         }
     };
-    return <>
-        <RegisterForm onSubmit={register} error={registerError} processing={processing}/>
-    </>;
+    return (
+        <div className={styles.formContainer}>
+            <RegisterForm onSubmit={register} error={registerError} processing={processing}/>
+        </div>
+    );
 };

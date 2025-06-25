@@ -21,6 +21,7 @@ import direction from './icons/arrow.png';
 import hidden from './icons/hidden.png';
 import plus from './icons/plus.png';
 import {IconTopic} from '../../types';
+import basket from './icons/shopping-basket.png';
 
 type IconProps ={
     topic: IconTopic;
@@ -49,6 +50,7 @@ export const Icon: React.FC<IconProps> = ({topic, size, mirror})=>{
             case 'direction': return direction;
             case 'hidden': return hidden;
             case 'plus': return plus;
+            case 'basket': return basket;
         }
     };
     return (

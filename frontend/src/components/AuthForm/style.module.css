@@ -1,5 +1,5 @@
 .form{
-    background-color: rgba(148, 186, 227, 0.85);
+    background-color: rgb(246, 247, 251);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -7,29 +7,49 @@
     padding: 3rem 1.2rem;
     gap: 2rem;
     width:50%;
-    border: 0.2rem solid #6762b7;
-    margin: 2rem auto;
+    border: 0.2rem solid #717179;
 }
 .errorMessage{
     color: #1a0221;
     font-size: 1.4rem;
 }
 .form input{
-    background-color: #ACDFEE;
-    border: 0.2rem solid #6762b7;
+    background-color: #101011;
+    border: 0.2rem solid #57575b;
     outline: none;
     font-size: 1.3rem;
     width: 90%;
     height: 2.6rem;
-    color: #244650;
+    color: #9da5a8;
     padding: 0 0.5rem;
     font-family: "Indie Flower", cursive;
     font-weight: bold;
-
+    box-shadow:  0.2rem 0.2rem 0.2rem 0.2rem rgba(0, 3, 3, 0.96);
 }
-
+.instructions{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.3rem;
+    color: #090909;
+}
+.instructions h2{
+    font-weight: bold;
+    font-size: 2rem;
+}
+.instructions p{
+    font-size: 1.1rem;
+}
 input::placeholder{
     font-weight: normal;
+}
+
+.buttons{
+    padding-top: 0.8rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3rem;
 }
 @media only screen and (max-width: 768px) {
     .form {

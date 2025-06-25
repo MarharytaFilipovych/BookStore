@@ -2,9 +2,9 @@ import React from 'react';
 import { Link } from 'react-router';
 import styles from './style.module.css';
 import classNames from 'classnames';
-import {Links, User} from '../../types';
+import {Links, Role, User} from '../../types';
 
-export const LinksSection: React.FC<{ links: Links, style: 'menu' | 'footer', user: User }> = ({ links, style, user }) => {
+export const LinksSection: React.FC<{ links: Links, style: 'menu' | 'footer', user: Role }> = ({ links, style, user }) => {
     return (
         <div>
             <ul className={classNames(styles.links, {

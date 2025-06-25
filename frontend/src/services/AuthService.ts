@@ -6,7 +6,7 @@ import {
     ResetPasswordDTO,
     RefreshTokenDTO,
     LogoutDTO,
-    API_ENDPOINTS
+    API_ENDPOINTS, Client
 } from '../types';
 
 export class AuthService {
@@ -243,6 +243,29 @@ export class AuthService {
         } catch (error) {
             console.warn('⚠️ AuthService: Failed to extract token info:', error);
             return null;
+        }
+    }
+
+    static async registerClient(client: Client): Promise<void> {
+        console.log('📝 AuthService: Registering new client...', {
+            email: client.email,
+            name: client.name,
+            hasPassword: !!client.password,
+            balance: client.balance
+        });
+
+        try {
+            await apiClient.post(API_ENDPOINTS.auth.registerClient, client);
+            console.log('✅ AuthService: Client registration successful', {
+                clientEmail: client.email,
+                clientName: client.name
+            });
+        } catch (error) {
+            console.error('❌ AuthService: Client registration failed', {
+                clientEmail: client.email,
+                error
+            });
+            throw error;
         }
     }
 

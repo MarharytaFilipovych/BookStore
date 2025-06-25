@@ -1,6 +1,6 @@
 import { apiClient } from '../config/ApiClient';
 import {
-    Book,
+    BookType,
     PaginatedResponseDTO,
     SearchBookDTO,
     UpdateBookRequest,
@@ -16,7 +16,7 @@ export class BookService {
         size = 10,
         sortBy?: BookSortField,
         sortOrder: SortOrder = 'asc'
-    ): Promise<PaginatedResponseDTO<Book>> {
+    ): Promise<PaginatedResponseDTO<BookType>> {
         console.log('📚 BookService: Getting books with sorting...', {
             page, size, sortBy, sortOrder
         });
@@ -32,7 +32,7 @@ export class BookService {
                 console.log(`📊 BookService: Sorting by ${sortBy} (${sortOrder})`);
             }
 
-            const response = await apiClient.get<PaginatedResponseDTO<Book>>(
+            const response = await apiClient.get<PaginatedResponseDTO<BookType>>(
                 `${API_ENDPOINTS.books.getAll}?${params.toString()}`
             );
 
@@ -56,7 +56,7 @@ export class BookService {
         size = 10,
         sortBy?: BookSortField,
         sortOrder: SortOrder = 'asc'
-    ): Promise<PaginatedResponseDTO<Book>> {
+    ): Promise<PaginatedResponseDTO<BookType>> {
         console.log('🔍 BookService: Searching books...', {
             searchParams, page, size, sortBy, sortOrder
         });
@@ -86,7 +86,7 @@ export class BookService {
                 hasSorting: !!sortBy
             });
 
-            const response = await apiClient.get<PaginatedResponseDTO<Book>>(
+            const response = await apiClient.get<PaginatedResponseDTO<BookType>>(
                 `${API_ENDPOINTS.books.search}?${params.toString()}`
             );
 
@@ -105,11 +105,11 @@ export class BookService {
         }
     }
 
-    static async getBookByName(name: string): Promise<Book> {
+    static async getBookByName(name: string): Promise<BookType> {
         console.log('📖 BookService: Getting book by name...', { name });
 
         try {
-            const response = await apiClient.get<Book>(
+            const response = await apiClient.get<BookType>(
                 API_ENDPOINTS.books.getByName(name)
             );
 
@@ -127,7 +127,7 @@ export class BookService {
         }
     }
 
-    static async createBook(book: Book): Promise<Book> {
+    static async createBook(book: BookType): Promise<BookType> {
         console.log('📝 BookService: Creating new book...', {
             name: book.name,
             author: book.author,
@@ -136,7 +136,7 @@ export class BookService {
         });
 
         try {
-            const response = await apiClient.post<Book>(
+            const response = await apiClient.post<BookType>(
                 API_ENDPOINTS.books.create,
                 book
             );
@@ -158,7 +158,7 @@ export class BookService {
         }
     }
 
-    static async updateBook(name: string, updates: UpdateBookRequest): Promise<Book> {
+    static async updateBook(name: string, updates: UpdateBookRequest): Promise<BookType> {
         console.log('✏️ BookService: Updating book...', {
             bookName: name,
             fieldsToUpdate: Object.keys(updates),
@@ -166,7 +166,7 @@ export class BookService {
         });
 
         try {
-            const response = await apiClient.put<Book>(
+            const response = await apiClient.put<BookType>(
                 API_ENDPOINTS.books.update(name),
                 updates
             );

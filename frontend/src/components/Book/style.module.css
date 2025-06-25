@@ -1,0 +1,29 @@
+.book {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border: 0.3rem solid #100f0f;
+    padding-bottom: 0.5rem;
+    background-color: #e3dbdb;
+}
+
+.bookDescription{
+    position: fixed;
+    top: 10vh;
+    left: 50%;
+    width: 90%;
+    max-width: 700px;
+    height: auto;
+    max-height: 80vh;
+    transform: translateX(-50%);
+    background: #3b3b3d;
+    border: 0.5rem solid #0f0f10;
+    color: #0c0c0b;
+    font-size: 1.6rem;
+    z-index: 10000;
+    padding: 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+

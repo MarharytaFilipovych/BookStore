@@ -2,18 +2,12 @@ import React, { useState, useContext } from 'react';
 import {Role} from "../../types";
 import {AppContext} from "../../context";
 import {ResetPasswordForm} from "../../components/AuthForm/ResetPasswordForm";
-
-
+import styles from './style.module.css';
 
 export const ResetPasswordPage: React.FC = () => {
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState('');
-
     const context = useContext(AppContext);
-
-    if (!context) {
-        throw new Error('ResetPasswordPage must be used within AppProvider');
-    }
 
     const handleResetPassword = async (
         email: string,
@@ -42,10 +36,12 @@ export const ResetPasswordPage: React.FC = () => {
     };
 
     return (
-        <ResetPasswordForm
-            onSubmit={handleResetPassword}
-            error={error}
-            processing={processing}
-        />
+        <div className={styles.formContainer}>
+                <ResetPasswordForm
+                    onSubmit={handleResetPassword}
+                    error={error}
+                    processing={processing}
+                />
+        </div>
     );
 };
