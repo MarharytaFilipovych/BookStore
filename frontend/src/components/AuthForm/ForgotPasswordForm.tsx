@@ -5,25 +5,29 @@ import {Role} from "../../types";
 import {useNavigate} from "react-router";
 
 export const ForgotPasswordForm: React.FC<{
-    onSubmit: (email: string, password: string, user: Role) => void,
-    passError: boolean,
+    onSubmit: (email: string, role: Role) => void,
+    error: string,
     processing: boolean,
-    user: Role
-}> = ({onSubmit, passError, processing, user}) => {
+    role: Role
+}> = ({onSubmit, error, processing, role}) => {
     const formRef = useRef<HTMLFormElement>(null);
     const navigate = useNavigate();
+
     const submit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if(!formRef.current) return;
         const formData: FormData = new FormData(formRef.current);
         const email = formData.get('email')?.toString() || '';
-        const password = formData.get('password')?.toString() || '';
-        onSubmit(email, password, user);
+        onSubmit(email, role);
     };
 
     return (
         <form className={styles.form} onSubmit={submit} ref={formRef}>
-            {passError && (<p className={styles.errorMessage}>Login or password is incorrect!</p>)}
+            {error && (<p className={styles.errorMessage}>{error}</p>)}
+
+            <h2>Reset your password!</h2>
+            <p>Enter your email address and we'll redirect you to the change password form:)</p>
+
             <input
                 name='email'
                 type='email'
@@ -32,27 +36,20 @@ export const ForgotPasswordForm: React.FC<{
                 required
                 aria-label='Email'
             />
-            <input
-                name='password'
-                type='password'
-                id='password'
-                placeholder='password...'
-                minLength={5}
-                required
-                aria-label='Password'
-            />
-            <AuthorizationButton
-                warning={false}
-                type='log-in'
-                form={true}
-                disabled={processing}
-            />
+
             <AuthorizationButton
                 warning={false}
                 type='forgot'
                 form={true}
                 disabled={processing}
-                onClick={()=> navigate('/forgot')}
+            />
+
+            <AuthorizationButton
+                warning={false}
+                type='cancel'
+                form={false}
+                disabled={processing}
+                onClick={() => navigate('/login')}
             />
         </form>
     );

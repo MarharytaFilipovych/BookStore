@@ -46,6 +46,18 @@
     color: #648580;
 }
 
+.reset{
+    background-color: rgba(223, 237, 245, 0.75);
+    border: 0.3rem solid #2a3549;
+    color: #0a2824;
+}
+
+.send-again{
+    background-color: rgb(97, 74, 103);
+    border: 0.3rem solid #2a3549;
+    color: #2a3549;
+}
+
 
 .cancel{
     background-color: rgba(191, 234, 224, 0.65);

@@ -1,53 +1,55 @@
-import  { createContext} from 'react';
-import {Role, User, Basket, BookItem, Book, Client, LoginRequest, LogoutDTO, ForgotPasswordDTO} from "./types";
+import React from 'react';
+import {
+    User,
+    Role,
+    Basket,
+    BookItem,
+    Client,
+    LoginRequest,
+    ForgotPasswordDTO,
+    ResetPasswordDTO
+} from './types';
 
-export type AppContext = {
+export type AppContextType = {
     user: User | null;
     role: Role | null;
-    setUser: (user: User | null) => void;
-    setRole: (role: Role) => void;
+    basket: Basket;
 
-    registerClient: (clientData: Client) => Promise<void>;
     login: (request: LoginRequest) => Promise<void>;
     logout: () => Promise<void>;
-    forgotPassword: (data: ForgotPasswordDTO) => Promise<void>
-    basket: Basket;
-    addToBasket: (bookItem: BookItem) => void;
-    removeFromBasket: (bookName: string) => void;
-    updateBasketQuantity: (bookItem: BookItem) => void;
-    clearBasket: () => void;
-};
+    forgotPassword: (data: ForgotPasswordDTO) => Promise<void>;
+    resetPassword: (data: ResetPasswordDTO) => Promise<void>;
+    registerClient: (client: Client) => Promise<void>;
+    refreshAuthToken: () => Promise<boolean>;
 
-const defaultContext: AppContext = {
-    user: null,
-    role: null,
-    setUser: () => {},
-    setRole: () => {},
-    registerClient: async () => {},
-    login: async () => {},
-    logout: async () => {},
-    forgotPassword: async  () => {},
-    basket: [],
-    addToBasket: () => {},
-    removeFromBasket: () => {},
-    updateBasketQuantity: () => {},
-    clearBasket: () => {}
+    setUser: (user: User | null) => void;
+    setRole: (role: Role) => void;
+    cleanUser: () => void;
+
+    addToBasket: (book: BookItem) => void;
+    removeFromBasket: (bookName: string) => void;
+    clearBasket: () => void;
 }
 
-export const AppContext = createContext<AppContext>(defaultContext);
+const defaultContextValue: AppContextType = {
+    user: null,
+    role: null,
+    basket: [],
 
+    login: async () => { throw new Error('AppContext not initialized') },
+    logout: async () => { throw new Error('AppContext not initialized') },
+    forgotPassword: async () => { throw new Error('AppContext not initialized') },
+    resetPassword: async () => { throw new Error('AppContext not initialized') },
+    registerClient: async () => { throw new Error('AppContext not initialized') },
+    refreshAuthToken: async () => { throw new Error('AppContext not initialized') },
 
-export const createBookItem = (book: Book, quantity: number = 1): BookItem => {
-    return {
-        bookName: book.name,
-        quantity: quantity
-    };
+    setUser: () => { throw new Error('AppContext not initialized') },
+    setRole: () => { throw new Error('AppContext not initialized') },
+    cleanUser: () => { throw new Error('AppContext not initialized') },
+
+    addToBasket: () => { throw new Error('AppContext not initialized') },
+    removeFromBasket: () => { throw new Error('AppContext not initialized') },
+    clearBasket: () => { throw new Error('AppContext not initialized') }
 };
 
-export const isClient = (user: User | null): user is import('./types').Client => {
-    return user !== null && 'balance' in user;
-};
-
-export const isEmployee = (user: User | null): user is import('./types').EmployeeDTO => {
-    return user !== null && 'phone' in user && 'birthdate' in user;
-};
+export const AppContext = React.createContext<AppContextType>(defaultContextValue);

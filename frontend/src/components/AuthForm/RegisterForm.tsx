@@ -71,7 +71,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing,
                 id='password'
                 name='password'
                 placeholder='password...'
-                minLength={5}
+                minLength={8}
                 required
             />
             <input
@@ -79,7 +79,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing,
                 id='confirmPassword'
                 name='confirmPassword'
                 placeholder='confirm password...'
-                minLength={5}
+                minLength={8}
                 required
             />
             <AuthorizationButton

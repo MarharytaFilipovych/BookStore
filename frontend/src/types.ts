@@ -56,34 +56,6 @@ export type LoginRequest = {
     role: Role;
 }
 
-export type RefreshTokenDTO = {
-    refreshToken: string;
-    email: string;
-    role: Role;
-}
-
-export type TokenResponseDTO = {
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-}
-
-export type ForgotPasswordDTO = {
-    email: string;
-    role: Role;
-}
-
-export type ResetPasswordDTO = {
-    email: string;
-    password: string;
-    reset_code: string;
-}
-
-export type LogoutDTO = {
-    email: string;
-    role: Role;
-}
-
 export type SearchBookDTO = {
     name?: string;
     genre?: string;
@@ -168,6 +140,36 @@ export type StateWithPagination = State & {
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
+export type ForgotPasswordDTO = {
+    email: string;
+    role: Role;
+}
+
+export type ResetPasswordDTO = {
+    email: string;
+    password: string;
+    resetCode: string;
+    role: Role;
+}
+
+export type RefreshTokenDTO = {
+    refreshToken: string;
+    email: string;
+    role: Role;
+}
+
+export type LogoutDTO = {
+    email: string;
+    role: Role;
+    refreshToken: string;
+}
+
+export type TokenResponseDTO = {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number; // seconds
+}
+
 export const API_ENDPOINTS = {
     books: {
         getAll: '/books',
@@ -197,12 +199,10 @@ export const API_ENDPOINTS = {
     },
     auth: {
         login: '/auth/login',
-        refresh: '/auth/refresh',
+        refresh: '/auth/refresh-token',
         logout: '/auth/logout',
         forgotPassword: '/auth/forgot-password',
-        resetPassword: '/auth/reset-password',
+        changePassword: '/auth/change-password',
         registerClient: '/auth/register/client',
     },
 } as const;
-
-export type EndpointsType = typeof API_ENDPOINTS;

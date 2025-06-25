@@ -4,6 +4,7 @@ import {
     TokenResponseDTO,
     ForgotPasswordDTO,
     ResetPasswordDTO,
+    RefreshTokenDTO,
     LogoutDTO,
     API_ENDPOINTS
 } from '../types';
@@ -67,15 +68,16 @@ export class AuthService {
         }
     }
 
-    static async forgotPassword(data: ForgotPasswordDTO): Promise<void> {
+    static async forgotPassword(data: ForgotPasswordDTO): Promise<string> {
         console.log('🔑 AuthService: Initiating password reset...', {
             email: data.email,
             role: data.role
         });
 
         try {
-            await apiClient.post(API_ENDPOINTS.auth.forgotPassword, data);
+            const response = await apiClient.post<string>(API_ENDPOINTS.auth.forgotPassword, data);
             console.log('✅ AuthService: Password reset email sent successfully');
+            return response.data; // Returns the reset code UUID
         } catch (error) {
             console.error('❌ AuthService: Password reset request failed', error);
             throw error;
@@ -86,11 +88,11 @@ export class AuthService {
         console.log('🔐 AuthService: Resetting password...', {
             email: data.email,
             hasPassword: !!data.password,
-            hasResetCode: !!data.reset_code
+            hasResetCode: !!data.resetCode
         });
 
         try {
-            await apiClient.post(API_ENDPOINTS.auth.resetPassword, data);
+            await apiClient.post(API_ENDPOINTS.auth.changePassword, data);
             console.log('✅ AuthService: Password reset successful');
         } catch (error) {
             console.error('❌ AuthService: Password reset failed', error);
@@ -98,36 +100,73 @@ export class AuthService {
         }
     }
 
+    static async refreshToken(data: RefreshTokenDTO): Promise<TokenResponseDTO> {
+        console.log('🔄 AuthService: Refreshing access token...', {
+            email: data.email,
+            role: data.role,
+            hasRefreshToken: !!data.refreshToken
+        });
+
+        try {
+            const response = await apiClient.post<TokenResponseDTO>(
+                API_ENDPOINTS.auth.refresh,
+                data
+            );
+
+            console.log('✅ AuthService: Token refresh successful', {
+                hasAccessToken: !!response.data.accessToken,
+                hasRefreshToken: !!response.data.refreshToken,
+                expiresIn: response.data.expiresIn
+            });
+
+            if (response.data.accessToken) {
+                localStorage.setItem('accessToken', response.data.accessToken);
+                console.log('💾 AuthService: New access token stored');
+            }
+
+            if (response.data.refreshToken) {
+                localStorage.setItem('refreshToken', response.data.refreshToken);
+                console.log('💾 AuthService: New refresh token stored');
+            }
+
+            return response.data;
+
+        } catch (error) {
+            console.error('❌ AuthService: Token refresh failed', error);
+            AuthService.clearTokens();
+            throw error;
+        }
+    }
+
     static isAuthenticated(): boolean {
-        const token = localStorage.getItem('accessToken');
+        const token = AuthService.getToken();
 
         if (!token) {
-            console.log('🔍 AuthService: No access token found');
+            console.log('⚠️ AuthService: No access token available');
             return false;
         }
 
         try {
             const tokenParts = token.split('.');
             if (tokenParts.length !== 3) {
-                console.log('⚠️ AuthService: Invalid token format');
+                console.warn('⚠️ AuthService: Invalid token format');
                 return false;
             }
 
             const payload = JSON.parse(atob(tokenParts[1]));
-            const currentTime = Date.now() / 1000;
+            const currentTime = Math.floor(Date.now() / 1000);
 
-            if (payload.exp && payload.exp > currentTime) {
-                console.log('✅ AuthService: Token is valid', {
-                    expiresAt: new Date(payload.exp * 1000).toISOString(),
-                    timeLeft: Math.round(payload.exp - currentTime) + ' seconds'
-                });
-                return true;
-            } else {
-                console.log('⚠️ AuthService: Token is expired', {
+            if (payload.exp && payload.exp < currentTime) {
+                console.warn('⚠️ AuthService: Token has expired', {
                     expiredAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown'
                 });
                 return false;
             }
+
+            console.log('✅ AuthService: Token is valid', {
+                expiresAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown'
+            });
+            return true;
 
         } catch (error) {
             console.warn('⚠️ AuthService: Token validation failed:', error);

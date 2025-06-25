@@ -3,7 +3,7 @@ import styles from './style.module.css';
 import classNames from 'classnames';
 
 type AuthorizationButtonProps = {
-    type: 'log-in' | 'sign' | 'log-out' | 'delete everything' | 'cancel' | 'forgot',
+    type: 'log-in' | 'sign' | 'log-out' | 'delete everything' | 'cancel' | 'forgot' | 'reset' | 'send-again',
     warning?: boolean
     form?: boolean,
     onClick?: ()=>void;
@@ -32,6 +32,12 @@ export const AuthorizationButton: React.FC<AuthorizationButtonProps> = ({warning
         case 'forgot':
             buttonText = "Forgot Password"
             break;
+        case 'reset':
+            buttonText = "Reset Password"
+            break;
+        case 'send-again':
+            buttonText = "Send Again"
+            break;
     }
 
     return <button disabled={disabled}
@@ -42,6 +48,8 @@ export const AuthorizationButton: React.FC<AuthorizationButtonProps> = ({warning
                        [styles.delete]: type === 'delete everything',
                        [styles.cancel]: type === 'cancel',
                        [styles.forgot]: type === 'forgot',
+                       [styles.reset]: type === 'reset',
+                       [styles.sendAgain]: type === 'send-again',
                        [styles.warning]: warning
                    })}
                    type={form ? 'submit' : 'button'}
