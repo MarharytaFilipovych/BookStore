@@ -1,0 +1,52 @@
+.clientContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border: 0.3rem solid #100f0f;
+    background-color: #e3dbdb;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    min-height: 80px;
+}
+
+.clientContainer:hover {
+    background-color: #d8d0d0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.clientName {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #2563eb;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.balance{
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #1a0221;
+}
+
+.clientEmail {
+    margin: 0;
+    font-size: 1rem;
+    color: #666;
+    font-style: italic;
+}
+
+
+@media (max-width: 768px) {
+    .clientContainer {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+        text-align: center;
+    }
+}

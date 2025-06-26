@@ -24,10 +24,9 @@
     border: 0.6rem solid #0e0e0e;
 }
 .logOut{
-    background-color: rgba(159, 153, 255, 0.75);
-    border: 0.3rem solid #222253;
+    background-color: rgba(106, 106, 121, 0.75);
+    border: 0.3rem solid #9f9fbe;
     color: #06061a;
-
 }
 .warning{
     padding: 1rem;

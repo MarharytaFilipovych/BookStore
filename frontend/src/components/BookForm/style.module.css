@@ -1,0 +1,273 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(2px);
+    padding: 1rem;
+}
+
+.bookForm {
+    background: #ffffff;
+    border: 0.5rem solid #0f0f10;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+.formHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: 2px solid #e5e7eb;
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    color: white;
+}
+
+.formHeader h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.formContent {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.inputGroup label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.inputGroup input,
+.inputGroup select,
+.inputGroup textarea {
+    padding: 0.75rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus,
+.inputGroup textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputGroup input:hover,
+.inputGroup select:hover,
+.inputGroup textarea:hover {
+    border-color: #9ca3af;
+}
+
+.inputGroup textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.inputGroup select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+.inputGroup input[type="number"] {
+    appearance: textfield;
+}
+
+.inputGroup input[type="number"]::-webkit-outer-spin-button,
+.inputGroup input[type="number"]::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+}
+
+.inputGroup input[type="date"] {
+    cursor: pointer;
+}
+
+.errorInput {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.errorInput:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.errorText {
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.cancelButton,
+.submitButton {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    min-width: 120px;
+}
+
+.cancelButton {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.cancelButton:hover {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.submitButton {
+    background-color: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.submitButton:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.submitButton:active {
+    transform: translateY(0);
+}
+
+/* Required field indicator */
+.inputGroup label::after {
+    content: none;
+}
+
+.inputGroup label:has(+ input:required)::after,
+.inputGroup label:has(+ select:required)::after,
+.inputGroup label:has(+ textarea:required)::after {
+    content: " *";
+    color: #ef4444;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .overlay {
+        padding: 0.5rem;
+    }
+
+    .bookForm {
+        max-height: 95vh;
+        border-width: 0.25rem;
+    }
+
+    .formHeader {
+        padding: 1rem;
+    }
+
+    .formHeader h2 {
+        font-size: 1.25rem;
+    }
+
+    .formContent {
+        padding: 1rem;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .formActions {
+        padding: 1rem;
+        flex-direction: column;
+    }
+
+    .cancelButton,
+    .submitButton {
+        width: 100%;
+        padding: 1rem;
+    }
+}
+
+/* Full-width inputs for single column */
+.inputGroup:only-child {
+    grid-column: 1 / -1;
+}
+
+.formRow:has(.inputGroup:only-child) {
+    grid-template-columns: 1fr;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .inputGroup input,
+    .inputGroup select,
+    .inputGroup textarea,
+    .cancelButton,
+    .submitButton {
+        transition: none;
+    }
+}
+
+/* Focus visible for keyboard navigation */
+.inputGroup input:focus-visible,
+.inputGroup select:focus-visible,
+.inputGroup textarea:focus-visible,
+.cancelButton:focus-visible,
+.submitButton:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}

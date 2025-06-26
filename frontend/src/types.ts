@@ -89,13 +89,11 @@ export type PaginatedResponseDTO<T> = {
 
 export interface UpdateBookRequest extends Partial<BookType> {}
 
-
-
 export type IconTopic = 'search' | 'tick' | 'star' | 'vote'
     | 'cross' | 'envelope' | 'call' | 'empty-star'
     | 'black-cross' | 'caret' | 'heart' | 'empty-heart'
     | 'empty-circle' | 'circle' | 'loading' | 'error'
-    | 'direction' | 'hidden' | 'plus' | 'basket';
+    | 'direction' | 'hidden' | 'plus' | 'basket' | 'bin' | 'ban';
 
 export type ContactProp = {
     typeOfContact: 'email' | 'call';
@@ -104,7 +102,7 @@ export type ContactProp = {
 
 export type LinkItem = {
     name: string;
-    request_type: requestType;
+    link: requestType;
 }
 
 export type Links = {

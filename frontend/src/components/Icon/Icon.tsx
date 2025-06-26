@@ -22,6 +22,8 @@ import hidden from './icons/hidden.png';
 import plus from './icons/plus.png';
 import {IconTopic} from '../../types';
 import basket from './icons/shopping-basket.png';
+import bin from './icons/bin.png';
+import ban from './icons/ban.png';
 
 type IconProps ={
     topic: IconTopic;
@@ -51,6 +53,8 @@ export const Icon: React.FC<IconProps> = ({topic, size, mirror})=>{
             case 'hidden': return hidden;
             case 'plus': return plus;
             case 'basket': return basket;
+            case 'bin' : return bin;
+            case 'ban': return ban;
         }
     };
     return (

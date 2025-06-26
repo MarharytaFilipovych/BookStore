@@ -13,12 +13,12 @@ export const LinksSection: React.FC<{ links: Links, style: 'menu' | 'footer', us
             })}>
                 {user == 'EMPLOYEE' && links.employeeLinks.map((link, index) => (
                     <li key={`link-${index}`} className={styles.link}>
-                        <Link to={`/${link.request_type}`}>{link.name}</Link>
+                        <Link to={`/${link.link}`}>{link.name}</Link>
                     </li>
                 ))}
                 {user == 'CLIENT' && links.clientLinks.map((link, index) => (
                     <li key={`userlink-${index}`} className={styles.link}>
-                        <Link to={`/user/${link.request_type}`}>{link.name}</Link>
+                        <Link to={`/user/${link.link}`}>{link.name}</Link>
                     </li>
                 ))}
             </ul>

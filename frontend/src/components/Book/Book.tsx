@@ -3,6 +3,7 @@ import styles from './style.module.css';
 import {BookType} from "../../types";
 import {AppContext} from "../../context";
 import {MiniButton} from "../MiniButton/MiniButton";
+import {BookService} from "../../services/BookService";
 
 export const Book: React.FC<BookType> = (book) => {
     const context = useContext(AppContext);
@@ -13,43 +14,45 @@ export const Book: React.FC<BookType> = (book) => {
     };
 
     return (
-        <div className={styles.bookContainer}>
-            <p
-                className={styles.bookName}
-                onClick={toggleDetails}
-                style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
-            >
-                {book.name}
-            </p>
+        <>
+            <div className={styles.bookContainer}>
+                <div className={styles.bookInfo}>
+                    <h3 className={styles.bookName} onClick={toggleDetails}>{book.name}</h3>
+                    <p className={styles.bookAuthor}>by {book.author}</p>
+                </div>
+
+                <div className={styles.bookActions}>
+                    <p className={styles.bookPrice}>${book.price}</p>
+                    {context.role === 'CLIENT' ?
+                        <MiniButton topic='basket' size='medium'
+                                    onClick={() => context.addToBasket({bookName: book.name, quantity: 1})}/>
+                    :   <MiniButton topic='bin' size='medium'
+                                    onClick={() => BookService.deleteBook(book.name)}/>
+                    }
+
+                </div>
+            </div>
 
             {showDetails && (
-                <article className={styles.bookDescription}>
-                    <div className={styles.bookDetailsHeader}>
-                        <h2>{book.name}</h2>
-                        <MiniButton
-                            topic='cross'
-                            size='mini'
-                            onClick={toggleDetails}
-                        />
-                    </div>
-                    <p>This book was written by <strong>{book.author}</strong> in <strong>{book.publication_date}</strong>.</p>
-                    <p><strong>Genre</strong>: {book.genre}</p>
-                    <p><strong>Age group</strong>: {book.age_group}</p>
-                    <p><strong>Language</strong>: {book.language}</p>
-                    <p><strong>Pages</strong>: {book.pages}</p>
-                    <p><strong>Price</strong>: ${book.price}</p>
-                    <p><strong>Characteristics</strong>: {book.characteristics}</p>
-                    <p><strong>Description</strong>: {book.description}</p>
-                </article>
+                <div className={styles.overlay} onClick={toggleDetails}>
+                    <article className={styles.bookDescription} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.bookDetailsHeader}>
+                            <h2>{book.name}</h2>
+                            <MiniButton topic='cross' size='mini' onClick={toggleDetails}/>
+                        </div>
+                        <div className={styles.bookDetailsContent}>
+                            <p>This book was written by <strong>{book.author}</strong> in <strong>{book.publication_date}</strong>.</p>
+                            <p><strong>Genre</strong>: {book.genre}</p>
+                            <p><strong>Age group</strong>: {book.age_group}</p>
+                            <p><strong>Language</strong>: {book.language}</p>
+                            <p><strong>Pages</strong>: {book.pages}</p>
+                            <p><strong>Price</strong>: ${book.price}</p>
+                            <p><strong>Characteristics</strong>: {book.characteristics}</p>
+                            <p><strong>Description</strong>: {book.description}</p>
+                        </div>
+                    </article>
+                </div>
             )}
-            <h2>{book.name}</h2>
-            <p className={styles.bookPrice}>${book.price}</p>
-
-            <MiniButton
-                topic='basket'
-                size='medium'
-                onClick={() => context.addToBasket({bookName: book.name, quantity: 1})}
-            />
-        </div>
+        </>
     );
 };
