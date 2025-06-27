@@ -3,6 +3,7 @@ import styles from './style.module.css';
 import {AuthorizationButton} from '../AuthorizationButton/AuthorizationButton';
 import {Role} from "../../types";
 import {useNavigate} from "react-router";
+import {Icon} from "../Icon/Icon";
 
 export const LogInForm: React.FC<{
     onSubmit: (email: string, password: string, user: Role) => void,
@@ -21,7 +22,8 @@ export const LogInForm: React.FC<{
         onSubmit(email, password, user);
     };
 
-    return (
+    return (<>
+        {processing && (<Icon topic='loading' size='big' />)}
         <form className={styles.form} onSubmit={submit} ref={formRef}>
             <div className={styles.instructions}>
                 <h2>Login!</h2>
@@ -60,5 +62,6 @@ export const LogInForm: React.FC<{
                 />
             </div>
         </form>
-    );
+        );
+    </>)
 };

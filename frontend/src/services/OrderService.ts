@@ -1,6 +1,6 @@
 import { apiClient } from '../config/ApiClient';
 import {
-    OrderDTO,
+    OrderType,
     BookItem,
     PaginatedResponseDTO,
     API_ENDPOINTS,
@@ -16,7 +16,7 @@ export class OrderService {
         size = 10,
         sortBy?: OrderSortField,
         sortOrder: SortOrder = 'desc'
-    ): Promise<PaginatedResponseDTO<OrderDTO>> {
+    ): Promise<PaginatedResponseDTO<OrderType>> {
         console.log('📦 OrderService: Getting orders with sorting...', {
             page, size, sortBy, sortOrder
         });
@@ -32,7 +32,7 @@ export class OrderService {
                 console.log(`📊 OrderService: Sorting by ${sortBy} (${sortOrder})`);
             }
 
-            const response = await apiClient.get<PaginatedResponseDTO<OrderDTO>>(
+            const response = await apiClient.get<PaginatedResponseDTO<OrderType>>(
                 `${API_ENDPOINTS.orders.getAll}?${params.toString()}`
             );
 
@@ -50,7 +50,7 @@ export class OrderService {
         }
     }
 
-    static async createOrder(orderData: Omit<OrderDTO, 'order_date'>): Promise<OrderDTO> {
+    static async createOrder(orderData: Omit<OrderType, 'order_date'>): Promise<OrderType> {
         console.log('📝 OrderService: Creating new order...', {
             clientEmail: orderData.client_email,
             employeeEmail: orderData.employee_email,
@@ -59,7 +59,7 @@ export class OrderService {
         });
 
         try {
-            const response = await apiClient.post<OrderDTO>(
+            const response = await apiClient.post<OrderType>(
                 API_ENDPOINTS.orders.create,
                 orderData
             );
@@ -87,7 +87,7 @@ export class OrderService {
         clientEmail: string,
         basketItems: BookItem[],
         employeeEmail?: string
-    ): Promise<OrderDTO> {
+    ): Promise<OrderType> {
         console.log('🛒 OrderService: Creating order from basket...', {
             clientEmail,
             employeeEmail,
@@ -97,7 +97,7 @@ export class OrderService {
         try {
             const totalPrice = await OrderService.calculateOrderPrice(basketItems);
 
-            const orderData: Omit<OrderDTO, 'order_date'> = {
+            const orderData: Omit<OrderType, 'order_date'> = {
                 client_email: clientEmail,
                 employee_email: employeeEmail,
                 price: totalPrice,
@@ -147,11 +147,11 @@ export class OrderService {
     }
 
 
-    static async confirmOrder(orderId: string, employeeEmail: string): Promise<OrderDTO> {
+    static async confirmOrder(orderId: string, employeeEmail: string): Promise<OrderType> {
         console.log('✅ OrderService: Confirming order...', { orderId, employeeEmail });
 
         try {
-            const response = await apiClient.put<OrderDTO>(
+            const response = await apiClient.put<OrderType>(
                 `${API_ENDPOINTS.orders.getAll}/${orderId}/confirm`,
                 { employee_email: employeeEmail }
             );

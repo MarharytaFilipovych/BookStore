@@ -3,6 +3,7 @@ import styles from './style.module.css';
 import {AuthorizationButton} from '../AuthorizationButton/AuthorizationButton';
 import {Role} from "../../types";
 import {useNavigate} from "react-router";
+import {Icon} from "../Icon/Icon";
 
 export const ForgotPasswordForm: React.FC<{
     onSubmit: (email: string, role: Role) => void,
@@ -21,40 +22,41 @@ export const ForgotPasswordForm: React.FC<{
         onSubmit(email, role);
     };
 
-    return (
-        <form className={styles.form} onSubmit={submit} ref={formRef}>
-            {error && (<p className={styles.errorMessage}>{error}</p>)}
+    return (<>
+            {processing && (<Icon topic='loading' size='big' />)}
+                <form className={styles.form} onSubmit={submit} ref={formRef}>
+                    {error && (<p className={styles.errorMessage}>{error}</p>)}
 
-            <div className={styles.instructions}>
-                <h2>Reset your password!</h2>
-                <p>Enter your email address and we'll redirect you to the change password form:)</p>
-            </div>
+                    <div className={styles.instructions}>
+                        <h2>Reset your password!</h2>
+                        <p>Enter your email address and we'll redirect you to the change password form:)</p>
+                    </div>
 
-            <input
-                name='email'
-                type='email'
-                id='email'
-                placeholder='your email...'
-                required
-                aria-label='Email'
-            />
+                    <input
+                        name='email'
+                        type='email'
+                        id='email'
+                        placeholder='your email...'
+                        required
+                        aria-label='Email'
+                    />
 
-            <div className={styles.buttons}>
-                <AuthorizationButton
-                    warning={false}
-                    type='reset'
-                    form={true}
-                    disabled={processing}
-                />
+                    <div className={styles.buttons}>
+                        <AuthorizationButton
+                            warning={false}
+                            type='reset'
+                            form={true}
+                            disabled={processing}
+                        />
 
-                <AuthorizationButton
-                    warning={false}
-                    type='cancel'
-                    form={false}
-                    disabled={processing}
-                    onClick={() => navigate(`/login/${role === 'EMPLOYEE' ? 'employee' : 'client'}`)}
-                />
-            </div>
-        </form>
-    );
+                        <AuthorizationButton
+                            warning={false}
+                            type='cancel'
+                            form={false}
+                            disabled={processing}
+                            onClick={() => navigate(`/login/${role === 'EMPLOYEE' ? 'employee' : 'client'}`)}
+                        />
+                    </div>
+                </form>
+    </>)
 };

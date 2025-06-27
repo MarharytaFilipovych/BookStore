@@ -2,7 +2,7 @@ import React, {ReactNode, useEffect, useState} from "react";
 import {
     Basket,
     BookItem,
-    Client,
+    ClientType,
     ForgotPasswordDTO,
     LoginRequest,
     ResetPasswordDTO,
@@ -14,6 +14,7 @@ import { AppContext } from './context';
 import { AuthService } from './services/AuthService';
 import { ClientService } from './services/ClientService';
 import { EmployeeService } from './services/EmployeeService';
+import {useStateWithUpdater} from "./hooks/useStateWithUpdater";
 
 type AppState = {
     user: User | null;
@@ -28,11 +29,8 @@ const initialState: AppState = {
 };
 
 export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-    const [state, setState] = useState<AppState>(initialState);
+    const [state, updateState] = useStateWithUpdater<AppState>(initialState);
 
-    const updateState = (updates: Partial<AppState>) => {
-        setState(prevState => ({ ...prevState, ...updates }));
-    };
 
     useEffect(() => {
         const initializeAuth =  () => {
@@ -142,7 +140,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         }
     };
 
-    const registerClient = async (client: Client): Promise<void> => {
+    const registerClient = async (client: ClientType): Promise<void> => {
         try {
             await AuthService.registerClient(client);
         } catch (error) {

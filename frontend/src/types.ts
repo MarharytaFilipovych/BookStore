@@ -5,7 +5,7 @@ export type BookSortField = 'name' | 'author' | 'genre' | 'price' | 'publication
 export type SortOrder = 'asc' | 'desc';
 export type EmployeeSortField = 'name' | 'email' | 'birthdate';
 export type ClientSortField = 'name' | 'email' | 'balance';
-export type User = Client | EmployeeDTO;
+export type User = ClientType | EmployeeType;
 export type OrderSortField = 'order_date' | 'price' | 'client_email' | 'employee_email' | 'client_name' | 'employee_name';
 export type BookType = {
     name: string;
@@ -27,14 +27,14 @@ export type BookItem = {
 
 export type Basket = BookItem[]
 
-export type Client = {
+export type ClientType = {
     name: string;
     email: string;
     password?: string;
     balance: number;
 }
 
-export type EmployeeDTO = {
+export type EmployeeType = {
     name: string;
     email: string;
     phone: string;
@@ -42,7 +42,7 @@ export type EmployeeDTO = {
     birthdate: string;
 }
 
-export type OrderDTO = {
+export type OrderType = {
     employee_email?: string;
     client_email: string;
     order_date: string;
@@ -56,7 +56,7 @@ export type LoginRequest = {
     role: Role;
 }
 
-export type SearchBookDTO = {
+export type SearchBook = {
     name?: string;
     genre?: string;
     author?: string;
@@ -93,7 +93,7 @@ export type IconTopic = 'search' | 'tick' | 'star' | 'vote'
     | 'cross' | 'envelope' | 'call' | 'empty-star'
     | 'black-cross' | 'caret' | 'heart' | 'empty-heart'
     | 'empty-circle' | 'circle' | 'loading' | 'error'
-    | 'direction' | 'hidden' | 'plus' | 'basket' | 'bin' | 'ban';
+    | 'direction' | 'hidden' | 'plus' | 'basket' | 'bin' | 'ban' | 'update';
 
 export type ContactProp = {
     typeOfContact: 'email' | 'call';
@@ -119,11 +119,6 @@ export type ConfigurationData = {
 
 export type requestType = 'clients' | 'orders' | 'books' | 'colleagues' | 'profile';
 
-export type UserCollections = {
-    favorites: Map<number, string>;
-    future: Map<number, string>;
-    watched: Map<number, string>;
-}
 
 export type State = {
     loading: boolean;
@@ -131,6 +126,8 @@ export type State = {
 }
 
 export type StateWithPagination = State & {
+    totalPages: number,
+    totalResults: number,
     pageToFetch: number;
     currentPage: number;
 }
@@ -204,3 +201,17 @@ export const API_ENDPOINTS = {
         registerClient: '/auth/register/client',
     },
 } as const;
+
+export type FilterState = {
+    name: string;
+    genre: string;
+    author: string;
+    language: string;
+    ageGroup: string;
+    minPrice: string;
+    maxPrice: string;
+    minPages: string;
+    maxPages: string;
+    publicationYear: string;
+    sort: string;
+}

@@ -1,6 +1,6 @@
 import { apiClient } from '../config/ApiClient';
 import {
-    EmployeeDTO,
+    EmployeeType,
     PaginatedResponseDTO,
     API_ENDPOINTS,
     EmployeeSortField,
@@ -14,7 +14,7 @@ export class EmployeeService {
         size = 10,
         sortBy?: EmployeeSortField,
         sortOrder: SortOrder = 'asc'
-    ): Promise<PaginatedResponseDTO<EmployeeDTO>> {
+    ): Promise<PaginatedResponseDTO<EmployeeType>> {
         console.log('👔 EmployeeService: Getting employees with sorting...', {
             page, size, sortBy, sortOrder
         });
@@ -30,7 +30,7 @@ export class EmployeeService {
                 console.log(`📊 EmployeeService: Sorting by ${sortBy} (${sortOrder})`);
             }
 
-            const response = await apiClient.get<PaginatedResponseDTO<EmployeeDTO>>(
+            const response = await apiClient.get<PaginatedResponseDTO<EmployeeType>>(
                 `${API_ENDPOINTS.employees.getAll}?${params.toString()}`
             );
 
@@ -48,11 +48,11 @@ export class EmployeeService {
         }
     }
 
-    static async getEmployeeByEmail(email: string): Promise<EmployeeDTO> {
+    static async getEmployeeByEmail(email: string): Promise<EmployeeType> {
         console.log('👔 EmployeeService: Getting employee by email...', { email });
 
         try {
-            const response = await apiClient.get<EmployeeDTO>(
+            const response = await apiClient.get<EmployeeType>(
                 API_ENDPOINTS.employees.getByEmail(email)
             );
 
@@ -70,7 +70,7 @@ export class EmployeeService {
         }
     }
 
-    static async createEmployee(employee: EmployeeDTO & { password: string }): Promise<EmployeeDTO> {
+    static async createEmployee(employee: EmployeeType & { password: string }): Promise<EmployeeType> {
         console.log('📝 EmployeeService: Creating new employee...', {
             name: employee.name,
             email: employee.email,
@@ -78,7 +78,7 @@ export class EmployeeService {
         });
 
         try {
-            const response = await apiClient.post<EmployeeDTO>(
+            const response = await apiClient.post<EmployeeType>(
                 API_ENDPOINTS.employees.getAll, // POST to /employees
                 employee
             );
@@ -99,7 +99,7 @@ export class EmployeeService {
         }
     }
 
-    static async updateEmployee(email: string, updates: Partial<EmployeeDTO>): Promise<EmployeeDTO> {
+    static async updateEmployee(email: string, updates: Partial<EmployeeType>): Promise<EmployeeType> {
         console.log('✏️ EmployeeService: Updating employee...', {
             employeeEmail: email,
             fieldsToUpdate: Object.keys(updates),
@@ -107,7 +107,7 @@ export class EmployeeService {
         });
 
         try {
-            const response = await apiClient.put<EmployeeDTO>(
+            const response = await apiClient.put<EmployeeType>(
                 API_ENDPOINTS.employees.update(email),
                 updates
             );
@@ -155,7 +155,7 @@ export class EmployeeService {
         size = 10,
         sortBy?: 'orderDate' | 'price' | 'client_email' | 'client_name',
         sortOrder: SortOrder = 'desc'
-    ): Promise<PaginatedResponseDTO<import('../types').OrderDTO>> {
+    ): Promise<PaginatedResponseDTO<import('../types').OrderType>> {
         console.log('📦 EmployeeService: Getting employee orders...', {
             employeeEmail, page, size, sortBy, sortOrder
         });
@@ -171,7 +171,7 @@ export class EmployeeService {
                 console.log(`📊 EmployeeService: Sorting orders by ${sortBy} (${sortOrder})`);
             }
 
-            const response = await apiClient.get<PaginatedResponseDTO<import('../types').OrderDTO>>(
+            const response = await apiClient.get<PaginatedResponseDTO<import('../types').OrderType>>(
                 `${API_ENDPOINTS.orders.getByEmployee(employeeEmail)}?${params.toString()}`
             );
 

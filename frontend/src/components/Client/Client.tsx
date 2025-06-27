@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './style.module.css';
-import {Client} from "../../types";
+import {ClientType} from "../../types";
 import {MiniButton} from "../MiniButton/MiniButton";
 import {ClientService} from "../../services/ClientService";
 
-export const ClientComponent: React.FC<Client> = (client) => {
+export const ClientComponent: React.FC<ClientType> = (client) => {
     return (
         <>
             <div className={styles.clientContainer}>

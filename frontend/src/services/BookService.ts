@@ -2,7 +2,7 @@ import { apiClient } from '../config/ApiClient';
 import {
     BookType,
     PaginatedResponseDTO,
-    SearchBookDTO,
+    SearchBook,
     UpdateBookRequest,
     API_ENDPOINTS,
     BookSortField,
@@ -51,7 +51,7 @@ export class BookService {
     }
 
     static async searchBooks(
-        searchParams: SearchBookDTO,
+        searchParams: SearchBook,
         page = 0,
         size = 10,
         sortBy?: BookSortField,

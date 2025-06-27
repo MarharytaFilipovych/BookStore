@@ -15,11 +15,15 @@ import {ForgotPasswordPage} from "./pages/AuthPage/ForgotPasswordPage";
 import {Header} from "./components/Header/Header";
 import {MenuButton} from "./components/MenuButton/MenuButton";
 import {MiniButton} from "./components/MiniButton/MiniButton";
+import {Basket} from "./components/Basket/Basket";
+import {BasketButton} from "./components/Basket/BasketButton";
+import {BooksPage} from "./pages/BooksPage/BooksPage";
 
 export const App: React.FC = () => {
     const context = React.useContext(AppContext);
     const [warning, setWarning] = useState<boolean>(false);
     const navigate = useNavigate();
+    const [isBasketOpen, setIsBasketOpen] = useState<boolean>(false);
 
     return (
         <>
@@ -33,6 +37,10 @@ export const App: React.FC = () => {
                 message={'Are you sure about logging out?'}
             />}
 
+            {isBasketOpen && context.role === 'CLIENT' && (
+                <Basket onClose={() => setIsBasketOpen(false)}/>
+            )}
+
             <div className={styles.wrapper}>
                 {context.user && (
                     <>
@@ -42,7 +50,7 @@ export const App: React.FC = () => {
                             <h1>Margosha book store</h1>
                         <Header part='right'>
                             <Link to={'/books'}><MiniButton topic='search' size='premedium'/></Link>
-
+                            {context.role === 'CLIENT' && (<BasketButton onClick={() => setIsBasketOpen(true)} /> )}
                             <h2>{context.user.name}</h2>
                             <AuthorizationButton type={'log-out'} onClick={()=> setWarning(true)}/>
                         </Header>
@@ -53,7 +61,7 @@ export const App: React.FC = () => {
                     <Route path="/" element={<WelcomePage/>} />
                     <Route path="/login/:user" element={<LoginPage />} />
                     <Route path="/register" element={<RegistrationPage />} />
-                    <Route path="/books" element={<div>Books Page</div>} />
+                    <Route path="/books" element={<BooksPage/>} />
                     <Route path="/basket" element={<div>Basket Page</div>} />
                     <Route path="/forgot" element={<ForgotPasswordPage/>}/>
                     <Route path="/sign" element={<RegistrationPage/>}/>

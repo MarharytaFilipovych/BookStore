@@ -6,7 +6,7 @@ import {
     ResetPasswordDTO,
     RefreshTokenDTO,
     LogoutDTO,
-    API_ENDPOINTS, Client
+    API_ENDPOINTS, ClientType
 } from '../types';
 
 export class AuthService {
@@ -246,7 +246,7 @@ export class AuthService {
         }
     }
 
-    static async registerClient(client: Client): Promise<void> {
+    static async registerClient(client: ClientType): Promise<void> {
         console.log('📝 AuthService: Registering new client...', {
             email: client.email,
             name: client.name,

@@ -1,4 +1,4 @@
-import {ContactProp, Links} from './types';
+import {BookSortField, ContactProp, Links, SortOrder} from './types';
 
 export const links: Links = {
     employeeLinks:[
@@ -21,12 +21,26 @@ export const myContacts: ContactProp[] = [
     { typeOfContact: 'call', contact: '+38 097 151 9327' },
 ];
 
-
-export const bookSortOptions: Map<string, string> = new Map([
-    ['year (from oldest)', 'year.asc'],
-    ['year (from newest)', 'year.desc'],
-    ['name (A-Z)', 'name.asc'],
-    ['name (Z-A)', 'name.desc'],
+export const sortOptions = new Map<string, {sortBy: BookSortField, sortOrder: SortOrder}>([
+    ['Title A-Z', {sortBy: 'name', sortOrder: 'asc'}],
+    ['Title Z-A', {sortBy: 'name', sortOrder: 'desc'}],
+    ['Author A-Z', {sortBy: 'author', sortOrder: 'asc'}],
+    ['Author Z-A', {sortBy: 'author', sortOrder: 'desc'}],
+    ['Year (Oldest First)', {sortBy: 'publication_date', sortOrder: 'asc'}],
+    ['Year (Newest First)', {sortBy: 'publication_date', sortOrder: 'desc'}],
+    ['Price (Low to High)', {sortBy: 'price', sortOrder: 'asc'}],
+    ['Price (High to Low)', {sortBy: 'price', sortOrder: 'desc'}],
+    ['Pages (Fewest First)', {sortBy: 'pages', sortOrder: 'asc'}],
+    ['Pages (Most First)', {sortBy: 'pages', sortOrder: 'desc'}]
 ]);
 
+export const ageGroups: string[] = ['Children', 'Teen', 'Adult', 'Other'];
+export const languages: string[] = ['English', 'Spanish', 'French', 'German', 'Ukrainian', 'Japanese', 'Other'];
+export const genres: string[] =  [
+    'Fiction', 'Non-Fiction', 'Mystery', 'Romance', 'Fantasy', 'Science Fiction',
+    'Thriller', 'Biography', 'History', 'Self-Help', 'Technical', 'Drama',
+    'Comedy', 'Horror', 'Adventure', 'Poetry', 'Philosophy', 'Religion',
+    'Art', 'Travel', 'Cooking', 'Health', 'Business', 'Education', 'Classic Literature'
+];
 
+export const PAGE_SIZE: number = 20;

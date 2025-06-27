@@ -1,10 +1,10 @@
 import React, {useContext, useState} from 'react';
 import styles from './style.module.css';
-import {OrderDTO} from "../../types";
+import {OrderType} from "../../types";
 import {AppContext} from "../../context";
 import {MiniButton} from "../MiniButton/MiniButton";
 
-type OrderComponentProps = OrderDTO & {
+type OrderComponentProps = OrderType & {
     onAssignEmployee?: (orderId: string) => void;
 };
 

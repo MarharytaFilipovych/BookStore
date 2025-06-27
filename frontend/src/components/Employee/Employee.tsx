@@ -1,8 +1,8 @@
 import React, {useContext, useState} from 'react';
 import styles from './style.module.css';
-import {EmployeeDTO} from "../../types";
+import {EmployeeType} from "../../types";
 
-export const EmployeeComponent: React.FC<EmployeeDTO> = (employee) => {
+export const EmployeeComponent: React.FC<EmployeeType> = (employee) => {
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {

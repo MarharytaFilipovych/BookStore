@@ -1,0 +1,22 @@
+.page {
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+}
+.page h2{
+    color: #1a0221;
+    font-weight: bold;
+    font-size: 3rem;
+    text-align: center;
+    text-wrap: wrap;
+}
+.booksContainer{
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+}

@@ -4,7 +4,7 @@ import {
     Role,
     Basket,
     BookItem,
-    Client,
+    ClientType,
     LoginRequest,
     ForgotPasswordDTO,
     ResetPasswordDTO
@@ -19,7 +19,7 @@ export type AppContextType = {
     logout: () => Promise<void>;
     forgotPassword: (data: ForgotPasswordDTO) => Promise<void>;
     resetPassword: (data: ResetPasswordDTO) => Promise<void>;
-    registerClient: (client: Client) => Promise<void>;
+    registerClient: (client: ClientType) => Promise<void>;
     refreshAuthToken: () => Promise<boolean>;
 
     setUser: (user: User | null) => void;

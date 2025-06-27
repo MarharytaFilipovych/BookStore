@@ -2,6 +2,7 @@ import React, {FormEvent, useEffect, useRef, useState} from 'react';
 import styles from './style.module.css';
 import { AuthorizationButton } from '../AuthorizationButton/AuthorizationButton';
 import {useNavigate} from "react-router";
+import {Icon} from "../Icon/Icon";
 
 type RegisterFormProps = {
     onSubmit: (username: string, email: string, balance: number, password: string)=>void,
@@ -43,12 +44,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing,
         }
     }, [error]);
 
-    return (
+    return (<>
+        {processing && (<Icon topic='loading' size='big' />)}
         <form className={styles.form} onSubmit={submit} ref={formRef}>
-            <div className={styles.instructions}>
-                <h2>Register!</h2>
-            </div>
-
+            <div className={styles.instructions}><h2>Register!</h2></div>
             {passwordError && (<p className={styles.errorMessage}>{passwordError}</p>)}
             <input
                 type='text'
@@ -103,6 +102,5 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({onSubmit, processing,
                 />
             </div>
 
-        </form>
-    );
+        </form>);</>)
 };

@@ -1,6 +1,6 @@
 import { apiClient } from '../config/ApiClient';
 import {
-    Client,
+    ClientType,
     PaginatedResponseDTO,
     API_ENDPOINTS,
     ClientSortField,
@@ -14,7 +14,7 @@ export class ClientService {
         size = 10,
         sortBy?: ClientSortField,
         sortOrder: SortOrder = 'asc'
-    ): Promise<PaginatedResponseDTO<Client>> {
+    ): Promise<PaginatedResponseDTO<ClientType>> {
         console.log('👥 ClientService: Getting clients with sorting...', {
             page, size, sortBy, sortOrder
         });
@@ -30,7 +30,7 @@ export class ClientService {
                 console.log(`📊 ClientService: Sorting by ${sortBy} (${sortOrder})`);
             }
 
-            const response = await apiClient.get<PaginatedResponseDTO<Client>>(
+            const response = await apiClient.get<PaginatedResponseDTO<ClientType>>(
                 `${API_ENDPOINTS.clients.getAll}?${params.toString()}`
             );
 
@@ -48,11 +48,11 @@ export class ClientService {
         }
     }
 
-    static async getClientByEmail(email: string): Promise<Client> {
+    static async getClientByEmail(email: string): Promise<ClientType> {
         console.log('👤 ClientService: Getting client by email...', { email });
 
         try {
-            const response = await apiClient.get<Client>(
+            const response = await apiClient.get<ClientType>(
                 API_ENDPOINTS.clients.getByEmail(email)
             );
 
@@ -70,7 +70,7 @@ export class ClientService {
         }
     }
 
-    static async createClient(client: Omit<Client, 'balance'> & { password: string }): Promise<Client> {
+    static async createClient(client: Omit<ClientType, 'balance'> & { password: string }): Promise<ClientType> {
         console.log('📝 ClientService: Creating new client...', {
             name: client.name,
             email: client.email,
@@ -78,7 +78,7 @@ export class ClientService {
         });
 
         try {
-            const response = await apiClient.post<Client>(
+            const response = await apiClient.post<ClientType>(
                 API_ENDPOINTS.clients.getAll, // POST to /clients
                 client
             );
@@ -100,7 +100,7 @@ export class ClientService {
         }
     }
 
-    static async updateClient(email: string, updates: Partial<Client>): Promise<Client> {
+    static async updateClient(email: string, updates: Partial<ClientType>): Promise<ClientType> {
         console.log('✏️ ClientService: Updating client...', {
             clientEmail: email,
             fieldsToUpdate: Object.keys(updates),
@@ -108,7 +108,7 @@ export class ClientService {
         });
 
         try {
-            const response = await apiClient.put<Client>(
+            const response = await apiClient.put<ClientType>(
                 API_ENDPOINTS.clients.update(email),
                 updates
             );
@@ -201,7 +201,7 @@ export class ClientService {
         size = 10,
         sortBy?: 'orderDate' | 'price',
         sortOrder: SortOrder = 'desc'
-    ): Promise<PaginatedResponseDTO<import('../types').OrderDTO>> {
+    ): Promise<PaginatedResponseDTO<import('../types').OrderType>> {
         console.log('📦 ClientService: Getting client orders...', {
             clientEmail, page, size, sortBy, sortOrder
         });
@@ -218,7 +218,7 @@ export class ClientService {
                 console.log(`📊 ClientService: Sorting orders by ${sortBy} (${sortOrder})`);
             }
 
-            const response = await apiClient.get<PaginatedResponseDTO<import('../types').OrderDTO>>(
+            const response = await apiClient.get<PaginatedResponseDTO<import('../types').OrderType>>(
                 `${API_ENDPOINTS.orders.getByClient(clientEmail)}?${params.toString()}`
             );
 
