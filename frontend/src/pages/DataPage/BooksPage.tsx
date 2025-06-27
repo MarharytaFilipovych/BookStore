@@ -28,12 +28,12 @@ export const BooksPage: React.FC = () => {
         if (filter.genre) searchDTO.genre = filter.genre;
         if (filter.author) searchDTO.author = filter.author;
         if (filter.language) searchDTO.language = filter.language.toUpperCase() as Language;
-        if (filter.ageGroup) searchDTO.ageGroup = filter.ageGroup.toUpperCase() as AgeGroup;
-        if (filter.minPrice) searchDTO.minPrice = parseFloat(filter.minPrice);
-        if (filter.maxPrice) searchDTO.maxPrice = parseFloat(filter.maxPrice);
-        if (filter.minPages) searchDTO.minPages = parseInt(filter.minPages);
-        if (filter.maxPages) searchDTO.maxPages = parseInt(filter.maxPages);
-        if (filter.publicationYear) searchDTO.publicationYear = parseInt(filter.publicationYear);
+        if (filter.ageGroup) searchDTO.age_group = filter.ageGroup.toUpperCase() as AgeGroup;
+        if (filter.minPrice) searchDTO.min_price = parseFloat(filter.minPrice);
+        if (filter.maxPrice) searchDTO.max_price = parseFloat(filter.maxPrice);
+        if (filter.minPages) searchDTO.min_pages = parseInt(filter.minPages);
+        if (filter.maxPages) searchDTO.max_pages = parseInt(filter.maxPages);
+        if (filter.publicationYear) searchDTO.publication_year = parseInt(filter.publicationYear);
         return searchDTO;
     };
 

@@ -74,7 +74,7 @@ export const Book: React.FC<BookType> = (book) => {
                         <MiniButton
                             topic='basket'
                             size='medium'
-                            onClick={() => context.addToBasket({bookName: book.name, quantity: 1})}
+                            onClick={() => context.addToBasket({book_name: book.name, quantity: 1})}
                         />
                     ) : (
                         <div className={styles.employeeActions}>

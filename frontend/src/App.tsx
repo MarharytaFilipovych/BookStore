@@ -45,7 +45,7 @@ export const App: React.FC = () => {
 
             <div className={styles.wrapper}>
                 {context.user && (
-                    <>
+                    <Header part='main'>
                         <Header part='left'>
                             <MenuButton user={context.role!} links={links}/>
                         </Header>
@@ -56,7 +56,7 @@ export const App: React.FC = () => {
                             <h2>{context.user.name}</h2>
                             <AuthorizationButton type={'log-out'} onClick={()=> setWarning(true)}/>
                         </Header>
-                    </>
+                    </Header>
                 )}
 
                 <Routes>

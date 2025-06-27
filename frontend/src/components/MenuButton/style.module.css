@@ -7,34 +7,34 @@
 }
 
 .line{
-    background-color: #00161C;
+    background-color: #333232;
     width:4.5rem;
     height: 0.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 
 }
-.menu-component{
+.menuComponent{
     border: none;
     background-color: transparent;
     display: flex;
     gap: 1rem;
     align-items: center;
 }
-.menu-text{
+.menuText{
     font-size: 1.8rem;
     font-weight: bold;
     font-family: "Joti One", serif;
     text-shadow: 0.5px 0.5px 1px #040d17;
-    color: #00161C;
+    color: #020220;
 }
 
-.menu-component:hover .line {
-    background-color: #07637e;
+.menuComponent:hover .line {
+    background-color: #825ad2;
     transform: scale(1.1);
 }
 
-.menu-component:hover .menu-text {
-    color: #07637e;
+.menuComponent:hover .menu-text {
+    color: #5f4c86;
     transform: scale(1.1);
 
 }
@@ -45,25 +45,25 @@
         width:4.2rem;
         height: 0.4rem;
     }
-    .menu-component{
+    .menuComponent{
         gap: 0.8rem;
     }
 
-    .menu-text{
+    .menuText{
         font-size: 1.6rem;
         font-weight: bold;
         font-family: "Joti One", serif;
         text-shadow: 0.5px 0.5px 1px #040d17;
-        color: #00161C;
+        color: #020220;
     }
 
-    .menu-component:hover .line {
-        background-color: #07637e;
+    .menuComponent:hover .line {
+        background-color: #afa1bf;
         transform: scale(1.1);
     }
 
-    .menu-component:hover .menu-text {
-        color: #07637e;
+    .menuComponent:hover .menu-text {
+        color: #b7a1d5;
         transform: scale(1.1);
 
     }

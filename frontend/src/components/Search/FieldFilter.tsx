@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './style.module.css';
 
 type FieldProps = {
-    typeOfField: 'genre' | 'country' | 'language',
+    typeOfField: 'genre' | 'country' | 'language' | 'age group',
     fields: string[],
     value: string,
     onInput: (value: string) => void;
@@ -10,7 +10,7 @@ type FieldProps = {
 
 export const FieldFilter: React.FC<FieldProps> = ({typeOfField, fields, value, onInput}) => {
     const datalistId = `${typeOfField}-options`;
-    const placeholderText = `Type ${typeOfField}...`;
+    const placeholderText = `type ${typeOfField}...`;
 
     const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onInput(e.target.value);

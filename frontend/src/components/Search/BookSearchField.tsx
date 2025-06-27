@@ -43,25 +43,18 @@ export const BookSearchField: React.FC<SearchFieldProps> = ({
                     onInput={(language: string) => onFilterChange('language', language)}
                 />
 
-                {/* Age Group Filter */}
-                <div className={styles.filterComponent}>
-                    <select
-                        value={filter.ageGroup}
-                        onChange={(e) => onFilterChange('ageGroup', e.target.value)}
-                        className={styles.filterSelect}
-                    >
-                        <option value="">All Age Groups</option>
-                        {ageGroups.map(ageGroup => (
-                            <option key={ageGroup} value={ageGroup}>
-                                {ageGroup}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <FieldFilter
+                    typeOfField='age group'
+                    fields={ageGroups}
+                    value={filter.ageGroup}
+                    onInput={(ageGroup: string) => onFilterChange('ageGroup', ageGroup)}
+                />
 
                 <SearchBar
                     value={filter.author}
                     onNameChange={(value) => onFilterChange('author', value)}
+                    text='type author...'
+                    small={true}
                 />
 
                 <div className={styles.filterComponent}>
@@ -114,6 +107,7 @@ export const BookSearchField: React.FC<SearchFieldProps> = ({
             <SearchBar
                 value={filter.name}
                 onNameChange={(value) => onFilterChange('name', value)}
+                text='type title...'
             />
         </div>
     );

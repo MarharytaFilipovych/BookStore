@@ -95,14 +95,14 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             console.log('📡 AppProvider: Calling AuthService.login...');
             const tokenResponse = await AuthService.login(request);
             console.log('✅ AppProvider: Tokens received', {
-                hasAccessToken: !!tokenResponse.accessToken,
-                hasRefreshToken: !!tokenResponse.refreshToken,
-                expiresIn: tokenResponse.expiresIn
+                hasAccessToken: !!tokenResponse.access_token,
+                hasRefreshToken: !!tokenResponse.refresh_token,
+                expiresIn: tokenResponse.expires_in
             });
 
             // Step 2: Set authorization header
             console.log('🔑 AppProvider: Setting authorization header...');
-            apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.accessToken}`);
+            apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.access_token}`);
             console.log('✅ AppProvider: Authorization header set');
 
             // Step 3: Fetch user data
@@ -153,7 +153,6 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
                 await AuthService.logout({
                     email: state.user.email,
                     role: state.role,
-                    refreshToken: AuthService.getRefreshToken() || ''
                 });
             }
         } catch (error) {
@@ -198,7 +197,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
     const removeFromBasket = (bookName: string) => {
         updateState({
-            basket: state.basket.filter(book => book.bookName !== bookName)
+            basket: state.basket.filter(book => book.book_name !== bookName)
         });
     };
 
@@ -214,12 +213,12 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             }
 
             const tokenResponse = await AuthService.refreshToken({
-                refreshToken,
+                refresh_token: refreshToken,
                 email: state.user.email,
                 role: state.role
             });
 
-            apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.accessToken}`);
+            apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.access_token}`);
             return true;
         } catch (error) {
             console.error('Token refresh failed:', error);

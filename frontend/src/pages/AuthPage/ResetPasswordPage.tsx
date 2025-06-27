@@ -22,7 +22,7 @@ export const ResetPasswordPage: React.FC = () => {
             await context.resetPassword({
                 email,
                 password: newPassword,
-                resetCode,
+                reset_code: resetCode,
                 role
             });
         } catch (err: any) {

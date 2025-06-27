@@ -16,7 +16,7 @@ body{
     flex-direction: column;
     gap: 3rem;
 }
-.content-area {
+.contentArea {
     flex: 1;
 }
 

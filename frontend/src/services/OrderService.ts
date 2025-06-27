@@ -126,11 +126,11 @@ export class OrderService {
         try {
             // Fetch price for each book in the basket
             for (const item of basketItems) {
-                const book = await BookService.getBookByName(item.bookName);
+                const book = await BookService.getBookByName(item.book_name);
                 const itemTotal = book.price * item.quantity;
                 totalPrice += itemTotal;
 
-                console.log(`📖 OrderService: ${item.bookName} - $${book.price} x ${item.quantity} = $${itemTotal}`);
+                console.log(`📖 OrderService: ${item.book_name} - $${book.price} x ${item.quantity} = $${itemTotal}`);
             }
 
             console.log('✅ OrderService: Order price calculated', {

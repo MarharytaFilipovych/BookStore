@@ -7,9 +7,10 @@
     padding: 0;
 }
 .page h2{
-    color: #1a0221;
+    margin: 3rem;
+    color: #edeaee;
     font-weight: bold;
-    font-size: 3rem;
+    font-size: 2rem;
     text-align: center;
     text-wrap: wrap;
 }

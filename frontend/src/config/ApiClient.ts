@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { TokenResponseDTO } from '../types';
+import {API_ENDPOINTS, TokenResponseDTO} from '../types';
 
 class ApiClient {
     private readonly client: AxiosInstance;
@@ -24,15 +24,22 @@ class ApiClient {
 
         this.client.interceptors.request.use(
             (config) => {
-                const token = localStorage.getItem('accessToken');
-
                 console.log(`🚀 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
 
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                    console.log('🔑 JWT token attached to request');
+                // Only set token if Authorization header isn't already present
+                if (!config.headers.Authorization) {
+                    const token = localStorage.getItem('accessToken');
+                    console.log(token)
+                    if (token) {
+                        config.headers.Authorization = `Bearer ${token}`;
+                        console.log('🔑 JWT token attached from localStorage');
+                    } else {
+                        console.log('⚠️ No JWT token found in localStorage');
+                    }
                 } else {
-                    console.log('⚠️ No JWT token found in localStorage');
+                    console.log('🔑 Using existing Authorization header');
+                    console.log('🔍 Authorization header value:', config.headers.Authorization);
+
                 }
 
                 if (config.data) {
@@ -80,17 +87,16 @@ class ApiClient {
                         if (!refreshToken) {
                             console.log('❌ No refresh token found, redirecting to login');
                             this.clearAuthData();
-                            window.location.href = '/welcome';
                             return Promise.reject(error);
                         }
 
                         console.log('🔄 Calling refresh token endpoint...');
                         const response = await this.refreshToken(refreshToken);
-                        const newAccessToken = response.data.accessToken;
+                        const newAccessToken = response.data.access_token;
 
                         localStorage.setItem('accessToken', newAccessToken);
-                        if (response.data.refreshToken) {
-                            localStorage.setItem('refreshToken', response.data.refreshToken);
+                        if (response.data.refresh_token) {
+                            localStorage.setItem('refreshToken', response.data.refresh_token);
                             console.log('🔄 Both access and refresh tokens updated');
                         } else {
                             console.log('🔄 Only access token updated');
@@ -106,7 +112,6 @@ class ApiClient {
 
                         this.clearAuthData();
                         console.log('🚪 Redirecting to welcome page...');
-                        window.location.href = '/welcome';
                         return Promise.reject(refreshError);
                     }
                 }
@@ -158,14 +163,14 @@ class ApiClient {
         });
 
         const response = await axios.post<TokenResponseDTO>(
-            `${this.client.defaults.baseURL}/auth/refresh`,
+            API_ENDPOINTS.auth.refresh,
             refreshData
         );
 
         console.log('✅ Refresh token response received:', {
-            hasAccessToken: !!response.data.accessToken,
-            hasRefreshToken: !!response.data.refreshToken,
-            expiresIn: response.data.expiresIn
+            hasAccessToken: !!response.data.access_token,
+            hasRefreshToken: !!response.data.refresh_token,
+            expiresIn: response.data.expires_in
         });
 
         return response;

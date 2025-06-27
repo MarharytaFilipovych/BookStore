@@ -18,7 +18,7 @@ export const LinksSection: React.FC<{ links: Links, style: 'menu' | 'footer', us
                 ))}
                 {user == 'CLIENT' && links.clientLinks.map((link, index) => (
                     <li key={`userlink-${index}`} className={styles.link}>
-                        <Link to={`/user/${link.link}`}>{link.name}</Link>
+                        <Link to={`/${link.link}`}>{link.name}</Link>
                     </li>
                 ))}
             </ul>

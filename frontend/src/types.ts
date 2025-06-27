@@ -22,7 +22,7 @@ export type BookType = {
 }
 
 export type BookItem = {
-    bookName: string;
+    book_name: string;
     quantity: number;
 }
 
@@ -62,12 +62,12 @@ export type SearchBook = {
     genre?: string;
     author?: string;
     language?: Language;
-    ageGroup?: AgeGroup;
-    minPrice?: number;
-    maxPrice?: number;
-    minPages?: number;
-    maxPages?: number;
-    publicationYear?: number;
+    age_group?: AgeGroup;
+    min_price?: number;
+    max_price?: number;
+    min_pages?: number;
+    max_pages?: number;
+    publication_year?: number;
 }
 
 export type MetaDTO = {
@@ -111,12 +111,6 @@ export type Links = {
     clientLinks: LinkItem[];
 }
 
-export type ConfigurationData = {
-    countries: Map<string, string>;
-    languages: Map<string, string>;
-    genres: Map<string, string>;
-    code_languages: Map<string, string>;
-}
 
 export type requestType = 'people/clients' | 'orders' | 'books' | 'people/colleagues' | 'profile';
 
@@ -144,12 +138,12 @@ export type ForgotPasswordDTO = {
 export type ResetPasswordDTO = {
     email: string;
     password: string;
-    resetCode: string;
+    reset_code: string;
     role: Role;
 }
 
 export type RefreshTokenDTO = {
-    refreshToken: string;
+    refresh_token: string;
     email: string;
     role: Role;
 }
@@ -157,14 +151,14 @@ export type RefreshTokenDTO = {
 export type LogoutDTO = {
     email: string;
     role: Role;
-    refreshToken: string;
 }
 
 export type TokenResponseDTO = {
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number; // seconds
+    access_token: string;
+    refresh_token: string;
+    expires_in: number; // seconds
 }
+
 
 export const API_ENDPOINTS = {
     books: {

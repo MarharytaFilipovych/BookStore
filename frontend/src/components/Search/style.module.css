@@ -1,19 +1,24 @@
 .search{
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    row-gap: 1rem;
+    margin: 1.5rem 3rem;
+    align-items: center;
+    justify-content: center;
 }
-.filter-container{
+.filterContainer{
     width: 100%;
     display: flex;
     margin-bottom: 1rem;
-    gap: 2.5rem;
+    row-gap: 2rem;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
 }
-.filter-component{
-    background-color: #ADE0F0;
-    border: 0.3rem solid #244650;
+.filterComponent{
+    background-color: #d1c0ee;
+    border: 0.3rem solid #141417;
     width: 15rem;
     height: 2.2rem;
     box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.3);
@@ -22,23 +27,22 @@
     padding: 0;
 }
 
-.button-wrapper{
+.buttonWrapper{
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 0.6rem;
     height: 2.2rem;
-    background-color: #ADE0F0;
+    background-color: #afa1bf;
     width: 100%;
 }
 
-.search-bar{
-
+.searchBar{
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #ACDFEE;
-    border: 0.3rem solid #244650;
+    background-color: #afa1bf;
+    border: 0.3rem solid #141417;
     padding: 1rem;
     width: 32rem;
     height: 2.9rem;
@@ -48,14 +52,19 @@
 
 }
 
+.small{
+    width: 15rem;
+    margin: 0;
+}
+
 input{
-    background-color: #ACDFEE;
+    background-color: #afa1bf;
     border: none;
     outline: none;
     font-size: 1.3rem;
     width: 90%;
     height: 2rem;
-    color: #244650;
+    color: #020220;
     padding: 0 0.5rem;
     font-family: "Indie Flower", cursive;
     font-weight: bold;
@@ -70,23 +79,26 @@ input::placeholder{
     font-weight: bold;
 
 }
-.filter-select {
-    height: 100%;
+.filterSelect {
     font-weight: bold;
-    color: #244650;
+    color: #020220;
+    height: 2.6rem;
+    background-color: #afa1bf;
 
 }
 
-.filter-component option {
-    color: #244650;
+.filterComponent option {
+    color: #0a0a0a;
     font-family: "Indie Flower", cursive;
     font-size: 1.3rem;
-    background-color: #5FB8D4;
+    background-color: #afa1bf;
     font-weight: bold;
 
 
 }
 .year{
+    background-color: #afa1bf;
+
     width: 6rem;
     padding: 0 0.5rem;
 }
@@ -95,18 +107,18 @@ input::placeholder{
     .search{
         gap: 1.2rem;
     }
-    .filter-container{
+    .filterContainer{
         gap: 1.2rem;
         width: 90%;
         margin: 0 auto;
 
     }
-    .filter-component{
+    .filterComponent{
         width:100%;
         font-size: 1.2rem;
     }
 
-    .search-bar{
+    .searchBar{
         width: 90%;
         margin: 0 auto;
     }
@@ -115,7 +127,7 @@ input::placeholder{
         font-size: 1.2rem;
     }
 
-    .filter-component option {
+    .filterComponent option {
         font-size: 1.2rem;
     }
     .year{

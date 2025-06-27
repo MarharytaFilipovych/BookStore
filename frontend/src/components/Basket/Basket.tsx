@@ -27,7 +27,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                 order_date: new Date().toISOString(),
                 price: calculateTotal(),
                 book_items: context.basket.map(item => ({
-                    bookName: item.bookName,
+                    book_name: item.book_name,
                     quantity: item.quantity
                 }))
             };
@@ -55,11 +55,11 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
 
         try {
             const fetchPromises = context.basket
-                .filter(item => !bookPrices[item.bookName])
+                .filter(item => !bookPrices[item.book_name])
                 .map(async (item) => {
-                    const book = await BookService.getBookByName(item.bookName);
-                    prices[item.bookName] = book.price;
-                    details[item.bookName] = book;
+                    const book = await BookService.getBookByName(item.book_name);
+                    prices[item.book_name] = book.price;
+                    details[item.book_name] = book;
                 });
 
             await Promise.all(fetchPromises);
@@ -83,12 +83,12 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
         if (newQuantity <= 0) {
             context.removeFromBasket(bookName);
         } else {
-            context.addToBasket({ bookName, quantity: newQuantity });
+            context.addToBasket({ book_name: bookName, quantity: newQuantity });
         }
     };
 
     const changeQuantity = (bookName: string, increase: boolean) => {
-        const item = context.basket.find(item => item.bookName === bookName);
+        const item = context.basket.find(item => item.book_name === bookName);
         if (item) {
             if(increase)updateQuantity(bookName, item.quantity + 1);
             else updateQuantity(bookName, item.quantity - 1);
@@ -97,7 +97,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
 
     const calculateTotal = (): number => {
         return context.basket.reduce((total, item) => {
-            const price = bookPrices[item.bookName] || 0;
+            const price = bookPrices[item.book_name] || 0;
             return total + (price * item.quantity);
         }, 0);
     };
@@ -139,12 +139,12 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                                         </div>
                                     )}
                                     {context.basket.map((item, index) => {
-                                        const book = bookDetails[item.bookName];
-                                        const price = bookPrices[item.bookName] || 0;
+                                        const book = bookDetails[item.book_name];
+                                        const price = bookPrices[item.book_name] || 0;
                                         return (
-                                            <div key={`${item.bookName}-${index}`} className={styles.basketItem}>
+                                            <div key={`${item.book_name}-${index}`} className={styles.basketItem}>
                                                 <div className={styles.itemInfo}>
-                                                    <h4 className={styles.bookName}>{item.bookName}</h4>
+                                                    <h4 className={styles.bookName}>{item.book_name}</h4>
                                                     {book && (
                                                         <div className={styles.bookMeta}>
                                                             <span className={styles.author}>by {book.author}</span>
@@ -165,7 +165,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                                                     <div className={styles.quantityControls}>
                                                         <button
                                                             className={styles.quantityBtn}
-                                                            onClick={() => changeQuantity(item.bookName, false)}
+                                                            onClick={() => changeQuantity(item.book_name, false)}
                                                             disabled={item.quantity <= 1}
                                                         >
                                                             -
@@ -173,13 +173,13 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                                                         <span className={styles.quantity}>{item.quantity}</span>
                                                         <button
                                                             className={styles.quantityBtn}
-                                                            onClick={() => changeQuantity(item.bookName, true)}
+                                                            onClick={() => changeQuantity(item.book_name, true)}
                                                         >
                                                             +
                                                         </button>
                                                     </div>
                                                     <MiniButton topic='cross' size='mini'
-                                                                onClick={() => context.removeFromBasket(item.bookName)}
+                                                                onClick={() => context.removeFromBasket(item.book_name)}
                                                     />
                                                 </div>
                                             </div>

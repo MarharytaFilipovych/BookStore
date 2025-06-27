@@ -1,4 +1,4 @@
-.mini-button {
+.miniButton {
     width: 2rem;
     height: 2.5rem;
     padding: 0;
@@ -12,11 +12,11 @@
 }
 
 
-.mini-button:not([disabled]) img:hover {
+.miniButton:not([disabled]) img:hover {
     transform: scale(1.1);
     filter: drop-shadow(0 0 3px #01090c);
 
 }
-.mini-button.right:not([disabled]) img:hover {
+.miniButton.right:not([disabled]) img:hover {
     transform: scaleX(-1) scale(1.1);
 }

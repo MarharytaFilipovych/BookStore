@@ -37,7 +37,7 @@
 }
 
 .menu .link:nth-child(even) {
-    background-color: #072933;
+    background-color: #2e213f;
 }
 
 @media only screen and (max-width: 768px) {

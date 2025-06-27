@@ -131,7 +131,7 @@ export const OrderComponent: React.FC<OrderComponentProps> = (order) => {
                                         {order.book_items.map((item, index) => (
                                             <div key={index} className={styles.bookItem}>
                                                 <div className={styles.bookItemInfo}>
-                                                    <strong>{item.bookName}</strong>
+                                                    <strong>{item.book_name}</strong>
                                                     <span className={styles.quantity}>Qty: {item.quantity}</span>
                                                 </div>
                                             </div>

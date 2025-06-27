@@ -25,19 +25,19 @@ export class AuthService {
             );
 
             console.log('✅ AuthService: Login successful', {
-                hasAccessToken: !!response.data.accessToken,
-                hasRefreshToken: !!response.data.refreshToken,
-                expiresIn: response.data.expiresIn,
+                hasAccessToken: !!response.data.access_token,
+                hasRefreshToken: !!response.data.refresh_token,
+                expiresIn: response.data.expires_in,
                 role: credentials.role
             });
 
-            if (response.data.accessToken) {
-                localStorage.setItem('accessToken', response.data.accessToken);
+            if (response.data.access_token) {
+                localStorage.setItem('accessToken', response.data.access_token);
                 console.log('💾 AuthService: Access token stored');
             }
 
-            if (response.data.refreshToken) {
-                localStorage.setItem('refreshToken', response.data.refreshToken);
+            if (response.data.refresh_token) {
+                localStorage.setItem('refreshToken', response.data.refresh_token);
                 console.log('💾 AuthService: Refresh token stored');
             }
 
@@ -88,7 +88,7 @@ export class AuthService {
         console.log('🔐 AuthService: Resetting password...', {
             email: data.email,
             hasPassword: !!data.password,
-            hasResetCode: !!data.resetCode
+            hasResetCode: !!data.reset_code
         });
 
         try {
@@ -104,7 +104,7 @@ export class AuthService {
         console.log('🔄 AuthService: Refreshing access token...', {
             email: data.email,
             role: data.role,
-            hasRefreshToken: !!data.refreshToken
+            hasRefreshToken: !!data.refresh_token
         });
 
         try {
@@ -114,18 +114,18 @@ export class AuthService {
             );
 
             console.log('✅ AuthService: Token refresh successful', {
-                hasAccessToken: !!response.data.accessToken,
-                hasRefreshToken: !!response.data.refreshToken,
-                expiresIn: response.data.expiresIn
+                hasAccessToken: !!response.data.access_token,
+                hasRefreshToken: !!response.data.refresh_token,
+                expiresIn: response.data.expires_in
             });
 
-            if (response.data.accessToken) {
-                localStorage.setItem('accessToken', response.data.accessToken);
+            if (response.data.access_token) {
+                localStorage.setItem('accessToken', response.data.access_token);
                 console.log('💾 AuthService: New access token stored');
             }
 
-            if (response.data.refreshToken) {
-                localStorage.setItem('refreshToken', response.data.refreshToken);
+            if (response.data.refresh_token) {
+                localStorage.setItem('refreshToken', response.data.refresh_token);
                 console.log('💾 AuthService: New refresh token stored');
             }
 
