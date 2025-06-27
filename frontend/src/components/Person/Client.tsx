@@ -7,10 +7,10 @@ import {ClientService} from "../../services/ClientService";
 export const ClientComponent: React.FC<ClientType> = (client) => {
     return (
         <>
-            <div className={styles.clientContainer}>
-                    <h3 className={styles.clientName}>{client.name}</h3>
-                    <p className={styles.clientEmail}>{client.email}</p>
-                    <p className={styles.balance}>{client.balance}</p>
+            <div className={styles.container}>
+                    <h3 className={styles.name}>{client.name}</h3>
+                    <p className={styles.email}>{client.email}</p>
+                    <p className={styles.addInfo}>{client.balance}</p>
                     <MiniButton
                         topic='ban'
                         size='medium'

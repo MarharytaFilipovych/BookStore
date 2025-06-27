@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import {Role} from "../../types";
 import {AppContext} from "../../context";
-import {ResetPasswordForm} from "../../components/AuthForm/ResetPasswordForm";
+import {ResetPasswordForm} from "../../components/Form/ResetPasswordForm";
 import styles from './style.module.css';
 
 export const ResetPasswordPage: React.FC = () => {

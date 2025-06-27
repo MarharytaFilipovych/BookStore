@@ -7,14 +7,14 @@
     padding: 0;
 }
 .page h2{
-    margin: 3rem;
+    margin: 1.7rem;
     color: #edeaee;
     font-weight: bold;
     font-size: 2rem;
     text-align: center;
     text-wrap: wrap;
 }
-.booksContainer{
+.container{
     padding: 3rem 1.5rem;
     display: flex;
     flex-direction: column;

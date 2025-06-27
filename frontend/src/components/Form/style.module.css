@@ -1,0 +1,134 @@
+.form{
+    background-color: rgb(175, 161, 191);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.2rem;
+    gap: 2rem;
+    width:50%;
+    border: 0.2rem solid #717179;
+}
+.errorMessage{
+    color: #1a0221;
+    font-size: 1.4rem;
+}
+.form input{
+    background-color: #101011;
+    border: 0.2rem solid #57575b;
+    outline: none;
+    font-size: 1.3rem;
+    width: 90%;
+    height: 2.6rem;
+    color: #9da5a8;
+    padding: 0 0.5rem;
+    font-family: "Indie Flower", cursive;
+    font-weight: bold;
+    box-shadow:  0.2rem 0.2rem 0.2rem 0.2rem rgba(0, 3, 3, 0.96);
+}
+.instructions{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.3rem;
+    color: #090909;
+}
+.instructions h2{
+    font-weight: bold;
+    font-size: 2rem;
+    padding: 0.5rem;
+}
+.instructions p{
+    font-size: 1.1rem;
+}
+input::placeholder{
+    font-weight: normal;
+}
+
+.buttons{
+    padding-top: 0.8rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3rem;
+}
+
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 90%;
+    gap: 0.5rem;
+}
+
+.label {
+    color: #090909;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.required {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.readOnly {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #2a2a2b !important;
+}
+
+.error {
+    border-color: #d32f2f !important;
+    box-shadow: 0.2rem 0.2rem 0.2rem 0.2rem rgba(211, 47, 47, 0.3) !important;
+}
+
+.form input:focus {
+    border-color: #4f9eff;
+    box-shadow: 0.2rem 0.2rem 0.2rem 0.2rem rgba(79, 158, 255, 0.3);
+}
+
+.form input:focus.error {
+    border-color: #d32f2f;
+    box-shadow: 0.2rem 0.2rem 0.2rem 0.2rem rgba(211, 47, 47, 0.3);
+}
+
+.form input[type="date"] {
+    color: #9da5a8;
+    background-color: #101011;
+}
+
+.form input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+}
+
+.form input[type="number"] {
+    color: #9da5a8;
+    background-color: #101011;
+}
+
+.form input[type="tel"] {
+    color: #9da5a8;
+    background-color: #101011;
+}
+
+@media only screen and (max-width: 768px) {
+    .form {
+        width: 85%;
+    }
+    .formGroup {
+        width: 95%;
+    }
+
+    .label {
+        font-size: 1.1rem;
+    }
+
+    .buttons {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}

@@ -1,7 +1,7 @@
 import React, {useContext, useState} from 'react';
 import {useNavigate} from 'react-router';
 import {AppContext} from '../../context';
-import {RegisterForm} from "../../components/AuthForm/RegisterForm";
+import {RegisterForm} from "../../components/Form/RegisterForm";
 import styles from './style.module.css';
 
 export const RegistrationPage: React.FC = ()=>{

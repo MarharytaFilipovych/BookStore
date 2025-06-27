@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useContext} from 'react';
 import {useNavigate} from 'react-router';
-import {LogInForm} from "../../components/AuthForm/LogInForm";
+import {LogInForm} from "../../components/Form/LogInForm";
 import {useParams} from "react-router-dom";
 import {Role} from "../../types";
 import {AppContext} from "../../context";
@@ -14,21 +14,10 @@ export const LoginPage: React.FC = () => {
     const [loginError, setLoginError] = useState<boolean>(false);
     const [processing, setProcessing] = useState<boolean>(false);
 
-    // Enhanced useEffect with debug logging
-    useEffect(() => {
-        console.log('👤 LoginPage: User state changed in useEffect', {
-            hasUser: !!context.user,
-            userEmail: context.user?.email,
-            userRole: context.role
-        });
-
-        if (context.user) {
-            console.log('✅ LoginPage: User found, navigating to /books');
-            navigate('/books');
-        } else {
-            console.log('⚠️ LoginPage: No user found, staying on login page');
-        }
-    }, [context.user, navigate]);
+    if (context.user) {
+        console.log('✅ LoginPage: User found, navigating to /books');
+        navigate('/books');
+    }
 
     const login = async (email: string, password: string, role: Role) => {
         console.log('🔐 LoginPage: Login form submitted', {
@@ -78,18 +67,3 @@ export const LoginPage: React.FC = () => {
         </div>
     );
 };
-
-// Debug function you can call in browser console
-if (typeof window !== 'undefined') {
-    (window as any).debugLoginState = () => {
-        console.log('🔍 Debug: Current login state', {
-            localStorage_user: localStorage.getItem('user'),
-            localStorage_role: localStorage.getItem('role'),
-            localStorage_accessToken: localStorage.getItem('accessToken'),
-            localStorage_refreshToken: localStorage.getItem('refreshToken'),
-            authService_isAuthenticated: AuthService.isAuthenticated(),
-            authService_getToken: AuthService.getToken(),
-            authService_getTokenInfo: AuthService.getTokenInfo()
-        });
-    };
-}

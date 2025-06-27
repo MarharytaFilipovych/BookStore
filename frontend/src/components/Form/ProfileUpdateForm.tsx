@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { ClientType, EmployeeType, Role } from '../../types';
-import { MiniButton } from '../MiniButton/MiniButton';
 import styles from './style.module.css';
+import { Icon } from "../Icon/Icon";
+import { AuthorizationButton } from "../AuthorizationButton/AuthorizationButton";
+import { Warning } from "../Warning/Warning";
+import { useNavigate } from "react-router";
 
 interface ProfileUpdateFormProps {
     user: ClientType | EmployeeType;
     userRole: Role;
     onUpdate: (updatedData: Partial<ClientType | EmployeeType>) => Promise<void>;
     onDeleteAccount: () => void;
-    isUpdating: boolean;
+    processing?: boolean;
+    error: string;
 }
 
 export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
@@ -16,28 +20,31 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                                                                         userRole,
                                                                         onUpdate,
                                                                         onDeleteAccount,
-                                                                        isUpdating
+                                                                        processing = false,
+                                                                        error = ''
                                                                     }) => {
+    const [warning, setWarning] = useState<boolean>(false);
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState(() => {
         if (userRole === 'CLIENT') {
             const client = user as ClientType;
             return {
                 name: client.name,
-                email: client.email, // Read-only
+                email: client.email,
                 balance: client.balance?.toString() || '0'
             };
         } else {
             const employee = user as EmployeeType;
             return {
                 name: employee.name,
-                email: employee.email, // Read-only
+                email: employee.email,
                 phone: employee.phone || '',
                 birthdate: employee.birthdate || ''
             };
         }
     });
 
-    const [showDeleteWarning, setShowDeleteWarning] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleInputChange = (field: string, value: string) => {
@@ -46,7 +53,6 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
             [field]: value
         }));
 
-        // Clear error when user starts typing
         if (errors[field]) {
             setErrors(prev => ({
                 ...prev,
@@ -84,10 +90,7 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         try {
             if (userRole === 'CLIENT') {
@@ -107,26 +110,27 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
         }
     };
 
-    const handleDeleteAccount = () => {
-        setShowDeleteWarning(false);
-        onDeleteAccount();
-    };
-
     return (
-        <div className={styles.profileForm}>
-            <div className={styles.formHeader}>
-                <h2>Update Profile</h2>
-                <div className={styles.userRole}>
-                    <span className={`${styles.roleBadge} ${styles[userRole.toLowerCase()]}`}>
-                        {userRole}
-                    </span>
-                </div>
-            </div>
-
+        <>
+            {warning && (
+                <Warning
+                    onClick={()=>{
+                        setWarning(false);
+                        onDeleteAccount();
+                    }}
+                    onCancel={() => setWarning(false)}
+                    purpose='delete'
+                    message={'Are you sure about deleting your account?'}
+                />
+            )}
             <form onSubmit={handleSubmit} className={styles.form}>
-                {/* Email - Read Only */}
+
+                <div className={styles.instructions}>
+                    <h2>Update your profile!</h2>
+                </div>
+                {error && (<p className={styles.errorMessage}>{error}</p>)}
+
                 <div className={styles.formGroup}>
-                    <label className={styles.label}>Email</label>
                     <input
                         type="email"
                         value={formData.email}
@@ -134,10 +138,8 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                         readOnly
                         disabled
                     />
-                    <span className={styles.helperText}>Email cannot be changed</span>
                 </div>
 
-                {/* Name */}
                 <div className={styles.formGroup}>
                     <label className={styles.label}>
                         Name <span className={styles.required}>*</span>
@@ -147,12 +149,12 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         className={`${styles.input} ${errors.name ? styles.error : ''}`}
-                        placeholder="Enter your full name"
+                        placeholder="type your name..."
+                        required
                     />
-                    {errors.name && <span className={styles.errorText}>{errors.name}</span>}
+                    {errors.name && <span className={styles.errorMessage}>{errors.name}</span>}
                 </div>
 
-                {/* Client-specific fields */}
                 {userRole === 'CLIENT' && (
                     <div className={styles.formGroup}>
                         <label className={styles.label}>Balance</label>
@@ -163,13 +165,13 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                             value={formData.balance}
                             onChange={(e) => handleInputChange('balance', e.target.value)}
                             className={`${styles.input} ${errors.balance ? styles.error : ''}`}
-                            placeholder="0.00"
+                            placeholder="type your balance (0.00)..."
+                            required
                         />
-                        {errors.balance && <span className={styles.errorText}>{errors.balance}</span>}
+                        {errors.balance && <span className={styles.errorMessage}>{errors.balance}</span>}
                     </div>
                 )}
 
-                {/* Employee-specific fields */}
                 {userRole === 'EMPLOYEE' && (
                     <>
                         <div className={styles.formGroup}>
@@ -181,9 +183,10 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                                 value={formData.phone}
                                 onChange={(e) => handleInputChange('phone', e.target.value)}
                                 className={`${styles.input} ${errors.phone ? styles.error : ''}`}
-                                placeholder="Enter your phone number"
+                                placeholder="type your number..."
+                                required
                             />
-                            {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+                            {errors.phone && <span className={styles.errorMessage}>{errors.phone}</span>}
                         </div>
 
                         <div className={styles.formGroup}>
@@ -195,69 +198,34 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                                 value={formData.birthdate}
                                 onChange={(e) => handleInputChange('birthdate', e.target.value)}
                                 className={`${styles.input} ${errors.birthdate ? styles.error : ''}`}
+                                placeholder="type your birthdate..."
+                                required
                             />
-                            {errors.birthdate && <span className={styles.errorText}>{errors.birthdate}</span>}
+                            {errors.birthdate && <span className={styles.errorMessage}>{errors.birthdate}</span>}
                         </div>
                     </>
                 )}
 
-                {/* Form Actions */}
-                <div className={styles.formActions}>
-                    <button
-                        type="submit"
-                        disabled={isUpdating}
-                        className={styles.updateButton}
-                    >
-                        {isUpdating ? 'Updating...' : 'Update Profile'}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => setShowDeleteWarning(true)}
-                        className={styles.deleteButton}
-                    >
-                        Delete Account
-                    </button>
+                <div className={styles.buttons}>
+                    <AuthorizationButton
+                        type='delete'
+                        form={true}
+                        disabled={processing}
+                        onClick={() => setWarning(true)}
+                    />
+                    <AuthorizationButton
+                        type='submit'
+                        form={true}
+                        disabled={processing}
+                    />
+                    <AuthorizationButton
+                        type='forgot'
+                        form={false}
+                        disabled={processing}
+                        onClick={() => navigate('/forgot', { state: { role: userRole } })}
+                    />
                 </div>
             </form>
-
-            {/* Delete Account Warning Modal */}
-            {showDeleteWarning && (
-                <div className={styles.overlay} onClick={() => setShowDeleteWarning(false)}>
-                    <div className={styles.warningModal} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.warningHeader}>
-                            <h3>⚠️ Delete Account</h3>
-                            <MiniButton
-                                topic='cross'
-                                size='mini'
-                                onClick={() => setShowDeleteWarning(false)}
-                            />
-                        </div>
-
-                        <div className={styles.warningContent}>
-                            <p>Are you sure you want to delete your account?</p>
-                            <p className={styles.warningText}>
-                                This action cannot be undone. All your data will be permanently removed.
-                            </p>
-                        </div>
-
-                        <div className={styles.warningActions}>
-                            <button
-                                onClick={() => setShowDeleteWarning(false)}
-                                className={styles.cancelButton}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDeleteAccount}
-                                className={styles.confirmDeleteButton}
-                            >
-                                Delete Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+        </>
     );
 };

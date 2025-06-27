@@ -5,14 +5,14 @@ import { AuthorizationButton } from '../AuthorizationButton/AuthorizationButton'
 type WarningProps = {
     onClick: () => void,
     onCancel: () => void,
-    purpose: 'log-out' | 'delete everything',
+    purpose: 'log-out' | 'delete',
     message: string
 }
 
 export const Warning: React.FC<WarningProps> = ({ onClick, purpose, onCancel, message }) => {
     return  <div className={styles.warning}>
             <p>{message}</p>
-            <div className='buttons'>
+            <div className={styles.buttons}>
                 <AuthorizationButton
                     type={purpose}
                     warning={true}

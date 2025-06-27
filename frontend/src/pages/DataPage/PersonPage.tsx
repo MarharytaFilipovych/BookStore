@@ -5,8 +5,8 @@ import { PersonSearchField } from "../../components/Search/PersonSearchField";
 import { clientSortOptionsWithMappings, employeeSortOptionsWithMappings } from "../../BusinessData";
 import styles from './style.module.css';
 import { GenericSearchablePage } from "./GenereicSearchablePage";
-import { ClientComponent } from "../../components/Client/Client";
-import { EmployeeComponent } from "../../components/Employee/Employee";
+import { ClientComponent } from "../../components/Person/Client";
+import { EmployeeComponent } from "../../components/Person/Employee";
 import { ClientService } from "../../services/ClientService";
 import { EmployeeService } from "../../services/EmployeeService";
 
@@ -106,7 +106,6 @@ export const PersonPage: React.FC = () => {
             sortOptions={isClientsPage ? clientSortOptionsWithMappings : employeeSortOptionsWithMappings}
             searchComponent={renderSearchComponent}
             renderItem={renderPerson}
-            itemsContainerClassName={styles.clientsContainer}
             noResultsMessage={
                 isClientsPage
                     ? "No clients found! Try adjusting your search criteria!"

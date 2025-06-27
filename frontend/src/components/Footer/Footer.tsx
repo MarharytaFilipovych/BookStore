@@ -25,7 +25,7 @@ export const Footer: React.FC<FooterProps> = ({links, contacts, user}) => {
                 </div>
                 <Contacts contacts={contacts}/>
             </div>
-            <p className={styles.copyright}>&copy; {currentYear} TV Serieees. All rights reserved.</p>
+            <p className={styles.copyright}>&copy; {currentYear} Margosha book store. All rights reserved.</p>
         </footer>
     );
 };

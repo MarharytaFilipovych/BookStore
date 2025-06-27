@@ -63,7 +63,7 @@ export const OrdersPage: React.FC = () => {
 
             await OrderService.confirmOrder(selectedOrder, employeeEmail);
 
-            console.log('✅ Employee assigned successfully');
+            console.log('✅ Person assigned successfully');
 
             // Refresh the page or update state
             window.location.reload();
@@ -94,7 +94,6 @@ export const OrdersPage: React.FC = () => {
                 sortOptions={orderSortOptions}
                 searchComponent={renderSearchComponent}
                 renderItem={renderOrder}
-                itemsContainerClassName={styles.ordersContainer}
                 noResultsMessage="No orders found! Try adjusting your search criteria!"
                 showResultsCount={true}
                 resultsCountText={(count) => `Found ${count} orders!`}

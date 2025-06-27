@@ -14,11 +14,11 @@ export const EmployeeComponent: React.FC<EmployeeType> = (employee) => {
 
     return (
         <>
-            <div className={styles.employeeContainer}>
-                    <h3 className={styles.employeeName}>{employee.name}</h3>
-                    <p className={styles.employeeEmail}>{employee.email}</p>
-                    <p className={styles.phoneNumber}>{employee.phone}</p>
-                <p className={styles.ageNumber}>birthdate ... <strong>{formatDate(employee.birthdate)}</strong></p>
+            <div className={styles.container}>
+                    <h3 className={styles.name}>{employee.name}</h3>
+                    <p className={styles.email}>{employee.email}</p>
+                    <p className={styles.number}>{employee.phone}</p>
+                <p >birthdate ... <strong className={styles.addInfo}>{formatDate(employee.birthdate)}</strong></p>
             </div>
         </>
     );

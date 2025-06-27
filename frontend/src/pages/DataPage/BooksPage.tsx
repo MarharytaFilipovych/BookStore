@@ -72,10 +72,42 @@ export const BooksPage: React.FC = () => {
         />
     );
 
+    // Handle book deletion from the page level
+    const handleBookDelete = async (bookName: string) => {
+        console.log('🗑️ BooksPage: Handling book deletion...', { bookName });
+
+        try {
+            await BookService.deleteBook(bookName);
+            console.log('✅ BooksPage: Book deleted successfully, refreshing page...');
+
+            // Refresh the page to show updated book list
+            window.location.reload();
+
+        } catch (error) {
+            console.error('❌ BooksPage: Failed to delete book:', error);
+            alert('Failed to delete book. Please try again.');
+        }
+    };
+
+    // Handle book update from the page level
+    const handleBookUpdate = async (bookName: string, updatedBook: BookType) => {
+        console.log('✏️ BooksPage: Handling book update...', { bookName });
+
+        try {
+            await BookService.updateBook(bookName, updatedBook);
+            console.log('✅ BooksPage: Book updated successfully, refreshing page...');
+            window.location.reload();
+        } catch (error) {
+            console.error('❌ BooksPage: Failed to update book:', error);
+        }
+    };
+
     const renderBook = (book: BookType, index: number) => (
         <Book
             key={`${book.name}-${index}`}
             {...book}
+            onDelete={handleBookDelete}
+            onUpdate={handleBookUpdate}
         />
     );
 
@@ -86,7 +118,6 @@ export const BooksPage: React.FC = () => {
             sortOptions={bookSortOptions}
             searchComponent={renderSearchComponent}
             renderItem={renderBook}
-            itemsContainerClassName={styles.booksContainer}
             noResultsMessage="No books found! Try adjusting your search criteria!"
             showResultsCount={true}
             resultsCountText={(count) => `Found ${count} books!`}

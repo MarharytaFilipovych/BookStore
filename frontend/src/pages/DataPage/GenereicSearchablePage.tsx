@@ -32,7 +32,6 @@ interface GenericSearchablePageProps<TItem, TFilter, TSortField> {
     renderItem: (item: TItem, index: number) => ReactNode;
 
     containerClassName?: string;
-    itemsContainerClassName?: string;
     noResultsMessage?: string;
     showResultsCount?: boolean;
     resultsCountText?: (count: number) => string;
@@ -49,7 +48,6 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
                                                                                                   searchComponent,
                                                                                                   renderItem,
                                                                                                   containerClassName = styles.page,
-                                                                                                  itemsContainerClassName = styles.itemsContainer,
                                                                                                   noResultsMessage = "No results found! Try adjusting your search criteria!",
                                                                                                   showResultsCount = false,
                                                                                                   resultsCountText = (count: number) => `Found ${count} results!`
@@ -149,7 +147,7 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
                     )}
 
                     {state.items.length > 0 && (
-                        <div className={itemsContainerClassName}>
+                        <div className={styles.container}>
                             {state.items.map((item, index) => renderItem(item, index))}
                         </div>
                     )}

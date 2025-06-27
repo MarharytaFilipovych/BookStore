@@ -3,51 +3,45 @@ import styles from './style.module.css';
 import { BookType } from "../../types";
 import { AppContext } from "../../context";
 import { MiniButton } from "../MiniButton/MiniButton";
-import { BookService } from "../../services/BookService";
 import { BookForm } from "../BookForm/BookForm";
+import {Warning} from "../Warning/Warning";
 
-export const Book: React.FC<BookType> = (book) => {
+interface BookProps extends BookType {
+    onDelete: (bookName: string) => Promise<void>;
+    onUpdate: (bookName: string, updatedBook: BookType) => Promise<void>;
+}
+
+export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
     const context = useContext(AppContext);
     const [showDetails, setShowDetails] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
-
-    // Add state for BookForm props
     const [isProcessing, setIsProcessing] = useState(false);
     const [formError, setFormError] = useState<string>('');
+    const [warning, setWarning] = useState<boolean>(false);
 
     const handleSubmitEdit = async (updatedBook: BookType) => {
         try {
             setIsProcessing(true);
             setFormError('');
-
-            await BookService.updateBook(book.name, updatedBook);
-
+            await onUpdate(book.name, updatedBook);
             setShowEditForm(false);
             setIsProcessing(false);
-             window.location.reload();
 
         } catch (error) {
             console.error('Failed to update book:', error);
-            setFormError('Failed to update book. Please try again.');
+            setFormError('Could not update book! Please try again.');
             setIsProcessing(false);
         }
     };
 
     const handleDeleteBook = async () => {
-        // Optional: Add confirmation dialog
-        if (!window.confirm(`Are you sure you want to delete "${book.name}"?`)) {
-            return;
-        }
-
         try {
-            await BookService.deleteBook(book.name);
-
-            // Optional: You might want to refresh the page or update local state
-            // window.location.reload(); // Simple refresh
-
+            setIsProcessing(true);
+            console.log('🗑️ Book: Requesting deletion...', book.name);
+            await onDelete(book.name);
         } catch (error) {
-            console.error('Failed to delete book:', error);
-            // Optional: Show error notification
+            console.error('❌ Book: Failed to delete book:', error);
+            setIsProcessing(false);
             alert('Failed to delete book. Please try again.');
         }
     };
@@ -60,6 +54,17 @@ export const Book: React.FC<BookType> = (book) => {
 
     return (
         <>
+            {warning && (
+                <Warning
+                    onClick={async ()=>{
+                        setWarning(false);
+                        await handleDeleteBook();
+                    }}
+                    onCancel={() => setWarning(false)}
+                    purpose='delete'
+                    message={'Are you sure about deleting this book?'}
+                />
+            )}
             <div className={styles.bookContainer}>
                 <div className={styles.bookInfo}>
                     <h3 className={styles.bookName} onClick={() => setShowDetails(!showDetails)}>
@@ -81,7 +86,7 @@ export const Book: React.FC<BookType> = (book) => {
                             <MiniButton
                                 topic='bin'
                                 size='medium'
-                                onClick={handleDeleteBook}
+                                onClick={() => setWarning(true)}
                             />
                             <MiniButton
                                 topic='update'
@@ -97,10 +102,10 @@ export const Book: React.FC<BookType> = (book) => {
                 <div className={styles.overlay} onClick={() => setShowDetails(!showDetails)}>
                     <article className={styles.bookDescription} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.bookDetailsHeader}>
-                            <h2>{book.name}</h2>
+                            <h3>{book.name}</h3>
                             <MiniButton
                                 topic='cross'
-                                size='mini'
+                                size='premedium'
                                 onClick={() => setShowDetails(!showDetails)}
                             />
                         </div>

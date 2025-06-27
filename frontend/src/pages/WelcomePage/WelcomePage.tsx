@@ -1,12 +1,19 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import styles from './style.module.css';
 import {AuthorizationButton} from "../../components/AuthorizationButton/AuthorizationButton";
-import {Link} from "react-router";
+import {Link, useNavigate} from "react-router";
 import {State} from "../../types";
 import {Icon} from "../../components/Icon/Icon";
+import {AppContext} from "../../context";
 
 
 export const WelcomePage: React.FC = ()=>{
+    const navigate = useNavigate();
+    const context = useContext(AppContext);
+    if (context.user) {
+        console.log('✅ WelcomePage: User found, navigating to /books');
+        navigate('/books');
+    }
     return <>
         <div className={styles.page}>
             <div className={styles.heading}>

@@ -108,18 +108,24 @@ export class ClientService {
         });
 
         try {
-            const response = await apiClient.put<ClientType>(
+            // Send the update request (returns only status code)
+            await apiClient.put<void>(
                 API_ENDPOINTS.clients.update(email),
                 updates
             );
 
-            console.log('✅ ClientService: Client updated successfully', {
-                updatedClient: response.data.name,
-                email: response.data.email,
-                fieldsUpdated: Object.keys(updates)
-            });
+            console.log('✅ ClientService: Client updated successfully (status code received)');
 
-            return response.data;
+            // Construct the updated client object by merging current data with updates
+            const updatedClient: ClientType = {
+               name: updates.name!,
+                balance: updates.balance!,
+                email: email
+            };
+
+            console.log('🔄 ClientService: Constructed updated client object', updatedClient);
+
+            return updatedClient;
 
         } catch (error) {
             console.error('❌ ClientService: Failed to update client', {
@@ -130,7 +136,6 @@ export class ClientService {
             throw error;
         }
     }
-
     static async deleteClient(email: string): Promise<void> {
         console.log('🗑️ ClientService: Deleting client...', { email });
 

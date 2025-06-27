@@ -50,10 +50,10 @@ export const orderSortOptions = new Map<string, {sortBy: OrderSortField, sortOrd
     ['Client Name Z-A', {sortBy: 'client_name', sortOrder: 'desc'}],
     ['Client Email A-Z', {sortBy: 'client_email', sortOrder: 'asc'}],
     ['Client Email Z-A', {sortBy: 'client_email', sortOrder: 'desc'}],
-    ['Employee Name A-Z', {sortBy: 'employee_name', sortOrder: 'asc'}],
-    ['Employee Name Z-A', {sortBy: 'employee_name', sortOrder: 'desc'}],
-    ['Employee Email A-Z', {sortBy: 'employee_email', sortOrder: 'asc'}],
-    ['Employee Email Z-A', {sortBy: 'employee_email', sortOrder: 'desc'}]
+    ['Person Name A-Z', {sortBy: 'employee_name', sortOrder: 'asc'}],
+    ['Person Name Z-A', {sortBy: 'employee_name', sortOrder: 'desc'}],
+    ['Person Email A-Z', {sortBy: 'employee_email', sortOrder: 'asc'}],
+    ['Person Email Z-A', {sortBy: 'employee_email', sortOrder: 'desc'}]
 ]);
 
 export const employeeSortOptionsWithMappings = new Map<string, {sortBy: EmployeeSortField, sortOrder: SortOrder}>([

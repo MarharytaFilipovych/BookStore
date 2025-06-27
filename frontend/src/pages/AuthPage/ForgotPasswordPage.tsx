@@ -2,7 +2,7 @@ import React, {useContext, useState} from "react";
 import {Role} from "../../types";
 import {AppContext} from "../../context";
 import {useLocation, useNavigate} from "react-router";
-import {ForgotPasswordForm} from "../../components/AuthForm/ForgotPasswordForm";
+import {ForgotPasswordForm} from "../../components/Form/ForgotPasswordForm";
 import styles from './style.module.css';
 
 export const ForgotPasswordPage: React.FC = () => {

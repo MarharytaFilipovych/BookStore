@@ -18,16 +18,6 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
     const isEditMode = Boolean(initialData.name);
 
     const [formData, setFormData] = useState<Partial<BookType>>({
-        name: '',
-        author: '',
-        genre: '',
-        language: 'ENGLISH',
-        age_group: 'ADULT',
-        price: 0,
-        pages: 0,
-        publication_date: '',
-        characteristics: '',
-        description: '',
         ...initialData
     });
 
@@ -70,10 +60,7 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (validateForm()) {
-            onSubmit(formData as BookType);
-        }
+        if (validateForm()) onSubmit(formData as BookType);
     };
 
     return (

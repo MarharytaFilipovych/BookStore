@@ -56,7 +56,7 @@ export class EmployeeService {
                 API_ENDPOINTS.employees.getByEmail(email)
             );
 
-            console.log('✅ EmployeeService: Employee retrieved successfully', {
+            console.log('✅ EmployeeService: Person retrieved successfully', {
                 employeeName: response.data.name,
                 email: response.data.email,
                 phone: response.data.phone
@@ -83,7 +83,7 @@ export class EmployeeService {
                 employee
             );
 
-            console.log('✅ EmployeeService: Employee created successfully', {
+            console.log('✅ EmployeeService: Person created successfully', {
                 createdEmployee: response.data.name,
                 email: response.data.email
             });
@@ -107,18 +107,23 @@ export class EmployeeService {
         });
 
         try {
-            const response = await apiClient.put<EmployeeType>(
+            await apiClient.put<void>(
                 API_ENDPOINTS.employees.update(email),
                 updates
             );
 
-            console.log('✅ EmployeeService: Employee updated successfully', {
-                updatedEmployee: response.data.name,
-                email: response.data.email,
-                fieldsUpdated: Object.keys(updates)
-            });
+            console.log('✅ EmployeeService: Employee updated successfully (status code received)');
 
-            return response.data;
+            const updatedEmployee: EmployeeType = {
+                email: email,
+                phone: updates.phone!,
+                birthdate: updates.birthdate!,
+                name: updates.name!
+            };
+
+            console.log('🔄 EmployeeService: Constructed updated employee object', updatedEmployee);
+
+            return updatedEmployee;
 
         } catch (error) {
             console.error('❌ EmployeeService: Failed to update employee', {
@@ -136,7 +141,7 @@ export class EmployeeService {
         try {
             await apiClient.delete(API_ENDPOINTS.employees.delete(email));
 
-            console.log('✅ EmployeeService: Employee deleted successfully', {
+            console.log('✅ EmployeeService: Person deleted successfully', {
                 deletedEmployee: email
             });
 
@@ -175,7 +180,7 @@ export class EmployeeService {
                 `${API_ENDPOINTS.orders.getByEmployee(employeeEmail)}?${params.toString()}`
             );
 
-            console.log('✅ EmployeeService: Employee orders retrieved successfully', {
+            console.log('✅ EmployeeService: Person orders retrieved successfully', {
                 employeeEmail,
                 totalOrders: response.data.meta?.total_count || 0,
                 ordersOnPage: response.data.orders?.length || 0,

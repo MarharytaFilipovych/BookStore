@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import {API_ENDPOINTS, TokenResponseDTO} from '../types';
+import {useNavigate} from "react-router";
 
 class ApiClient {
     private readonly client: AxiosInstance;
@@ -85,10 +86,13 @@ class ApiClient {
                     try {
                         const refreshToken = localStorage.getItem('refreshToken');
                         if (!refreshToken) {
+                            console.log("Refresh token: ", refreshToken)
                             console.log('❌ No refresh token found, redirecting to login');
                             this.clearAuthData();
+                            window.location.href = '/';
                             return Promise.reject(error);
                         }
+                        console.log("Refresh token: ", refreshToken)
 
                         console.log('🔄 Calling refresh token endpoint...');
                         const response = await this.refreshToken(refreshToken);
@@ -279,8 +283,8 @@ class ApiClient {
         console.log('🔍 Current authentication state:', {
             hasAccessToken: !!localStorage.getItem('accessToken'),
             hasRefreshToken: !!localStorage.getItem('refreshToken'),
-            hasUser: !!localStorage.getItem('bookstore_user'),
-            hasRole: !!localStorage.getItem('bookstore_role'),
+            hasUser: !!localStorage.getItem('user'),
+            hasRole: !!localStorage.getItem('role'),
             baseURL: this.client.defaults.baseURL
         });
     }

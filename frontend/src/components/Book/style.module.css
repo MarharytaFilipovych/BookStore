@@ -2,13 +2,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 1rem 2rem;
     margin-bottom: 1rem;
     border: 0.3rem solid #100f0f;
     background-color: #e3dbdb;
     border-radius: 8px;
     transition: all 0.2s ease;
     min-height: 80px;
+    width: 80%;
 }
 
 .bookContainer:hover {
@@ -77,7 +78,7 @@
     background: #ffffff;
     border: 0.5rem solid #0f0f10;
     border-radius: 12px;
-    color: #333;
+    color: #151414;
     font-size: 1rem;
     z-index: 10000;
     overflow: hidden;
@@ -89,15 +90,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 1.5rem 1rem;
-    border-bottom: 2px solid #e5e7eb;
+    padding: 1rem;
+    border-bottom: 0.4rem solid #e5e7eb;
     background-color: #f9fafb;
+    margin: 0;
 }
 
-.bookDetailsHeader h2 {
+.bookDetailsHeader h3 {
     margin: 0;
     font-size: 1.5rem;
-    color: #111827;
+    color: #191a1c;
+    font-weight: bold;
 }
 
 .bookDetailsContent {
@@ -114,7 +117,12 @@
 .bookDetailsContent p:last-child {
     margin-bottom: 0;
 }
-
+.employeeActions{
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: center;
+}
 .bookDetailsContent strong {
     color: #374151;
 }

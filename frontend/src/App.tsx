@@ -1,6 +1,6 @@
 import {AppContext} from "./context";
-import React, {useState} from "react";
-import {Link, useNavigate} from "react-router";
+import React, {useEffect, useState} from "react";
+import {Link, useLocation, useNavigate} from "react-router";
 import {Warning} from "./components/Warning/Warning";
 import {AuthorizationButton} from "./components/AuthorizationButton/AuthorizationButton";
 import {WelcomePage} from "./pages/WelcomePage/WelcomePage";
@@ -20,13 +20,22 @@ import {BasketButton} from "./components/Basket/BasketButton";
 import {BooksPage} from "./pages/DataPage/BooksPage";
 import {PersonPage} from "./pages/DataPage/PersonPage";
 import {OrdersPage} from "./pages/DataPage/OrderPage";
-import {ProfilePage} from "./pages/ProfilePage/ProfilePage";
+import {ProfilePage} from "./pages/AuthPage/ProfilePage";
 
 export const App: React.FC = () => {
     const context = React.useContext(AppContext);
     const [warning, setWarning] = useState<boolean>(false);
     const navigate = useNavigate();
     const [isBasketOpen, setIsBasketOpen] = useState<boolean>(false);
+    const location = useLocation();
+    useEffect(() => {
+        const publicRoutes = ['/', '/login/client', '/login/employee', '/register', '/forgot', '/reset-password'];
+        const isPublicRoute = publicRoutes.includes(location.pathname);
+        if (!context.user && !isPublicRoute) {
+            console.log('🚪 User not authenticated, redirecting to welcome page...');
+            navigate('/', { replace: true });
+        }
+    }, [context.user, location.pathname, navigate]);
     return (
         <>
             {warning && <Warning
@@ -58,21 +67,21 @@ export const App: React.FC = () => {
                         </Header>
                     </Header>
                 )}
-
-                <Routes>
-                    <Route path="/" element={<WelcomePage/>} />
-                    <Route path="/login/:user" element={<LoginPage />} />
-                    <Route path="/register" element={<RegistrationPage />} />
-                    <Route path="/books" element={<BooksPage/>} />
-                    <Route path="/basket" element={<div>Basket Page</div>} />
-                    <Route path="/forgot" element={<ForgotPasswordPage/>}/>
-                    <Route path="/sign" element={<RegistrationPage/>}/>
-                    <Route path="/reset-password" element={<ResetPasswordPage/>}/>
-                    <Route path="/people/:type" element={<PersonPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/orders" element={<OrdersPage/>}/>
-                </Routes>
-
+                <div className={styles.contentArea}>
+                    <Routes>
+                        <Route path="/" element={<WelcomePage/>} />
+                        <Route path="/login/:user" element={<LoginPage />} />
+                        <Route path="/register" element={<RegistrationPage />} />
+                        <Route path="/books" element={<BooksPage/>} />
+                        <Route path="/basket" element={<div>Basket Page</div>} />
+                        <Route path="/forgot" element={<ForgotPasswordPage/>}/>
+                        <Route path="/sign" element={<RegistrationPage/>}/>
+                        <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+                        <Route path="/people/:type" element={<PersonPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/orders" element={<OrdersPage/>}/>
+                    </Routes>
+                </div>
                 {context.user && <Footer links={links} user={context.role!} contacts={myContacts}/>}
             </div>
         </>
