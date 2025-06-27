@@ -4,15 +4,15 @@ import { SearchBar } from './SearchBar';
 import { FieldFilter } from './FieldFilter';
 import { Year } from './Year';
 import { Filter } from './Filter';
-import {FilterState} from "../../types";
+import {BookFilterState} from "../../types";
 
 type SearchFieldProps = {
     genres: string[];
     languages: string[];
     ageGroups: string[];
     sortOptions: string[];
-    filter: FilterState;
-    onFilterChange: (key: keyof (FilterState), value: string) => void;
+    filter: BookFilterState;
+    onFilterChange: (key: keyof (BookFilterState), value: string) => void;
 }
 
 export const BookSearchField: React.FC<SearchFieldProps> = ({

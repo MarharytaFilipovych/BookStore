@@ -19,6 +19,7 @@ export const LogInForm: React.FC<{
         const formData: FormData = new FormData(formRef.current);
         const email = formData.get('email')?.toString() || '';
         const password = formData.get('password')?.toString() || '';
+        console.log("Submitting: " , email, password, user)
         onSubmit(email, password, user);
     };
 

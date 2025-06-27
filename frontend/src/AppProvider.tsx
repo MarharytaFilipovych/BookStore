@@ -85,23 +85,64 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     };
 
     const login = async (request: LoginRequest): Promise<void> => {
+        console.log('🔐 AppProvider: Starting login process...', {
+            email: request.email,
+            role: request.role
+        });
+
         try {
+            // Step 1: Get tokens from backend
+            console.log('📡 AppProvider: Calling AuthService.login...');
             const tokenResponse = await AuthService.login(request);
+            console.log('✅ AppProvider: Tokens received', {
+                hasAccessToken: !!tokenResponse.accessToken,
+                hasRefreshToken: !!tokenResponse.refreshToken,
+                expiresIn: tokenResponse.expiresIn
+            });
 
+            // Step 2: Set authorization header
+            console.log('🔑 AppProvider: Setting authorization header...');
             apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.accessToken}`);
+            console.log('✅ AppProvider: Authorization header set');
 
+            // Step 3: Fetch user data
+            console.log('👤 AppProvider: Fetching user data...');
             let userResponse;
             if (request.role === 'CLIENT') {
+                console.log('📞 AppProvider: Calling ClientService.getClientByEmail...');
                 userResponse = await ClientService.getClientByEmail(request.email);
             } else {
+                console.log('📞 AppProvider: Calling EmployeeService.getEmployeeByEmail...');
                 userResponse = await EmployeeService.getEmployeeByEmail(request.email);
             }
+            console.log('✅ AppProvider: User data received', {
+                userName: userResponse?.name,
+                userEmail: userResponse?.email
+            });
 
+            // Step 4: Set user and role in context
+            console.log('💾 AppProvider: Setting user in context...');
             const userData = userResponse;
             setUser(userData);
+            console.log('✅ AppProvider: User set in context:', userData);
+
+            console.log('🏷️ AppProvider: Setting role in context...');
             setRole(request.role);
+            console.log('✅ AppProvider: Role set in context:', request.role);
+
+            console.log('🎉 AppProvider: Login process completed successfully!');
+
         } catch (error) {
-            console.error('Login failed:', error);
+            console.error('❌ AppProvider: Login failed at some step:', error);
+
+            // More detailed error logging
+            if (error instanceof Error) {
+                console.error('❌ AppProvider: Error details:', {
+                    message: error.message,
+                    stack: error.stack
+                });
+            }
+
             throw new Error('Login failed. Please check your credentials.');
         }
     };

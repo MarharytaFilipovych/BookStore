@@ -147,25 +147,37 @@ export class OrderService {
     }
 
 
-    static async confirmOrder(orderId: string, employeeEmail: string): Promise<OrderType> {
-        console.log('✅ OrderService: Confirming order...', { orderId, employeeEmail });
+    static async confirmOrder(orderToConfirm: OrderType, employeeEmail: string): Promise<void> {
+        console.log('✅ OrderService: Confirming order...', {
+            orderDate: orderToConfirm.order_date,
+            clientEmail: orderToConfirm.client_email,
+            employeeEmail
+        });
 
         try {
-            const response = await apiClient.put<OrderType>(
-                `${API_ENDPOINTS.orders.getAll}/${orderId}/confirm`,
-                { employee_email: employeeEmail }
+            const orderData: OrderType = {
+                ...orderToConfirm,
+                employee_email: employeeEmail
+            };
+
+             await apiClient.put<void>(
+                API_ENDPOINTS.orders.getAll,
+                orderData
             );
 
             console.log('✅ OrderService: Order confirmed successfully', {
-                orderId,
-                confirmedBy: employeeEmail,
-                orderDate: response.data.order_date
+                orderDate: orderToConfirm.order_date,
+                clientEmail: orderToConfirm.client_email,
+                confirmedBy: employeeEmail
             });
 
-            return response.data;
-
         } catch (error) {
-            console.error('❌ OrderService: Failed to confirm order', { orderId, employeeEmail, error });
+            console.error('❌ OrderService: Failed to confirm order', {
+                orderDate: orderToConfirm.order_date,
+                clientEmail: orderToConfirm.client_email,
+                employeeEmail,
+                error
+            });
             throw error;
         }
     }

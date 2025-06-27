@@ -17,14 +17,16 @@ import {MenuButton} from "./components/MenuButton/MenuButton";
 import {MiniButton} from "./components/MiniButton/MiniButton";
 import {Basket} from "./components/Basket/Basket";
 import {BasketButton} from "./components/Basket/BasketButton";
-import {BooksPage} from "./pages/BooksPage/BooksPage";
+import {BooksPage} from "./pages/DataPage/BooksPage";
+import {PersonPage} from "./pages/DataPage/PersonPage";
+import {OrdersPage} from "./pages/DataPage/OrderPage";
+import {ProfilePage} from "./pages/ProfilePage/ProfilePage";
 
 export const App: React.FC = () => {
     const context = React.useContext(AppContext);
     const [warning, setWarning] = useState<boolean>(false);
     const navigate = useNavigate();
     const [isBasketOpen, setIsBasketOpen] = useState<boolean>(false);
-
     return (
         <>
             {warning && <Warning
@@ -66,6 +68,9 @@ export const App: React.FC = () => {
                     <Route path="/forgot" element={<ForgotPasswordPage/>}/>
                     <Route path="/sign" element={<RegistrationPage/>}/>
                     <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+                    <Route path="/people/:type" element={<PersonPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/orders" element={<OrdersPage/>}/>
                 </Routes>
 
                 {context.user && <Footer links={links} user={context.role!} contacts={myContacts}/>}

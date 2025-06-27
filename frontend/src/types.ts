@@ -1,12 +1,13 @@
 export type Language = 'ENGLISH' | 'SPANISH' | 'FRENCH' | 'GERMAN' | 'UKRAINIAN' | 'JAPANESE' | 'OTHER';
 export type AgeGroup = 'CHILD' | 'TEEN' | 'ADULT' | 'OTHER';
 export type Role = 'CLIENT' | 'EMPLOYEE';
-export type BookSortField = 'name' | 'author' | 'genre' | 'price' | 'publication_date' | 'age_group' | 'pages';
 export type SortOrder = 'asc' | 'desc';
 export type EmployeeSortField = 'name' | 'email' | 'birthdate';
 export type ClientSortField = 'name' | 'email' | 'balance';
-export type User = ClientType | EmployeeType;
 export type OrderSortField = 'order_date' | 'price' | 'client_email' | 'employee_email' | 'client_name' | 'employee_name';
+export type BookSortField = 'name' | 'author' | 'genre' | 'price' | 'publication_date' | 'age_group' | 'pages';
+export type SortField = BookSortField | ClientSortField | OrderSortField | EmployeeSortField;
+export type User = ClientType | EmployeeType;
 export type BookType = {
     name: string;
     genre: string;
@@ -117,7 +118,7 @@ export type ConfigurationData = {
     code_languages: Map<string, string>;
 }
 
-export type requestType = 'clients' | 'orders' | 'books' | 'colleagues' | 'profile';
+export type requestType = 'people/clients' | 'orders' | 'books' | 'people/colleagues' | 'profile';
 
 
 export type State = {
@@ -202,7 +203,7 @@ export const API_ENDPOINTS = {
     },
 } as const;
 
-export type FilterState = {
+export type BookFilterState = {
     name: string;
     genre: string;
     author: string;
@@ -213,5 +214,16 @@ export type FilterState = {
     minPages: string;
     maxPages: string;
     publicationYear: string;
+    sort: string;
+}
+
+export type PersonFilterState = {
+    email: string;
+    sort: string;
+}
+
+export type OrderFilterState = {
+    clientEmail: string;
+    employeeEmail: string;
     sort: string;
 }
