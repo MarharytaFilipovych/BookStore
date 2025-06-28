@@ -1,9 +1,14 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import {API_ENDPOINTS, TokenResponseDTO} from '../types';
-import {useNavigate} from "react-router";
+import { API_ENDPOINTS, TokenResponseDTO, RefreshTokenDTO } from '../types';
 
 class ApiClient {
     private readonly client: AxiosInstance;
+    private isRefreshing = false; // ✅ ADDED: Prevent multiple refresh attempts
+    private failedQueue: Array<{
+        resolve: (value: any) => void;
+        reject: (error: any) => void;
+        config: any;
+    }> = []; // ✅ ADDED: Queue for failed requests during refresh
 
     constructor() {
         console.log('🏗️ Initializing ApiClient...');
@@ -20,6 +25,22 @@ class ApiClient {
         this.setupInterceptors();
     }
 
+    // ✅ ADDED: Process queued requests after successful refresh
+    private processQueue(error: any, token: string | null = null) {
+        this.failedQueue.forEach(({ resolve, reject, config }) => {
+            if (error) {
+                reject(error);
+            } else {
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                resolve(this.client(config));
+            }
+        });
+
+        this.failedQueue = [];
+    }
+
     private setupInterceptors() {
         console.log('⚙️ Setting up request/response interceptors...');
 
@@ -30,7 +51,6 @@ class ApiClient {
                 // Only set token if Authorization header isn't already present
                 if (!config.headers.Authorization) {
                     const token = localStorage.getItem('accessToken');
-                    console.log(token)
                     if (token) {
                         config.headers.Authorization = `Bearer ${token}`;
                         console.log('🔑 JWT token attached from localStorage');
@@ -39,8 +59,6 @@ class ApiClient {
                     }
                 } else {
                     console.log('🔑 Using existing Authorization header');
-                    console.log('🔍 Authorization header value:', config.headers.Authorization);
-
                 }
 
                 if (config.data) {
@@ -78,26 +96,71 @@ class ApiClient {
                     message: error.response?.data?.message || error.message
                 });
 
+                // Handle 401 errors (token expired)
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     console.log('🔄 Token expired (401), attempting refresh...');
 
+                    // ✅ FIXED: Handle concurrent requests during refresh
+                    if (this.isRefreshing) {
+                        console.log('⏳ Refresh already in progress, queuing request...');
+                        return new Promise((resolve, reject) => {
+                            this.failedQueue.push({ resolve, reject, config: originalRequest });
+                        });
+                    }
+
                     originalRequest._retry = true;
+                    this.isRefreshing = true;
 
                     try {
                         const refreshToken = localStorage.getItem('refreshToken');
-                        if (!refreshToken) {
-                            console.log("Refresh token: ", refreshToken)
-                            console.log('❌ No refresh token found, redirecting to login');
-                            this.clearAuthData();
-                            window.location.href = '/';
-                            return Promise.reject(error);
+                        const savedUser = localStorage.getItem('user');
+                        const savedRole = localStorage.getItem('role');
+
+                        if (!refreshToken || !savedUser || !savedRole) {
+                            console.log('❌ Missing refresh data, redirecting to login');
+                            throw new Error('Missing authentication data');
                         }
-                        console.log("Refresh token: ", refreshToken)
 
                         console.log('🔄 Calling refresh token endpoint...');
-                        const response = await this.refreshToken(refreshToken);
+
+                        // ✅ FIXED: Parse user data properly
+                        let email: string;
+                        try {
+                            const userData = JSON.parse(savedUser);
+                            email = userData.email;
+                        } catch (parseError) {
+                            console.error('❌ Failed to parse user data:', parseError);
+                            throw new Error('Invalid user data');
+                        }
+
+                        // ✅ FIXED: Use correct refresh token payload structure
+                        const refreshData: RefreshTokenDTO = {
+                            refresh_token: refreshToken, // ✅ FIXED: Correct field name
+                            email: email,
+                            role: savedRole as any
+                        };
+
+                        console.log('📤 Sending refresh token request:', {
+                            endpoint: API_ENDPOINTS.auth.refresh,
+                            email,
+                            role: savedRole,
+                            hasRefreshToken: !!refreshToken
+                        });
+
+                        // ✅ FIXED: Use a fresh axios instance to avoid interceptor loop
+                        const response = await axios.post<TokenResponseDTO>(
+                            `${this.client.defaults.baseURL}${API_ENDPOINTS.auth.refresh}`,
+                            refreshData,
+                            {
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                        );
+
                         const newAccessToken = response.data.access_token;
 
+                        // Store new tokens
                         localStorage.setItem('accessToken', newAccessToken);
                         if (response.data.refresh_token) {
                             localStorage.setItem('refreshToken', response.data.refresh_token);
@@ -106,17 +169,26 @@ class ApiClient {
                             console.log('🔄 Only access token updated');
                         }
 
-                        console.log('✅ Token refresh successful, retrying original request...');
+                        console.log('✅ Token refresh successful, processing queued requests...');
 
+                        // ✅ FIXED: Update original request and process queue
                         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                        this.processQueue(null, newAccessToken);
+
                         return this.client(originalRequest);
 
                     } catch (refreshError) {
                         console.error('❌ Token refresh failed:', refreshError);
 
                         this.clearAuthData();
+                        this.processQueue(refreshError, null);
+
                         console.log('🚪 Redirecting to welcome page...');
+                        window.location.href = '/';
+
                         return Promise.reject(refreshError);
+                    } finally {
+                        this.isRefreshing = false; // ✅ FIXED: Reset refresh flag
                     }
                 }
 
@@ -125,59 +197,6 @@ class ApiClient {
         );
 
         console.log('✅ Interceptors configured successfully');
-    }
-
-    private async refreshToken(refreshToken: string) {
-        console.log('🔄 Preparing refresh token request...');
-
-        const savedUser = localStorage.getItem('user');
-        const savedRole = localStorage.getItem('role');
-
-        console.log('📋 Checking stored user data for refresh...', {
-            hasUser: !!savedUser,
-            hasRole: !!savedRole
-        });
-
-        if (!savedUser || !savedRole) {
-            console.error('❌ Missing user data for token refresh');
-            throw new Error('Missing user data for token refresh');
-        }
-
-        let email: string;
-        try {
-            const userData = JSON.parse(savedUser);
-            email = userData.email;
-            console.log(`👤 Using email for refresh: ${email}`);
-        } catch (parseError) {
-            console.error('❌ Failed to parse user data:', parseError);
-            throw new Error('Invalid user data for token refresh');
-        }
-
-        const refreshData = {
-            refreshToken,
-            email,
-            role: savedRole
-        };
-
-        console.log('📤 Sending refresh token request:', {
-            endpoint: '/auth/refresh',
-            email,
-            role: savedRole,
-            hasRefreshToken: !!refreshToken
-        });
-
-        const response = await axios.post<TokenResponseDTO>(
-            API_ENDPOINTS.auth.refresh,
-            refreshData
-        );
-
-        console.log('✅ Refresh token response received:', {
-            hasAccessToken: !!response.data.access_token,
-            hasRefreshToken: !!response.data.refresh_token,
-            expiresIn: response.data.expires_in
-        });
-
-        return response;
     }
 
     private clearAuthData() {
@@ -285,11 +304,14 @@ class ApiClient {
             hasRefreshToken: !!localStorage.getItem('refreshToken'),
             hasUser: !!localStorage.getItem('user'),
             hasRole: !!localStorage.getItem('role'),
-            baseURL: this.client.defaults.baseURL
+            baseURL: this.client.defaults.baseURL,
+            isRefreshing: this.isRefreshing,
+            queuedRequests: this.failedQueue.length
         });
     }
 }
 
 export const apiClient = new ApiClient();
 
+// ✅ ADDED: Debug helper
 (window as any).debugApi = () => apiClient.debugAuthState();
