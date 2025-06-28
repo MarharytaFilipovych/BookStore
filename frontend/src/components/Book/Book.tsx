@@ -20,6 +20,7 @@ export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
     const [warning, setWarning] = useState<boolean>(false);
 
     const handleSubmitEdit = async (updatedBook: BookType) => {
+        console.log('📝 Book: handleSubmitEdit called with:', updatedBook);
         try {
             setIsProcessing(true);
             setFormError('');

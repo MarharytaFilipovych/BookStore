@@ -14,10 +14,12 @@ export const LoginPage: React.FC = () => {
     const [loginError, setLoginError] = useState<boolean>(false);
     const [processing, setProcessing] = useState<boolean>(false);
 
-    if (context.user) {
-        console.log('✅ LoginPage: User found, navigating to /books');
-        navigate('/books');
-    }
+    useEffect(() => {
+        if (context.user) {
+            console.log('✅ LoginPage: User found, navigating to /books');
+            navigate('/books');
+        }
+    }, [context.user, navigate]);
 
     const login = async (email: string, password: string, role: Role) => {
         console.log('🔐 LoginPage: Login form submitted', {

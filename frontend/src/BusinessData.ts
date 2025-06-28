@@ -74,7 +74,7 @@ export const clientSortOptionsWithMappings = new Map<string, {sortBy: ClientSort
     ['Balance (Low to High)', {sortBy: 'balance', sortOrder: 'asc'}]
 ]);
 
-export const ageGroups: string[] = ['Children', 'Teen', 'Adult', 'Other'];
+export const ageGroups: string[] = ['Child', 'Teen', 'Adult', 'Other'];
 export const languages: string[] = ['English', 'Spanish', 'French', 'German', 'Ukrainian', 'Japanese', 'Other'];
 export const genres: string[] =  [
     'Fiction', 'Non-Fiction', 'Mystery', 'Romance', 'Fantasy', 'Science Fiction',

@@ -17,15 +17,19 @@ export const OrderSearchField: React.FC<OrderSearchFieldProps> = ({
                                                                   }) => {
     return (
         <div className={styles.search}>
-            <div className={styles.filterContainer}>
+            <div className={styles.search}>
                 <SearchBar
                     value={filter.clientEmail}
                     onNameChange={(value) => onFilterChange('clientEmail', value)}
+                    text='type client email...'
+                    noMargin={true}
                 />
 
                 <SearchBar
                     value={filter.employeeEmail}
                     onNameChange={(value) => onFilterChange('employeeEmail', value)}
+                    text='type employee email...'
+                    noMargin={true}
                 />
 
                 <Filter

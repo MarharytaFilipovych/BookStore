@@ -13,6 +13,12 @@ export const ProfilePage: React.FC = () => {
     const [error, setError] = useState<string>('');
     const [isUpdating, setIsUpdating] = useState(false);
 
+    if (!context.user) {
+        console.log('❌ ProfilePage: User is null, redirecting to login');
+        navigate('/');
+        return null;
+    }
+
     const userRole = context.role!;
     const user = context.user as ClientType | EmployeeType;
 

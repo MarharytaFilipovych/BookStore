@@ -17,10 +17,10 @@ export const PersonSearchField: React.FC<SearchFieldProps> = ({
                                                               }) => {
     return (
         <div className={styles.search}>
-            <div className={styles.filterContainer}>
                 <SearchBar
                     value={filter.email}
                     onNameChange={(value) => onFilterChange('email', value)}
+                    noMargin={true}
                 />
 
                 <Filter
@@ -28,7 +28,6 @@ export const PersonSearchField: React.FC<SearchFieldProps> = ({
                     value={filter.sort}
                     onSelectOption={(sort: string) => onFilterChange('sort', sort)}
                 />
-            </div>
         </div>
     );
 };

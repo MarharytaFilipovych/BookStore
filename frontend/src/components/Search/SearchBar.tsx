@@ -8,9 +8,10 @@ export const SearchBar: React.FC<{
     onNameChange: (name: string) => void;
     text?: string;
     small?: boolean;
-}> = ({ value, onNameChange, text, small }) => {
+    noMargin?: boolean;
+}> = ({ value, onNameChange, text, small, noMargin }) => {
     return (
-        <div className={classNames(styles.searchBar, { [styles.small]: small })}>
+        <div className={classNames(styles.searchBar, { [styles.small]: small, [styles.noMargin] : noMargin})}>
             <Icon topic="search" size="mini" />
             <input
                 type="text"

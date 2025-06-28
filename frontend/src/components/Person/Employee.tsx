@@ -1,6 +1,7 @@
 import React, {useContext, useState} from 'react';
 import styles from './style.module.css';
 import {EmployeeType} from "../../types";
+import classNames from "classnames";
 
 export const EmployeeComponent: React.FC<EmployeeType> = (employee) => {
     const formatDate = (dateString: string): string => {
@@ -14,11 +15,11 @@ export const EmployeeComponent: React.FC<EmployeeType> = (employee) => {
 
     return (
         <>
-            <div className={styles.container}>
+            <div className={classNames(styles.container, styles.employeeContainer)}>
                     <h3 className={styles.name}>{employee.name}</h3>
                     <p className={styles.email}>{employee.email}</p>
                     <p className={styles.number}>{employee.phone}</p>
-                <p >birthdate ... <strong className={styles.addInfo}>{formatDate(employee.birthdate)}</strong></p>
+                <p>birthdate ... <strong className={styles.addInfo}>{formatDate(employee.birthdate)}</strong></p>
             </div>
         </>
     );

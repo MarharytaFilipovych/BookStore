@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styles from './style.module.css';
 import { BookType, Language, AgeGroup } from "../../types";
 import { MiniButton } from "../MiniButton/MiniButton";
@@ -16,58 +16,90 @@ type BookFormProps = {
 
 export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialData = {} , error, processing}) => {
     const isEditMode = Boolean(initialData.name);
-
-    const [formData, setFormData] = useState<Partial<BookType>>({
-        ...initialData
-    });
-
+    const formRef = useRef<HTMLFormElement>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const handleInputChange = (field: keyof BookType, value: string | number) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-
-        if (errors[field]) {
-            setErrors(prev => ({
-                ...prev,
-                [field]: ''
-            }));
-        }
-    };
-
-    const validateForm = (): boolean => {
+    const validateFormData = (formData: FormData): boolean => {
         const newErrors: Record<string, string> = {};
 
-        if (!formData.name?.trim()) newErrors.name = 'Book name is required';
-        if (!formData.author?.trim()) newErrors.author = 'Author is required';
-        if (!formData.genre?.trim()) newErrors.genre = 'Genre is required';
-        if (!formData.price || formData.price <= 0) newErrors.price = 'Price must be greater than 0';
-        if (!formData.pages || formData.pages <= 0) newErrors.pages = 'Pages must be greater than 0';
-        if (!formData.publication_date) newErrors.publication_date = 'Publication date is required';
+        const name = formData.get('name')?.toString()?.trim();
+        const author = formData.get('author')?.toString()?.trim();
+        const genre = formData.get('genre')?.toString()?.trim();
+        const price = Number(formData.get('price')?.toString() || '0');
+        const pages = Number(formData.get('pages')?.toString() || '0');
+        const publicationDate = formData.get('publication_date')?.toString();
+        const characteristics = formData.get('characteristics')?.toString()?.trim();
+        const description = formData.get('description')?.toString()?.trim();
+
+        if (!name) newErrors.name = 'Book name is required';
+        if (!author) newErrors.author = 'Author is required';
+        if (!genre) newErrors.genre = 'Genre is required';
+        if (!price || price <= 0) newErrors.price = 'Price must be greater than 0';
+        if (!pages || pages <= 0) newErrors.pages = 'Pages must be greater than 0';
+        if (!publicationDate) newErrors.publication_date = 'Publication date is required';
         else {
-            if (new Date(formData.publication_date) > new Date()) {
+            if (new Date(publicationDate) > new Date()) {
                 newErrors.publication_date = 'Publication date cannot be in the future';
             }
         }
-        if (!formData.characteristics?.trim()) newErrors.characteristics = 'Characteristics are required';
-        if (!formData.description?.trim()) newErrors.description = 'Description is required';
+        if (!characteristics) newErrors.characteristics = 'Characteristics are required';
+        if (!description) newErrors.description = 'Description is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        console.log('🔥 BookForm: handleSubmit called!');
         e.preventDefault();
-        if (validateForm()) onSubmit(formData as BookType);
+
+        if (!formRef.current) {
+            console.log('❌ Form ref is null');
+            return;
+        }
+
+        const formData = new FormData(formRef.current);
+        console.log('📝 Form data extracted:', {
+            name: formData.get('name'),
+            author: formData.get('author'),
+            genre: formData.get('genre'),
+            price: formData.get('price'),
+            pages: formData.get('pages'),
+            publication_date: formData.get('publication_date'),
+            age_group: formData.get('age_group'),
+            language: formData.get('language'),
+            characteristics: formData.get('characteristics'),
+            description: formData.get('description')
+        });
+
+        if (validateFormData(formData)) {
+            console.log('✅ Validation passed, creating book object');
+
+            const bookData: BookType = {
+                name: formData.get('name')?.toString() || '',
+                author: formData.get('author')?.toString() || '',
+                genre: formData.get('genre')?.toString() || '',
+                price: Number(formData.get('price')?.toString() || '0'),
+                pages: Number(formData.get('pages')?.toString() || '0'),
+                publication_date: formData.get('publication_date')?.toString() || '',
+                age_group: formData.get('age_group')?.toString().toUpperCase() as AgeGroup || 'ADULT',
+                language: formData.get('language')?.toString().toUpperCase() as Language || 'ENGLISH',
+                characteristics: formData.get('characteristics')?.toString() || '',
+                description: formData.get('description')?.toString() || ''
+            };
+
+            console.log('📤 Calling onSubmit with:', bookData);
+            onSubmit(bookData);
+        } else {
+            console.log('❌ Validation failed, errors:', errors);
+        }
     };
 
     return (
         <>
             {processing && (<Icon topic='loading' size='big' />)}
             <div className={styles.overlay}>
-                <form className={styles.bookForm} onSubmit={handleSubmit}>
+                <form className={styles.bookForm} onSubmit={handleSubmit} ref={formRef}>
                     <h2>{error}</h2>
                     <div className={styles.formHeader}>
                         <h2>{isEditMode ? 'Edit Book' : 'Create new book!'}</h2>
@@ -79,12 +111,13 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                                 <label htmlFor="name">Book Name *</label>
                                 <input
                                     id="name"
+                                    name="name"
                                     type="text"
-                                    value={formData.name || ''}
-                                    onChange={(e) => handleInputChange('name', e.target.value)}
+                                    defaultValue={initialData.name || ''}
                                     className={errors.name ? styles.errorInput : ''}
                                     placeholder="Enter book title"
-                                    disabled={isEditMode}
+                                    readOnly={isEditMode}
+                                    required
                                 />
                                 {errors.name && <span className={styles.errorText}>{errors.name}</span>}
                                 {isEditMode && <small className={styles.helpText}>Book name cannot be changed</small>}
@@ -94,11 +127,12 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                                 <label htmlFor="author">Author *</label>
                                 <input
                                     id="author"
+                                    name="author"
                                     type="text"
-                                    value={formData.author || ''}
-                                    onChange={(e) => handleInputChange('author', e.target.value)}
+                                    defaultValue={initialData.author || ''}
                                     className={errors.author ? styles.errorInput : ''}
                                     placeholder="Enter author name"
+                                    required
                                 />
                                 {errors.author && <span className={styles.errorText}>{errors.author}</span>}
                             </div>
@@ -109,11 +143,12 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                                 <label htmlFor="genre">Genre *</label>
                                 <select
                                     id="genre"
-                                    value={formData.genre || ''}
-                                    onChange={(e) => handleInputChange('genre', e.target.value)}
+                                    name="genre"
+                                    defaultValue={initialData.genre || ''}
                                     className={errors.genre ? styles.errorInput : ''}
+                                    required
                                 >
-                                    <option value="">Select genre</option>
+                                    <option value="">Select a genre</option>
                                     {genres.map(genre => (
                                         <option key={genre} value={genre}>{genre}</option>
                                     ))}
@@ -122,16 +157,15 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                             </div>
 
                             <div className={styles.inputGroup}>
-                                <label htmlFor="language">Language *</label>
+                                <label htmlFor="age_group">Age Group *</label>
                                 <select
-                                    id="language"
-                                    value={formData.language || 'ENGLISH'}
-                                    onChange={(e) => handleInputChange('language', e.target.value as Language)}
+                                    id="age_group"
+                                    name="age_group"
+                                    defaultValue={initialData.age_group || 'ADULT'}
+                                    required
                                 >
-                                    {languages.map(language => (
-                                        <option key={language} value={language}>
-                                            {language.charAt(0) + language.slice(1).toLowerCase()}
-                                        </option>
+                                    {ageGroups.map(ageGroup => (
+                                        <option key={ageGroup} value={ageGroup}>{ageGroup}</option>
                                     ))}
                                 </select>
                             </div>
@@ -139,16 +173,15 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
 
                         <div className={styles.formRow}>
                             <div className={styles.inputGroup}>
-                                <label htmlFor="age_group">Age Group *</label>
+                                <label htmlFor="language">Language *</label>
                                 <select
-                                    id="age_group"
-                                    value={formData.age_group || 'ADULT'}
-                                    onChange={(e) => handleInputChange('age_group', e.target.value as AgeGroup)}
+                                    id="language"
+                                    name="language"
+                                    defaultValue={initialData.language || 'ENGLISH'}
+                                    required
                                 >
-                                    {ageGroups.map(ageGroup => (
-                                        <option key={ageGroup} value={ageGroup}>
-                                            {ageGroup.charAt(0) + ageGroup.slice(1).toLowerCase()}
-                                        </option>
+                                    {languages.map(language => (
+                                        <option key={language} value={language}>{language}</option>
                                     ))}
                                 </select>
                             </div>
@@ -157,11 +190,11 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                                 <label htmlFor="publication_date">Publication Date *</label>
                                 <input
                                     id="publication_date"
+                                    name="publication_date"
                                     type="date"
-                                    value={formData.publication_date || ''}
-                                    onChange={(e) => handleInputChange('publication_date', e.target.value)}
+                                    defaultValue={initialData.publication_date || ''}
                                     className={errors.publication_date ? styles.errorInput : ''}
-                                    max={new Date().toISOString().split('T')[0]}
+                                    required
                                 />
                                 {errors.publication_date && <span className={styles.errorText}>{errors.publication_date}</span>}
                             </div>
@@ -172,13 +205,14 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                                 <label htmlFor="price">Price ($) *</label>
                                 <input
                                     id="price"
+                                    name="price"
                                     type="number"
                                     min="0.01"
                                     step="0.01"
-                                    value={formData.price || ''}
-                                    onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                                    defaultValue={initialData.price || ''}
                                     className={errors.price ? styles.errorInput : ''}
                                     placeholder="0.00"
+                                    required
                                 />
                                 {errors.price && <span className={styles.errorText}>{errors.price}</span>}
                             </div>
@@ -187,12 +221,13 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                                 <label htmlFor="pages">Pages *</label>
                                 <input
                                     id="pages"
+                                    name="pages"
                                     type="number"
                                     min="1"
-                                    value={formData.pages || ''}
-                                    onChange={(e) => handleInputChange('pages', parseInt(e.target.value) || 0)}
+                                    defaultValue={initialData.pages || ''}
                                     className={errors.pages ? styles.errorInput : ''}
-                                    placeholder="Number of pages"
+                                    placeholder="Enter number of pages"
+                                    required
                                 />
                                 {errors.pages && <span className={styles.errorText}>{errors.pages}</span>}
                             </div>
@@ -202,11 +237,12 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                             <label htmlFor="characteristics">Characteristics *</label>
                             <textarea
                                 id="characteristics"
-                                value={formData.characteristics || ''}
-                                onChange={(e) => handleInputChange('characteristics', e.target.value)}
+                                name="characteristics"
+                                defaultValue={initialData.characteristics || ''}
                                 className={errors.characteristics ? styles.errorInput : ''}
                                 placeholder="Enter book characteristics (e.g., plot twists, colorful illustrations)"
                                 rows={3}
+                                required
                             />
                             {errors.characteristics && <span className={styles.errorText}>{errors.characteristics}</span>}
                         </div>
@@ -215,11 +251,12 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                             <label htmlFor="description">Description *</label>
                             <textarea
                                 id="description"
-                                value={formData.description || ''}
-                                onChange={(e) => handleInputChange('description', e.target.value)}
+                                name="description"
+                                defaultValue={initialData.description || ''}
                                 className={errors.description ? styles.errorInput : ''}
                                 placeholder="Enter detailed book description"
                                 rows={4}
+                                required
                             />
                             {errors.description && <span className={styles.errorText}>{errors.description}</span>}
                         </div>
@@ -227,7 +264,7 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
 
                     <div className={styles.formActions}>
                         <AuthorizationButton type='cancel' onClick={onCancel} />
-                        <AuthorizationButton type='submit' />
+                        <AuthorizationButton type='submit' form={true} disabled={processing} />
                     </div>
                 </form>
             </div>
