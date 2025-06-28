@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { API_ENDPOINTS, TokenResponseDTO, RefreshTokenDTO } from '../types';
+import {API_ENDPOINTS, TokenResponseDTO, RefreshTokenDTO, Role} from '../types';
 
 class ApiClient {
     private readonly client: AxiosInstance;
@@ -137,7 +137,7 @@ class ApiClient {
                         const refreshData: RefreshTokenDTO = {
                             refresh_token: refreshToken, // ✅ FIXED: Correct field name
                             email: email,
-                            role: savedRole as any
+                            role: savedRole as Role
                         };
 
                         console.log('📤 Sending refresh token request:', {

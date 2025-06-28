@@ -4,7 +4,6 @@ import { BookService } from "../../services/BookService";
 import { Book } from "../../components/Book/Book";
 import { BookSearchField } from "../../components/Search/BookSearchField";
 import { bookSortOptions, ageGroups, languages, genres } from "../../BusinessData";
-import styles from './style.module.css';
 import {GenericSearchablePage} from "./GenereicSearchablePage";
 
 export const BooksPage: React.FC = () => {
@@ -72,15 +71,12 @@ export const BooksPage: React.FC = () => {
         />
     );
 
-    // Handle book deletion from the page level
     const handleBookDelete = async (bookName: string) => {
         console.log('🗑️ BooksPage: Handling book deletion...', { bookName });
 
         try {
             await BookService.deleteBook(bookName);
             console.log('✅ BooksPage: Book deleted successfully, refreshing page...');
-
-            // Refresh the page to show updated book list
             window.location.reload();
 
         } catch (error) {
@@ -89,7 +85,6 @@ export const BooksPage: React.FC = () => {
         }
     };
 
-    // Handle book update from the page level
     const handleBookUpdate = async (bookName: string, updatedBook: BookType) => {
         console.log('✏️ BooksPage: Handling book update...', { bookName });
 

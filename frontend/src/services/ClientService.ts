@@ -4,7 +4,7 @@ import {
     PaginatedResponseDTO,
     API_ENDPOINTS,
     ClientSortField,
-    SortOrder
+    SortOrder, Links
 } from '../types';
 
 export class ClientService {
@@ -70,36 +70,6 @@ export class ClientService {
         }
     }
 
-    static async createClient(client: Omit<ClientType, 'balance'> & { password: string }): Promise<ClientType> {
-        console.log('📝 ClientService: Creating new client...', {
-            name: client.name,
-            email: client.email,
-            hasPassword: !!client.password
-        });
-
-        try {
-            const response = await apiClient.post<ClientType>(
-                API_ENDPOINTS.clients.getAll, // POST to /clients
-                client
-            );
-
-            console.log('✅ ClientService: Client created successfully', {
-                createdClient: response.data.name,
-                email: response.data.email,
-                balance: response.data.balance
-            });
-
-            return response.data;
-
-        } catch (error) {
-            console.error('❌ ClientService: Failed to create client', {
-                clientEmail: client.email,
-                error
-            });
-            throw error;
-        }
-    }
-
     static async updateClient(email: string, updates: Partial<ClientType>): Promise<ClientType> {
         console.log('✏️ ClientService: Updating client...', {
             clientEmail: email,
@@ -161,8 +131,8 @@ export class ClientService {
         try {
             const blockData = reason ? { reason } : {};
 
-            await apiClient.put(
-                `${API_ENDPOINTS.clients.getByEmail(email)}/block`,
+            await apiClient.post(
+                API_ENDPOINTS.clients.block(email),
                 blockData
             );
 
@@ -185,7 +155,7 @@ export class ClientService {
         console.log('✅ ClientService: Unblocking client...', { email });
 
         try {
-            await apiClient.put(`${API_ENDPOINTS.clients.getByEmail(email)}/unblock`);
+            await apiClient.delete(API_ENDPOINTS.clients.unblock(email));
 
             console.log('✅ ClientService: Client unblocked successfully', {
                 unblockedClient: email
@@ -200,6 +170,49 @@ export class ClientService {
         }
     }
 
+    static async isClientBlocked(email: string): Promise<boolean> {
+        console.log('🔍 ClientService: Checking if client is blocked...', { email });
+
+        try {
+            const response = await apiClient.get<boolean>(
+                API_ENDPOINTS.clients.isBlocked(email)
+            );
+
+            console.log('✅ ClientService: Client blocked status checked', {
+                email,
+                isBlocked: response.data
+            });
+
+            return response.data;
+
+        } catch (error) {
+            console.error('❌ ClientService: Failed to check client blocked status', {
+                email,
+                error
+            });
+            return false;
+        }
+    }
+
+    static async getBlockedClients(): Promise<ClientType[]> {
+        console.log('🚫 ClientService: Getting all blocked clients...');
+
+        try {
+            const response = await apiClient.get<ClientType[]>(
+                API_ENDPOINTS.clients.getAllBlocked()
+            );
+
+            console.log('✅ ClientService: Blocked clients retrieved successfully', {
+                totalBlocked: response.data?.length || 0
+            });
+
+            return response.data || [];
+
+        } catch (error) {
+            console.error('❌ ClientService: Failed to get blocked clients', { error });
+            throw error;
+        }
+    }
     static async getClientOrders(
         clientEmail: string,
         page = 0,

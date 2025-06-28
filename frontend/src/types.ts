@@ -34,6 +34,12 @@ export type ClientType = {
     password?: string;
     balance: number;
 }
+export type ClientTypeWithStatus = {
+    client: ClientType,
+    blocked: boolean
+}
+
+
 
 export type EmployeeType = {
     name: string;
@@ -94,7 +100,7 @@ export type IconTopic = 'search' | 'tick' | 'star' | 'vote'
     | 'cross' | 'envelope' | 'call' | 'empty-star'
     | 'black-cross' | 'caret' | 'heart' | 'empty-heart'
     | 'empty-circle' | 'circle' | 'loading' | 'error'
-    | 'direction' | 'hidden' | 'plus' | 'basket' | 'bin' | 'ban' | 'update';
+    | 'direction' | 'hidden' | 'plus' | 'basket' | 'bin' | 'ban' | 'update' | 'unban';
 
 export type ContactProp = {
     typeOfContact: 'email' | 'call';
@@ -178,6 +184,10 @@ export const API_ENDPOINTS = {
         getByEmail: (email: string) => `/clients/${encodeURIComponent(email)}`,
         update: (email: string) => `/clients/${encodeURIComponent(email)}`,
         delete: (email: string) => `/clients/${encodeURIComponent(email)}`,
+        isBlocked: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
+        block: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
+        unblock: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
+        getAllBlocked: () => '/clients/blocked/list'
     },
     employees: {
         getAll: '/employees',
