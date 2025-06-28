@@ -31,4 +31,6 @@ public interface ClientService {
     void unblockClient(String clientEmail);
 
     void updateClientPassword(String email, String newPassword);
+
+    boolean isBlocked(String clientEmail);
 }

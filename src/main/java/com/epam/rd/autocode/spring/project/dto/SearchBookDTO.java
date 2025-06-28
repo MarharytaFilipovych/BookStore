@@ -15,10 +15,8 @@ import java.time.Year;
 @Data
 @NoArgsConstructor
 public class SearchBookDTO {
-    @BookTitle(required = false)
     private String name;
 
-    @CorrectName(required = false, message = "Genre must contain only letters, spaces, hyphens, and apostrophes")
     private String genre;
 
     @CorrectEnum(enumClass = AgeGroup.class, message = "Invalid age group. Must be one of: CHILD, TEEN, ADULT, OTHER", required = false)
@@ -37,7 +35,6 @@ public class SearchBookDTO {
     @JsonProperty("publication_year")
     private Year publicationYear;
 
-    @CorrectName(required = false)
     private String author;
 
     @Min(value = 1, message = "Number of pages must be at least 1")

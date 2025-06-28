@@ -70,11 +70,9 @@ public class OrderServiceImpl implements OrderService {
     public OrderDTO addOrder(OrderDTO dto) {
         if(dto.getClientEmail() == null)throw new OrderMustContainClientException();
         Order order = orderMapper.toEntity(dto);
-        Employee employee = employeeRepository.getByEmail(dto.getEmployeeEmail())
-                .orElseThrow(()-> new NotFoundException("Employee with email " + dto.getEmployeeEmail()));
         Client client = clientRepository.getByEmail(dto.getClientEmail())
                 .orElseThrow(() -> new NotFoundException("Client with email " + dto.getClientEmail()));
-        order.setEmployee(employee);
+        order.setEmployee(null);
         order.setClient(client);
 
         if(dto.getBookItems() != null && !dto.getBookItems().isEmpty()){

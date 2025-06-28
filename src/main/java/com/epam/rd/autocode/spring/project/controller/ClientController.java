@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/clients")
 public class ClientController {
@@ -48,7 +50,7 @@ public class ClientController {
         return ResponseEntity.ok(clientService.getClientByEmail(email));
     }
 
-    @PreAuthorize("#email == authentication.name and hasRole('CLIENT')")
+    @PreAuthorize("(#email == authentication.name and hasRole('CLIENT')) or hasRole('EMPLOYEE')")
     @GetMapping("{email}/orders")
     public ResponseEntity<PaginatedResponseDTO<OrderDTO>> getOrdersByClient
             (@PathVariable @Email String email,
@@ -78,10 +80,15 @@ public class ClientController {
     }
 
     @GetMapping("/blocked")
-    public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getBlockedClients(@CorrectSortFields(entityType = SortableEntity.CLIENT)
+    public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getBlockedClients(@CorrectSortFields(entityType = SortableEntity.BLOCKED_CLIENT)
                                                                              @PageableDefault(sort = "name") Pageable pageable){
         Page<ClientDTO> page = clientService.getBlockedClients(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));
+    }
+
+    @GetMapping("/blocked/list")
+    public ResponseEntity<List<ClientDTO>> getBlockedClients(){
+        return ResponseEntity.ok(clientService.getBlockedClients());
     }
 
     @PostMapping("/blocked/{email}")
@@ -94,5 +101,10 @@ public class ClientController {
     public ResponseEntity<Void> unblockClient(@PathVariable @Email String email){
         clientService.unblockClient(email);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/blocked/{email}")
+    public ResponseEntity<Boolean> checkIfClientIsBLocked(@PathVariable @Email String email){
+        return ResponseEntity.ok(clientService.isBlocked(email));
     }
 }

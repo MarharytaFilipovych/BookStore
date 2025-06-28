@@ -11,6 +11,7 @@ import {
 export const links: Links = {
     employeeLinks: [
         {link: 'people/clients', name: 'our clients'},
+        {link: 'people/blocked', name: 'blocked clients'},
         {link: 'orders', name: 'orders'},
         {link: 'my-orders', name: 'my orders'},
         {link: 'books', name: 'books'},

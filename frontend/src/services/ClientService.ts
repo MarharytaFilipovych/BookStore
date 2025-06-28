@@ -194,12 +194,12 @@ export class ClientService {
         }
     }
 
-    static async getBlockedClients(): Promise<ClientType[]> {
+    static async getBlockedClientsList(): Promise<ClientType[]> {
         console.log('🚫 ClientService: Getting all blocked clients...');
 
         try {
             const response = await apiClient.get<ClientType[]>(
-                API_ENDPOINTS.clients.getAllBlocked()
+                API_ENDPOINTS.clients.getAllBlockedList()
             );
 
             console.log('✅ ClientService: Blocked clients retrieved successfully', {
@@ -213,6 +213,44 @@ export class ClientService {
             throw error;
         }
     }
+
+    static async getBlockedClients(
+        page = 0,
+        size = 10,
+        sortBy?: ClientSortField,
+        sortOrder: SortOrder = 'asc'
+    ): Promise<PaginatedResponseDTO<ClientType>> {
+        console.log('👥 ClientService: Getting blocked clients with sorting...', {
+            page, size, sortBy, sortOrder
+        });
+        try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: size.toString(),
+            });
+
+            if (sortBy) {
+                params.append('sort', `${sortBy},${sortOrder}`);
+                console.log(`📊 ClientService: Sorting by ${sortBy} (${sortOrder})`);
+            }
+
+            const response = await apiClient.get<PaginatedResponseDTO<ClientType>>(
+                `${API_ENDPOINTS.clients.getAllBlocked()}?${params.toString()}`
+            );
+            console.log('✅ ClientService: Blocked clients retrieved successfully', {
+                sortedBy: sortBy ? `${sortBy} (${sortOrder})` : 'default',
+                totalClients: response.data.meta?.total_count || 0,
+                clientsOnPage: response.data.clients?.length || 0
+            });
+
+            return response.data;
+
+        } catch (error) {
+            console.error('❌ ClientService: Failed to get sorted clients', error);
+            throw error;
+        }
+    }
+
     static async getClientOrders(
         clientEmail: string,
         page = 0,

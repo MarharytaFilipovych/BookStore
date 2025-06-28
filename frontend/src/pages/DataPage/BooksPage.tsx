@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {BookType, BookFilterState, SearchBook, Language, AgeGroup, BookSortField, SortOrder} from "../../types";
 import { BookService } from "../../services/BookService";
 import { Book } from "../../components/Book/Book";
@@ -7,7 +7,7 @@ import { bookSortOptions, ageGroups, languages, genres } from "../../BusinessDat
 import {GenericSearchablePage} from "./GenereicSearchablePage";
 
 export const BooksPage: React.FC = () => {
-    const getFilterState = (searchParams: URLSearchParams): BookFilterState => ({
+    const getFilterState = useCallback((searchParams: URLSearchParams): BookFilterState => ({
         name: searchParams.get('name') ?? '',
         genre: searchParams.get('genre') ?? '',
         author: searchParams.get('author') ?? '',
@@ -19,9 +19,9 @@ export const BooksPage: React.FC = () => {
         maxPages: searchParams.get('maxPages') ?? '',
         publicationYear: searchParams.get('publicationYear') ?? '',
         sort: searchParams.get('sort') ?? ''
-    });
+    }), []);
 
-    const convertFilterToSearchBook = (filter: BookFilterState): SearchBook => {
+    const convertFilterToSearchBook = useCallback((filter: BookFilterState): SearchBook => {
         const searchDTO: SearchBook = {};
         if (filter.name) searchDTO.name = filter.name;
         if (filter.genre) searchDTO.genre = filter.genre;
@@ -34,9 +34,9 @@ export const BooksPage: React.FC = () => {
         if (filter.maxPages) searchDTO.max_pages = parseInt(filter.maxPages);
         if (filter.publicationYear) searchDTO.publication_year = parseInt(filter.publicationYear);
         return searchDTO;
-    };
+    }, []);
 
-    const fetchBooks = async (
+    const fetchBooks = useCallback(async (
         page: number,
         pageSize: number,
         filter: BookFilterState,
@@ -55,9 +55,9 @@ export const BooksPage: React.FC = () => {
             meta: response.meta,
             items: response.books || []
         };
-    };
+    }, [convertFilterToSearchBook]);
 
-    const renderSearchComponent = ({ filter, onFilterChange }: {
+    const renderSearchComponent = useCallback(({ filter, onFilterChange }: {
         filter: BookFilterState;
         onFilterChange: (key: keyof BookFilterState, value: string) => void;
     }) => (
@@ -69,9 +69,9 @@ export const BooksPage: React.FC = () => {
             filter={filter}
             onFilterChange={onFilterChange}
         />
-    );
+    ), []); // No dependencies since genres, languages, etc. are static
 
-    const handleBookDelete = async (bookName: string) => {
+    const handleBookDelete = useCallback(async (bookName: string) => {
         console.log('🗑️ BooksPage: Handling book deletion...', { bookName });
 
         try {
@@ -83,9 +83,9 @@ export const BooksPage: React.FC = () => {
             console.error('❌ BooksPage: Failed to delete book:', error);
             alert('Failed to delete book. Please try again.');
         }
-    };
+    }, []);
 
-    const handleBookUpdate = async (bookName: string, updatedBook: BookType) => {
+    const handleBookUpdate = useCallback(async (bookName: string, updatedBook: BookType) => {
         console.log('✏️ BooksPage: Handling book update...', { bookName });
 
         try {
@@ -95,16 +95,18 @@ export const BooksPage: React.FC = () => {
         } catch (error) {
             console.error('❌ BooksPage: Failed to update book:', error);
         }
-    };
+    }, []);
 
-    const renderBook = (book: BookType, index: number) => (
+    const renderBook = useCallback((book: BookType, index: number) => (
         <Book
             key={`${book.name}-${index}`}
             {...book}
             onDelete={handleBookDelete}
             onUpdate={handleBookUpdate}
         />
-    );
+    ), [handleBookDelete, handleBookUpdate]);
+
+    const resultsCountText = useCallback((count: number) => `Found ${count} books!`, []);
 
     return (
         <GenericSearchablePage<BookType, BookFilterState, BookSortField>
@@ -115,7 +117,7 @@ export const BooksPage: React.FC = () => {
             renderItem={renderBook}
             noResultsMessage="No books found! Try adjusting your search criteria!"
             showResultsCount={true}
-            resultsCountText={(count) => `Found ${count} books!`}
+            resultsCountText={resultsCountText}
         />
     );
 };

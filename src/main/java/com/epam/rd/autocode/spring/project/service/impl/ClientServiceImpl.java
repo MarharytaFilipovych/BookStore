@@ -8,9 +8,11 @@ import com.epam.rd.autocode.spring.project.mappers.ClientMapper;
 import com.epam.rd.autocode.spring.project.model.BlockedClient;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.repo.BlockedClientRepository;
+import com.epam.rd.autocode.spring.project.repo.ClientRefreshTokenRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import com.epam.rd.autocode.spring.project.service.SortMappingService;
+import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,13 +27,15 @@ public class ClientServiceImpl implements ClientService {
     private final BlockedClientRepository blockedClientRepository;
     private final PasswordEncoder passwordEncoder;
     private final SortMappingService sortMappingService;
+    private final ClientRefreshTokenRepository clientRefreshTokenRepository;
 
-    public ClientServiceImpl(ClientRepository clientRepository, ClientMapper mapper, BlockedClientRepository blockedClientRepository, PasswordEncoder passwordEncoder, SortMappingService sortMappingService) {
+    public ClientServiceImpl(ClientRepository clientRepository, ClientMapper mapper, BlockedClientRepository blockedClientRepository, PasswordEncoder passwordEncoder, SortMappingService sortMappingService, ClientRefreshTokenRepository clientRefreshTokenRepository) {
         this.clientRepository = clientRepository;
         this.clientMapper = mapper;
         this.blockedClientRepository = blockedClientRepository;
         this.passwordEncoder = passwordEncoder;
         this.sortMappingService = sortMappingService;
+        this.clientRefreshTokenRepository = clientRefreshTokenRepository;
     }
 
     @Override
@@ -47,8 +51,10 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Page<ClientDTO> getBlockedClients(Pageable pageable) {
-        return blockedClientRepository.findAll(pageable)
+        Pageable mappedPageable = sortMappingService.applyMappings(pageable, "blocked_client");
+        return blockedClientRepository.findAll(mappedPageable)
                 .map(b -> clientMapper.toDto(b.getClient()));
+
     }
 
     @Override
@@ -63,6 +69,10 @@ public class ClientServiceImpl implements ClientService {
         blockedClientRepository.deleteByClient_Email(clientEmail);
     }
 
+    @Override
+    public boolean isBlocked(String clientEmail){
+        return blockedClientRepository.existsByClient_Email(clientEmail);
+    }
 
     @Override
     public Page<ClientDTO> getAllClients(Pageable pageable) {
@@ -102,8 +112,10 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Transactional
     public void deleteClientByEmail(String email) {
         unblockClient(email);
+        clientRefreshTokenRepository.deleteClientRefreshTokensByClient_Email(email);
         clientRepository.deleteByEmail(email);
     }
 

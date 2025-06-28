@@ -7,10 +7,12 @@ import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.mappers.EmployeeMapper;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
+import com.epam.rd.autocode.spring.project.repo.EmployeeRefreshTokenRepository;
 import com.epam.rd.autocode.spring.project.repo.EmployeeRepository;
 import com.epam.rd.autocode.spring.project.repo.OrderRepository;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import com.epam.rd.autocode.spring.project.service.SortMappingService;
+import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +27,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final PasswordEncoder passwordEncoder;
     private final SortMappingService sortMappingService;
+    private final EmployeeRefreshTokenRepository employeeRefreshTokenRepository;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper mapper, OrderRepository orderRepository, PasswordEncoder passwordEncoder, SortMappingService sortMappingService) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper mapper, OrderRepository orderRepository, PasswordEncoder passwordEncoder, SortMappingService sortMappingService, EmployeeRefreshTokenRepository employeeRefreshTokenRepository) {
         this.employeeRepository = employeeRepository;
         this.employeeMapper = mapper;
         this.passwordEncoder = passwordEncoder;
         this.sortMappingService = sortMappingService;
+        this.employeeRefreshTokenRepository = employeeRefreshTokenRepository;
     }
 
     @Override
@@ -41,7 +45,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Page<EmployeeDTO> getAllEmployees(Pageable pageable) {
         Pageable mappedPageable = sortMappingService.applyMappings(pageable, "employee");
-        return employeeRepository.findAll(pageable).map(employeeMapper::toDto);
+        return employeeRepository.findAll(mappedPageable).map(employeeMapper::toDto);
     }
 
     @Override
@@ -78,10 +82,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                 );
     }
 
-
-
     @Override
+    @Transactional
     public void deleteEmployeeByEmail(String email) {
+        employeeRefreshTokenRepository.deleteEmployeeRefreshTokenByEmployee_Email(email);
         employeeRepository.deleteByEmail(email);
     }
 

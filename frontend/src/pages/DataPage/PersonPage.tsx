@@ -21,7 +21,7 @@ type ExtendedPageState = {
 
 export const PersonPage: React.FC = () => {
     const { type } = useParams<{ type: string }>();
-    const isClientsPage = type === 'clients';
+    const isClientsPage = type === 'clients' || type === 'blocked';
 
     const [extendedState, setExtendedState] = useStateWithUpdater<ExtendedPageState>({
         blockedClients: new Set(),
@@ -35,11 +35,9 @@ export const PersonPage: React.FC = () => {
 
     const fetchBlockedClients = useCallback(async () => {
         if (!isClientsPage) return;
-
         setExtendedState(({isLoadingBlockedList: true }));
-
         try {
-            const blockedClientsResponse = await ClientService.getBlockedClients();
+            const blockedClientsResponse = await ClientService.getBlockedClientsList();
             const blockedEmails = new Set(blockedClientsResponse.map(client => client.email));
             setExtendedState(({blockedClients: blockedEmails, isLoadingBlockedList: false}));
             console.log(`Loaded ${blockedEmails.size} blocked clients`);
@@ -56,12 +54,22 @@ export const PersonPage: React.FC = () => {
         sorting?: { sortBy: PersonSortField; sortOrder: SortOrder }
     ): Promise<{ meta: { totalPages: number; total_count: number }; items: PersonType[] }> => {
         if (isClientsPage) {
-            const response = await ClientService.getClients(
-                page,
-                pageSize,
-                sorting?.sortBy as ClientSortField,
-                sorting?.sortOrder
-            );
+            let response;
+            if(type === 'blocked'){
+                response = await ClientService.getBlockedClients(
+                    page,
+                    pageSize,
+                    sorting?.sortBy as ClientSortField,
+                    sorting?.sortOrder
+                );
+            }else{
+                response = await ClientService.getClients(
+                    page,
+                    pageSize,
+                    sorting?.sortBy as ClientSortField,
+                    sorting?.sortOrder
+                );
+            }
             return {
                 meta: {
                     totalPages: response.meta.totalPages,

@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.dto.request;
 
 import com.epam.rd.autocode.spring.project.annotations.CorrectEnum;
 import com.epam.rd.autocode.spring.project.model.enums.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RefreshTokenDTO {
+    @JsonProperty("refresh_token")
     @NotNull(message = "Refresh token is required!")
     private UUID refreshToken;
     

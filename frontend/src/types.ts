@@ -117,7 +117,7 @@ export type Links = {
     clientLinks: LinkItem[];
 }
 
-export type requestType = 'people/clients' | 'orders' | 'books' | 'people/colleagues' | 'profile' | 'my-orders';
+export type requestType = 'people/clients' | 'orders' | 'books' | 'people/colleagues' | 'profile' | 'my-orders' | 'people/blocked';
 
 export type State = {
     loading: boolean;
@@ -187,7 +187,8 @@ export const API_ENDPOINTS = {
         isBlocked: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
         block: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
         unblock: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
-        getAllBlocked: () => '/clients/blocked/list'
+        getAllBlockedList: () => '/clients/blocked/list',
+        getAllBlocked: () => '/clients/blocked'
     },
     employees: {
         getAll: '/employees',
