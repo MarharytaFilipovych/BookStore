@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import { useParams} from "react-router-dom";
 import { PersonFilterState, SortOrder, ClientType, EmployeeType, ClientSortField, EmployeeSortField, StateWithPagination } from "../../types";
 import { PersonSearchField } from "../../components/Search/PersonSearchField";
@@ -17,6 +17,7 @@ type PersonSortField = ClientSortField | EmployeeSortField;
 type ExtendedPageState = {
     blockedClients: Set<string>;
     isLoadingBlockedList: boolean;
+    refreshTrigger: number;
 };
 
 export const PersonPage: React.FC = () => {
@@ -26,6 +27,7 @@ export const PersonPage: React.FC = () => {
     const [extendedState, setExtendedState] = useStateWithUpdater<ExtendedPageState>({
         blockedClients: new Set(),
         isLoadingBlockedList: false,
+        refreshTrigger: 0
     });
 
     const getFilterState = (searchParams: URLSearchParams): PersonFilterState => ({
@@ -113,6 +115,7 @@ export const PersonPage: React.FC = () => {
         try {
             await ClientService.unblockClient(email);
             await fetchBlockedClients();
+            setExtendedState({refreshTrigger: extendedState.refreshTrigger + 1})
             console.log(`Client ${email} unblocked successfully`);
         } catch (error) {
             console.error('Failed to unblock client:', error);
@@ -174,11 +177,16 @@ export const PersonPage: React.FC = () => {
                 sortOptions={isClientsPage ? clientSortOptionsWithMappings : employeeSortOptionsWithMappings}
                 searchComponent={renderSearchComponent}
                 renderItem={renderPerson}
+                resultsCountText={(count) => {
+                    if(isClientsPage) return `Found ${count} ${count === 1 ? 'client' : 'clients'}!`
+                    return `Found ${count} ${count === 1 ? 'colleague' : 'colleagues'}!`
+                }}
                 noResultsMessage={
                     isClientsPage
                         ? "No clients found! Try adjusting your search criteria!"
                         : "No colleagues found! Try adjusting your search criteria!"
                 }
+                refreshTrigger={extendedState.refreshTrigger}
             />
         </>
     );

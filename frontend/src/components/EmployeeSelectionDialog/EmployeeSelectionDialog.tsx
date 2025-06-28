@@ -1,60 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { EmployeeType } from '../../types';
+import React, { useState } from 'react';
 import { EmployeeService } from '../../services/EmployeeService';
 import { MiniButton } from '../MiniButton/MiniButton';
 import styles from './style.module.css';
+import {AuthorizationButton} from "../AuthorizationButton/AuthorizationButton";
 
 interface EmployeeSelectionDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onSelectEmployee: (employeeEmail: string) => void;
-    orderInfo?: {
-        orderDate: string;
-        clientEmail: string;
-    };
 }
 
-export const EmployeeSelectionDialog: React.FC<EmployeeSelectionDialogProps> = ({
-                                                                                    isOpen,
-                                                                                    onClose,
-                                                                                    onSelectEmployee,
-                                                                                    orderInfo
-                                                                                }) => {
-    const [employees, setEmployees] = useState<EmployeeType[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [selectedEmployee, setSelectedEmployee] = useState<string>('');
+export const EmployeeSelectionDialog: React.FC<EmployeeSelectionDialogProps> = ({isOpen, onClose, onSelectEmployee}) => {
+    const [employeeEmail, setEmployeeEmail] = useState<string>('');
+    const [isValidating, setIsValidating] = useState(false);
+    const [error, setError] = useState<string>('');
 
-    useEffect(() => {
-        if (isOpen) {
-            fetchEmployees();
-        }
-    }, [isOpen]);
+    const handleConfirm = async () => {
+        if (!employeeEmail.trim()) return;
+        setIsValidating(true);
+        setError('');
 
-    const fetchEmployees = async () => {
-        setLoading(true);
-        setError(null);
         try {
-            const response = await EmployeeService.getEmployees(0, 100); // Get all employees
-            setEmployees(response.employees || []);
-        } catch (err) {
-            console.error('Failed to fetch employees:', err);
-            setError('Failed to load employees. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleConfirm = () => {
-        if (selectedEmployee) {
-            onSelectEmployee(selectedEmployee);
+            await EmployeeService.getEmployeeByEmail(employeeEmail);
+            onSelectEmployee(employeeEmail);
             handleClose();
+        } catch (error: any) {
+            if (error.response?.status === 404) setError('Employee does not exist');
+            else setError('Invalid email');
+        } finally {
+            setIsValidating(false);
         }
     };
 
     const handleClose = () => {
-        setSelectedEmployee('');
-        setError(null);
+        setEmployeeEmail('');
+        setError('');
         onClose();
     };
 
@@ -64,89 +44,30 @@ export const EmployeeSelectionDialog: React.FC<EmployeeSelectionDialogProps> = (
         <div className={styles.overlay} onClick={handleClose}>
             <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.dialogHeader}>
-                    <h2>Assign Employee to Order</h2>
-                    <MiniButton
-                        topic='cross'
-                        size='mini'
-                        onClick={handleClose}
-                    />
+                    <h2>Type employee email...</h2>
+                    <MiniButton topic='cross' size='premedium' onClick={handleClose} />
                 </div>
 
-                {orderInfo && (
-                    <div className={styles.orderInfo}>
-                        <p><strong>Order Date:</strong> {new Date(orderInfo.orderDate).toLocaleDateString()}</p>
-                        <p><strong>Client:</strong> {orderInfo.clientEmail}</p>
-                    </div>
-                )}
-
                 <div className={styles.dialogContent}>
-                    {loading && (
-                        <div className={styles.loading}>
-                            <p>Loading employees...</p>
-                        </div>
-                    )}
-
-                    {error && (
-                        <div className={styles.error}>
-                            <p>{error}</p>
-                            <button onClick={fetchEmployees} className={styles.retryButton}>
-                                Retry
-                            </button>
-                        </div>
-                    )}
-
-                    {!loading && !error && employees.length === 0 && (
-                        <div className={styles.noEmployees}>
-                            <p>No employees available</p>
-                        </div>
-                    )}
-
-                    {!loading && !error && employees.length > 0 && (
-                        <div className={styles.employeeList}>
-                            <h3>Select an employee:</h3>
-                            <div className={styles.employeeOptions}>
-                                {employees.map((employee) => (
-                                    <label
-                                        key={employee.email}
-                                        className={`${styles.employeeOption} ${
-                                            selectedEmployee === employee.email ? styles.selected : ''
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="employee"
-                                            value={employee.email}
-                                            checked={selectedEmployee === employee.email}
-                                            onChange={(e) => setSelectedEmployee(e.target.value)}
-                                        />
-                                        <div className={styles.employeeInfo}>
-                                            <div className={styles.employeeName}>{employee.name}</div>
-                                            <div className={styles.employeeEmail}>{employee.email}</div>
-                                            {employee.phone && (
-                                                <div className={styles.employeePhone}>{employee.phone}</div>
-                                            )}
-                                        </div>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    <input
+                        type="email"
+                        className={`${styles.emailInput} ${error ? styles.emailInputError : ''}`}
+                        placeholder="employee@gmail.com"
+                        value={employeeEmail}
+                        onChange={(e) => {
+                            setEmployeeEmail(e.target.value);
+                            setError('');
+                        }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
+                        disabled={isValidating}
+                        autoFocus
+                    />
+                    {error && <div className={styles.errorMessage}>{error}</div>}
                 </div>
 
                 <div className={styles.dialogActions}>
-                    <button
-                        onClick={handleClose}
-                        className={styles.cancelButton}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleConfirm}
-                        disabled={!selectedEmployee || loading}
-                        className={styles.confirmButton}
-                    >
-                        Assign Employee
-                    </button>
+                    <AuthorizationButton type='cancel' onClick={handleClose}/>
+                    <AuthorizationButton type='submit' onClick={handleConfirm} disabled={!employeeEmail.trim() || isValidating}/>
                 </div>
             </div>
         </div>

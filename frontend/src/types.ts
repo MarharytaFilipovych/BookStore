@@ -93,14 +93,7 @@ export type PaginatedResponseDTO<T> = {
     clients?: T[];
 }
 
-
 export interface UpdateBookRequest extends Partial<BookType> {}
-
-export type IconTopic = 'search' | 'tick' | 'star' | 'vote'
-    | 'cross' | 'envelope' | 'call' | 'empty-star'
-    | 'black-cross' | 'caret' | 'heart' | 'empty-heart'
-    | 'empty-circle' | 'circle' | 'loading' | 'error'
-    | 'direction' | 'hidden' | 'plus' | 'basket' | 'bin' | 'ban' | 'update' | 'unban';
 
 export type ContactProp = {
     typeOfContact: 'email' | 'call';

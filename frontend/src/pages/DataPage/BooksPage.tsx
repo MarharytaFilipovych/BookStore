@@ -1,12 +1,22 @@
-import React, { useCallback } from "react";
+import React, {useCallback, useContext, useState} from "react";
 import {BookType, BookFilterState, SearchBook, Language, AgeGroup, BookSortField, SortOrder} from "../../types";
 import { BookService } from "../../services/BookService";
 import { Book } from "../../components/Book/Book";
 import { BookSearchField } from "../../components/Search/BookSearchField";
 import { bookSortOptions, ageGroups, languages, genres } from "../../BusinessData";
 import {GenericSearchablePage} from "./GenereicSearchablePage";
+import {AppContext} from "../../context";
+import {Button} from "../../components/Button/Button";
+import {BookForm} from "../../components/BookForm/BookForm";
+import styles from './style.module.css';
 
 export const BooksPage: React.FC = () => {
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [isCreateBookDialogOpen, setIsCreateBookDialogOpen] = useState(false);
+    const [createBookError, setCreateBookError] = useState('');
+    const [isCreatingBook, setIsCreatingBook] = useState(false);
+    const context = useContext(AppContext);
+
     const getFilterState = useCallback((searchParams: URLSearchParams): BookFilterState => ({
         name: searchParams.get('name') ?? '',
         genre: searchParams.get('genre') ?? '',
@@ -69,16 +79,15 @@ export const BooksPage: React.FC = () => {
             filter={filter}
             onFilterChange={onFilterChange}
         />
-    ), []); // No dependencies since genres, languages, etc. are static
+    ), []);
 
     const handleBookDelete = useCallback(async (bookName: string) => {
         console.log('🗑️ BooksPage: Handling book deletion...', { bookName });
-
         try {
             await BookService.deleteBook(bookName);
+            context.removeFromBasket(bookName);
             console.log('✅ BooksPage: Book deleted successfully, refreshing page...');
-            window.location.reload();
-
+            setRefreshTrigger(prev => prev + 1);
         } catch (error) {
             console.error('❌ BooksPage: Failed to delete book:', error);
             alert('Failed to delete book. Please try again.');
@@ -91,10 +100,37 @@ export const BooksPage: React.FC = () => {
         try {
             await BookService.updateBook(bookName, updatedBook);
             console.log('✅ BooksPage: Book updated successfully, refreshing page...');
-            window.location.reload();
+            setRefreshTrigger(prev => prev + 1);
         } catch (error) {
             console.error('❌ BooksPage: Failed to update book:', error);
         }
+    }, []);
+
+    const handleBookCreate = useCallback(async (book: BookType) => {
+        console.log('📚 BooksPage: Handling book creation...', book);
+        setIsCreatingBook(true);
+        setCreateBookError('');
+
+        try {
+            await BookService.createBook(book);
+            console.log('✅ BooksPage: Book created successfully, refreshing page...');
+
+            // Close dialog and refresh
+            setIsCreateBookDialogOpen(false);
+            setRefreshTrigger(prev => prev + 1);
+
+        } catch (error: any) {
+            console.error('❌ BooksPage: Failed to create book:', error);
+            setCreateBookError(error.response?.data?.message || 'Failed to create book. Please try again.');
+        } finally {
+            setIsCreatingBook(false);
+        }
+    }, []);
+
+    const handleCancelCreate = useCallback(() => {
+        setIsCreateBookDialogOpen(false);
+        setCreateBookError('');
+        setIsCreatingBook(false);
     }, []);
 
     const renderBook = useCallback((book: BookType, index: number) => (
@@ -106,18 +142,38 @@ export const BooksPage: React.FC = () => {
         />
     ), [handleBookDelete, handleBookUpdate]);
 
-    const resultsCountText = useCallback((count: number) => `Found ${count} books!`, []);
-
     return (
-        <GenericSearchablePage<BookType, BookFilterState, BookSortField>
-            fetchData={fetchBooks}
-            getFilterFromParams={getFilterState}
-            sortOptions={bookSortOptions}
-            searchComponent={renderSearchComponent}
-            renderItem={renderBook}
-            noResultsMessage="No books found! Try adjusting your search criteria!"
-            showResultsCount={true}
-            resultsCountText={resultsCountText}
-        />
+        <>
+            {context.role === 'EMPLOYEE' && (
+                <div className={styles.button}>
+                    <Button
+                        purpose='Create new book!'
+                        onClick={() => setIsCreateBookDialogOpen(true)}
+                        disabled={isCreatingBook}
+                    />
+                </div>
+            )}
+
+                <GenericSearchablePage<BookType, BookFilterState, BookSortField>
+                    fetchData={fetchBooks}
+                    getFilterFromParams={getFilterState}
+                    sortOptions={bookSortOptions}
+                    searchComponent={renderSearchComponent}
+                    renderItem={renderBook}
+                    noResultsMessage="No books found! Try adjusting your search criteria!"
+                    showResultsCount={true}
+                    resultsCountText={(count) => `Found ${count} ${count === 1 ? 'book' : 'books'}!`}
+                    refreshTrigger={refreshTrigger}
+                />
+
+                {isCreateBookDialogOpen && (
+                    <BookForm
+                        onSubmit={handleBookCreate}
+                        onCancel={handleCancelCreate}
+                        error={createBookError}
+                        processing={isCreatingBook}
+                    />
+                )}
+        </>
     );
 };

@@ -16,11 +16,12 @@ import {Header} from "./components/Header/Header";
 import {MenuButton} from "./components/MenuButton/MenuButton";
 import {MiniButton} from "./components/MiniButton/MiniButton";
 import {Basket} from "./components/Basket/Basket";
-import {BasketButton} from "./components/Basket/BasketButton";
 import {BooksPage} from "./pages/DataPage/BooksPage";
 import {PersonPage} from "./pages/DataPage/PersonPage";
 import {OrdersPage} from "./pages/DataPage/OrderPage";
 import {ProfilePage} from "./pages/AuthPage/ProfilePage";
+import {Icon} from "./components/Icon/Icon";
+import {ScrollToTop} from "./components/ScrollToTop/ScrollToTop";
 
 export const App: React.FC = () => {
     const context = React.useContext(AppContext);
@@ -28,16 +29,21 @@ export const App: React.FC = () => {
     const navigate = useNavigate();
     const [isBasketOpen, setIsBasketOpen] = useState<boolean>(false);
     const location = useLocation();
+
     useEffect(() => {
-        const publicRoutes = ['/', '/login/client', '/login/employee', '/register', '/forgot', '/reset-password'];
+        if (context.isLoading) return;
+        const publicRoutes = ['/', '/login/client', '/login/employee', '/sign', '/forgot', '/reset-password'];
         const isPublicRoute = publicRoutes.includes(location.pathname);
         if (!context.user && !isPublicRoute) {
             console.log('🚪 User not authenticated, redirecting to welcome page...');
             navigate('/', { replace: true });
         }
-    }, [context.user, location.pathname, navigate]);
+    }, [context.user, context.isLoading, location.pathname, navigate]);
+
     return (
         <>
+
+            <ScrollToTop />
             {warning && <Warning
                 onClick={async ()=>{
                     await context.logout();
@@ -47,6 +53,7 @@ export const App: React.FC = () => {
                 purpose='log-out'
                 message={'Are you sure about logging out?'}
             />}
+            {context.isLoading && <Icon topic='loading' size='big'/>}
 
             {isBasketOpen && context.role === 'CLIENT' && (
                 <Basket onClose={() => setIsBasketOpen(false)}/>
@@ -58,10 +65,10 @@ export const App: React.FC = () => {
                         <Header part='left'>
                             <MenuButton user={context.role!} links={links}/>
                         </Header>
-                            <h1>Margosha book store</h1>
+                        <h1>Margosha book store</h1>
                         <Header part='right'>
                             <Link to={'/books'}><MiniButton topic='search' size='premedium'/></Link>
-                            {context.role === 'CLIENT' && (<BasketButton onClick={() => setIsBasketOpen(true)} /> )}
+                            {context.role === 'CLIENT' && (<MiniButton topic='basket' size='premedium' onClick={() => setIsBasketOpen(true)} />)}
                             <h2>{context.user.name}</h2>
                             <AuthorizationButton type={'log-out'} onClick={()=> setWarning(true)}/>
                         </Header>

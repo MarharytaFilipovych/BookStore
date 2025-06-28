@@ -5,9 +5,10 @@
     flex-direction: column;
     margin: 0;
     padding: 0;
+    gap: 2rem;
 }
 .page h2{
-    margin: 1.7rem;
+    margin: 1rem;
     color: #edeaee;
     font-weight: bold;
     font-size: 2rem;
@@ -15,9 +16,17 @@
     text-wrap: wrap;
 }
 .container{
-    padding: 3rem 1.5rem;
+    padding: 0 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
+}
+
+.button{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem
 }

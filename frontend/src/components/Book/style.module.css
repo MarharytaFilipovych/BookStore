@@ -70,6 +70,13 @@
     color: #491651;
 }
 
+.bookQuantity{
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #7ca5f1;
+}
+
 .bookDescription {
     position: relative;
     width: 90%;

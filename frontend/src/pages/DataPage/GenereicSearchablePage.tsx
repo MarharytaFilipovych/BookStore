@@ -35,6 +35,7 @@ interface GenericSearchablePageProps<TItem, TFilter, TSortField> {
     noResultsMessage?: string;
     showResultsCount?: boolean;
     resultsCountText?: (count: number) => string;
+    refreshTrigger?: number;
 }
 
 type GenericPageState<TItem> = {
@@ -50,7 +51,8 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
                                                                                                   containerClassName = styles.page,
                                                                                                   noResultsMessage = "No results found! Try adjusting your search criteria!",
                                                                                                   showResultsCount = false,
-                                                                                                  resultsCountText = (count: number) => `Found ${count} results!`
+                                                                                                  resultsCountText = (count: number) => `Found ${count} results!`,
+                                                                                                    refreshTrigger
                                                                                               }: GenericSearchablePageProps<TItem, TFilter, TSortField>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation();
@@ -112,11 +114,7 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
 
     useEffect(() => {
         handleFetchData();
-    }, [location]);
-
-    useEffect(() => {
-        handleFetchData();
-    }, [searchParams]);
+    }, [searchParams, refreshTrigger, location]);
 
     const handleFilterChange = (key: keyof TFilter, value: string) => {
         setSearchParams(setNewQueryParams<TFilter>(key, value, searchParams));

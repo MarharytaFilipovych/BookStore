@@ -43,7 +43,7 @@ export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
         } catch (error) {
             console.error('❌ Book: Failed to delete book:', error);
             setIsProcessing(false);
-            alert('Failed to delete book. Please try again.');
+            alert('This book cannot be deleted!');
         }
     };
 
@@ -76,12 +76,23 @@ export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
 
                 <div className={styles.bookActions}>
                     <p className={styles.bookPrice}>${book.price}</p>
+                    <p className={styles.bookQuantity}>
+                        {context.checkQuantity(book.name)} {context.checkQuantity(book.name) === 1 ? 'item' : 'items'}
+                    </p>
                     {context?.role === 'CLIENT' ? (
-                        <MiniButton
-                            topic='basket'
-                            size='medium'
-                            onClick={() => context.addToBasket({book_name: book.name, quantity: 1})}
-                        />
+                        <div className={styles.employeeActions}>
+                            <MiniButton
+                                topic='basket'
+                                size='medium'
+                                onClick={() => context.addToBasket(book.name)}
+                            />
+                            <MiniButton
+                                topic='bin'
+                                size='medium'
+                                onClick={() => context.removeFromBasket(book.name)}
+                            />
+                        </div>
+
                     ) : (
                         <div className={styles.employeeActions}>
                             <MiniButton

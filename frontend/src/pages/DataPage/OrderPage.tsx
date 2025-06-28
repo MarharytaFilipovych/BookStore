@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useCallback, useContext, useState} from "react";
 import {OrderType, OrderFilterState, OrderSortField, SortOrder, ForWhomOrder} from "../../types";
 import { OrderService } from "../../services/OrderService";
 import { OrderComponent } from "../../components/Order/Order";
@@ -13,6 +13,8 @@ import {EmployeeService} from "../../services/EmployeeService";
 export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
     const context = useContext(AppContext);
 
     const getFilterState = (searchParams: URLSearchParams): OrderFilterState => {
@@ -120,25 +122,14 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
 
     const handleEmployeeSelection = async (employeeEmail: string) => {
         if (!selectedOrder) return;
-
-        try {
-            console.log('🔄 Assigning employee to order...', {
+         console.log('🔄 Assigning employee to order...', {
                 orderDate: selectedOrder.order_date,
                 clientEmail: selectedOrder.client_email,
                 assignedTo: employeeEmail
             });
-
-            await OrderService.confirmOrder(selectedOrder, employeeEmail);
-
-            console.log('✅ Person assigned successfully');
-
-            // Refresh the page or update state
-            window.location.reload();
-
-        } catch (error) {
-            console.error('❌ Failed to assign employee to order:', error);
-            // You might want to show an error notification here
-        }
+        await OrderService.confirmOrder(selectedOrder, employeeEmail);
+        console.log('✅ Person assigned successfully');
+        setRefreshTrigger(prev => prev + 1);
     };
 
     const renderOrder = (order: OrderType, index: number) => (
@@ -171,7 +162,8 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
                 renderItem={renderOrder}
                 noResultsMessage="No orders found! Try adjusting your search criteria!"
                 showResultsCount={true}
-                resultsCountText={(count) => `Found ${count} orders!`}
+                resultsCountText={(count) => `Found ${count} ${count === 1 ? 'order' : 'orders'}!`}
+                refreshTrigger={refreshTrigger}
             />
 
             <EmployeeSelectionDialog
@@ -181,10 +173,6 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
                     setSelectedOrder(null);
                 }}
                 onSelectEmployee={handleEmployeeSelection}
-                orderInfo={selectedOrder ? {
-                    orderDate: selectedOrder.order_date,
-                    clientEmail: selectedOrder.client_email
-                } : undefined}
             />
         </>
     );

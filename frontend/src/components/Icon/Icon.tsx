@@ -20,18 +20,25 @@ import error from './icons/error.png';
 import direction from './icons/arrow.png';
 import hidden from './icons/hidden.png';
 import plus from './icons/plus.png';
-import {IconTopic} from '../../types';
 import basket from './icons/shopping-basket.png';
 import bin from './icons/bin.png';
 import ban from './icons/ban.png';
 import update from './icons/update.png';
 import unban from './icons/unban.png';
+import minus from  './icons/minus.png';
+
+export type IconTopic = 'search' | 'tick' | 'star' | 'vote'
+    | 'cross' | 'envelope' | 'call' | 'empty-star'
+    | 'black-cross' | 'caret' | 'heart' | 'empty-heart'
+    | 'empty-circle' | 'circle' | 'loading' | 'error'
+    | 'direction' | 'hidden' | 'plus' | 'basket' | 'bin' | 'ban' | 'update' | 'unban' | 'minus';
 
 type IconProps ={
     topic: IconTopic;
     size: 'mini' | 'medium' | 'big' | 'premedium'
     mirror?: boolean;
 }
+
 export const Icon: React.FC<IconProps> = ({topic, size, mirror})=>{
     const getSource = () => {
         switch(topic) {
@@ -59,6 +66,7 @@ export const Icon: React.FC<IconProps> = ({topic, size, mirror})=>{
             case 'ban': return ban;
             case 'update': return update;
             case 'unban': return unban;
+            case 'minus': return minus;
         }
     };
     return (

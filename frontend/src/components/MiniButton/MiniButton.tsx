@@ -1,8 +1,7 @@
 import React from 'react';
 import styles from './style.module.css';
-import {Icon} from '../Icon/Icon';
+import {Icon, IconTopic} from '../Icon/Icon';
 import classNames from 'classnames';
-import {IconTopic} from '../../types';
 
 type MiniButtonProps = {
     topic: IconTopic;

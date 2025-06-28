@@ -18,22 +18,23 @@ import {useStateWithUpdater} from "./hooks/useStateWithUpdater";
 
 type AppState = {
     user: User | null;
-    role: Role | null;
+    role: Role;
     basket: Basket;
+    isLoading: boolean;
 }
 
 const initialState: AppState = {
     user: null,
-    role: null,
+    role: 'CLIENT',
     basket: [],
+    isLoading: true,
 };
 
 export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     const [state, updateState] = useStateWithUpdater<AppState>(initialState);
 
-
     useEffect(() => {
-        const initializeAuth =  () => {
+        const initializeAuth = () => {
             try {
                 const storedUser = localStorage.getItem('user');
                 const storedRole = localStorage.getItem('role');
@@ -41,7 +42,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
                 if (storedUser && storedRole && accessToken && AuthService.isAuthenticated()) {
                     const parsedUser = JSON.parse(storedUser);
-                    updateState({user: parsedUser, role: storedRole as Role});
+                    updateState({user: parsedUser, role: storedRole as Role, isLoading: false});
 
                     apiClient.setDefaultHeader('Authorization', `Bearer ${accessToken}`);
                 } else {
@@ -79,8 +80,9 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
         updateState({
             user: null,
-            role: null,
+            role: 'CLIENT',
             basket: [],
+            isLoading: false, // Set loading to false after cleanup
         });
     };
 
@@ -189,10 +191,18 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         }
     };
 
-    const addToBasket = (book: BookItem) => {
-        updateState({
-            basket: [...state.basket, book]
-        });
+    const addToBasket = (name: string, quantity: number = 1) => {
+        const existingItem = state.basket.find(b => b.book_name === name);
+
+        const updatedBasket = existingItem
+            ? state.basket.map(item =>
+                item.book_name ===name
+                    ? { ...item, quantity: item.quantity + quantity }
+                    : item
+            )
+            : [...state.basket, {book_name: name, quantity: quantity}];
+
+        updateState({ basket: updatedBasket });
     };
 
     const removeFromBasket = (bookName: string) => {
@@ -200,6 +210,12 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             basket: state.basket.filter(book => book.book_name !== bookName)
         });
     };
+
+    const checkQuantity =  (name: string): number =>{
+        const book = state.basket.find(b => b.book_name === name);
+        if(book)return book.quantity;
+        return 0;
+    }
 
     const clearBasket = () => {
         updateState({ basket: [] });
@@ -231,6 +247,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         user: state.user,
         role: state.role,
         basket: state.basket,
+        isLoading: state.isLoading,
 
         login,
         logout,
@@ -246,6 +263,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         addToBasket,
         removeFromBasket,
         clearBasket,
+        checkQuantity
     };
 
     return (

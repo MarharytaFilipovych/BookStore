@@ -3,7 +3,6 @@ import {
     User,
     Role,
     Basket,
-    BookItem,
     ClientType,
     LoginRequest,
     ForgotPasswordDTO,
@@ -12,8 +11,9 @@ import {
 
 export type AppContextType = {
     user: User | null;
-    role: Role | null;
+    role: Role;
     basket: Basket;
+    isLoading: boolean; // Add loading state
 
     login: (request: LoginRequest) => Promise<void>;
     logout: () => Promise<void>;
@@ -26,15 +26,17 @@ export type AppContextType = {
     setRole: (role: Role) => void;
     cleanUser: () => void;
 
-    addToBasket: (book: BookItem) => void;
+    addToBasket: (name: string, quantity?: number) => void;
     removeFromBasket: (bookName: string) => void;
     clearBasket: () => void;
+    checkQuantity: (name: string) => number;
 }
 
 const defaultContextValue: AppContextType = {
     user: null,
-    role: null,
+    role: 'CLIENT',
     basket: [],
+    isLoading: true,
 
     login: async () => { throw new Error('AppContext not initialized') },
     logout: async () => { throw new Error('AppContext not initialized') },
@@ -49,7 +51,8 @@ const defaultContextValue: AppContextType = {
 
     addToBasket: () => { throw new Error('AppContext not initialized') },
     removeFromBasket: () => { throw new Error('AppContext not initialized') },
-    clearBasket: () => { throw new Error('AppContext not initialized') }
+    clearBasket: () => { throw new Error('AppContext not initialized') },
+    checkQuantity: ()=> { throw new Error('AppContext not initialized') }
 };
 
 export const AppContext = React.createContext<AppContextType>(defaultContextValue);
