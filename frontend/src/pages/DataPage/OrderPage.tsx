@@ -4,7 +4,7 @@ import { OrderService } from "../../services/OrderService";
 import { OrderComponent } from "../../components/Order/Order";
 import { OrderSearchField } from "../../components/Search/OrderSearchField";
 import { EmployeeSelectionDialog } from "../../components/EmployeeSelectionDialog/EmployeeSelectionDialog";
-import { orderSortOptions } from "../../BusinessData";
+import {clientOrderSortOptions, employeeOrderSortOptions, orderSortOptions} from "../../BusinessData";
 import { GenericSearchablePage } from "./GenereicSearchablePage";
 import {AppContext} from "../../context";
 import {ClientService} from "../../services/ClientService";
@@ -89,9 +89,9 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
                 const filterState = getFilterState(new URLSearchParams(window.location.search));
                 if (filterState.employeeEmail) {
                     console.log('📦 Fetching orders by employee email:', filterState.employeeEmail);
-                    response = await fetchEmployeeOrders(context.user!.email, page, pageSize, sorting);
+                    response = await fetchEmployeeOrders(filterState.employeeEmail, page, pageSize, sorting);
                 } else if (filterState.clientEmail) {
-                    response = await fetchClientOrders(context.user!.email, page, pageSize, sorting);
+                    response = await fetchClientOrders(filterState.clientEmail, page, pageSize, sorting);
                 } else {
                     console.log('📦 Fetching all orders');
                     response = await OrderService.getOrders(page, pageSize, sorting?.sortBy, sorting?.sortOrder);
@@ -111,7 +111,7 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
         onFilterChange: (key: keyof OrderFilterState, value: string) => void;
     }) => (
         <OrderSearchField
-            sortOptions={Array.from(orderSortOptions.keys())}
+            sortOptions={Array.from(getSortOptions().keys())}
             filter={filter}
             onFilterChange={onFilterChange}
             forWhom={forWhom}
@@ -153,12 +153,20 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
         />
     );
 
+    const getSortOptions = () => {
+        switch (forWhom) {
+            case 'employee': return employeeOrderSortOptions;
+            case 'client': return clientOrderSortOptions;
+            case 'all': return orderSortOptions;
+        }
+    };
+
     return (
         <>
             <GenericSearchablePage<OrderType, OrderFilterState, OrderSortField>
                 fetchData={fetchOrders}
                 getFilterFromParams={getFilterState}
-                sortOptions={orderSortOptions}
+                sortOptions={getSortOptions()}
                 searchComponent={renderSearchComponent}
                 renderItem={renderOrder}
                 noResultsMessage="No orders found! Try adjusting your search criteria!"
