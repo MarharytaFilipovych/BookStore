@@ -3,7 +3,6 @@ import { useParams} from "react-router-dom";
 import { PersonFilterState, SortOrder, ClientType, EmployeeType, ClientSortField, EmployeeSortField } from "../../types";
 import { PersonSearchField } from "../../components/Search/PersonSearchField";
 import { clientSortOptionsWithMappings, employeeSortOptionsWithMappings } from "../../BusinessData";
-import styles from './style.module.css';
 import { GenericSearchablePage } from "./GenereicSearchablePage";
 import { ClientComponent } from "../../components/Person/Client";
 import { EmployeeComponent } from "../../components/Person/Employee";

@@ -21,6 +21,7 @@ export const PersonSearchField: React.FC<SearchFieldProps> = ({
                     value={filter.email}
                     onNameChange={(value) => onFilterChange('email', value)}
                     noMargin={true}
+                    text='type email...'
                 />
 
                 <Filter

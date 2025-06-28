@@ -9,7 +9,7 @@ export const ClientComponent: React.FC<ClientType> = (client) => {
         <>
             <div className={styles.container}>
                     <h3 className={styles.name}>{client.name}</h3>
-                    <p className={styles.email}>{client.email}</p>
+                    <a  href={`mailto:${client.email}`} className={styles.email}>{client.email}</a>
                     <p className={styles.addInfo}>{client.balance}</p>
                     <MiniButton
                         topic='ban'

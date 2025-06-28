@@ -17,8 +17,8 @@ export const EmployeeComponent: React.FC<EmployeeType> = (employee) => {
         <>
             <div className={classNames(styles.container, styles.employeeContainer)}>
                     <h3 className={styles.name}>{employee.name}</h3>
-                    <p className={styles.email}>{employee.email}</p>
-                    <p className={styles.number}>{employee.phone}</p>
+                    <a href={`mailto:${employee.email}`} className={styles.email}>{employee.email}</a>
+                    <a href={`tel:${employee.phone}`} className={styles.number}>{employee.phone}</a>
                 <p>birthdate ... <strong className={styles.addInfo}>{formatDate(employee.birthdate)}</strong></p>
             </div>
         </>

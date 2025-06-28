@@ -204,7 +204,7 @@ export class ClientService {
         clientEmail: string,
         page = 0,
         size = 10,
-        sortBy?: 'orderDate' | 'price',
+        sortBy?: 'orderDate' | 'price' | 'employee_name' | 'employee_email',
         sortOrder: SortOrder = 'desc'
     ): Promise<PaginatedResponseDTO<import('../types').OrderType>> {
         console.log('📦 ClientService: Getting client orders...', {

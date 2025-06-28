@@ -12,13 +12,14 @@ export const links: Links = {
     employeeLinks: [
         {link: 'people/clients', name: 'our clients'},
         {link: 'orders', name: 'orders'},
+        {link: 'my-orders', name: 'my orders'},
         {link: 'books', name: 'books'},
         {link: 'people/colleagues', name: 'my colleagues'},
         {link: 'profile', name: 'my profile'}
     ],
     clientLinks: [
         {link: 'books', name: 'books'},
-        {link: 'orders', name: 'my orders'},
+        {link: 'my-orders', name: 'my orders'},
         {link: 'profile', name: 'my profile'}
     ]
 };
@@ -50,6 +51,17 @@ export const orderSortOptions = new Map<string, {sortBy: OrderSortField, sortOrd
     ['Client Name Z-A', {sortBy: 'client_name', sortOrder: 'desc'}],
     ['Client Email A-Z', {sortBy: 'client_email', sortOrder: 'asc'}],
     ['Client Email Z-A', {sortBy: 'client_email', sortOrder: 'desc'}],
+    ['Person Name A-Z', {sortBy: 'employee_name', sortOrder: 'asc'}],
+    ['Person Name Z-A', {sortBy: 'employee_name', sortOrder: 'desc'}],
+    ['Person Email A-Z', {sortBy: 'employee_email', sortOrder: 'asc'}],
+    ['Person Email Z-A', {sortBy: 'employee_email', sortOrder: 'desc'}]
+]);
+
+export const clientOrderSortOptions = new Map<string, {sortBy: OrderSortField, sortOrder: SortOrder}>([
+    ['Date (Newest First)', {sortBy: 'order_date', sortOrder: 'desc'}],
+    ['Date (Oldest First)', {sortBy: 'order_date', sortOrder: 'asc'}],
+    ['Price (High to Low)', {sortBy: 'price', sortOrder: 'desc'}],
+    ['Price (Low to High)', {sortBy: 'price', sortOrder: 'asc'}],
     ['Person Name A-Z', {sortBy: 'employee_name', sortOrder: 'asc'}],
     ['Person Name Z-A', {sortBy: 'employee_name', sortOrder: 'desc'}],
     ['Person Email A-Z', {sortBy: 'employee_email', sortOrder: 'asc'}],

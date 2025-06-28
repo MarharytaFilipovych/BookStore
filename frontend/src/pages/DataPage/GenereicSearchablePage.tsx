@@ -88,8 +88,20 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
                 loading: false,
                 items: response.items || []
             });
-        } catch (err) {
-            console.error('Error fetching data:', err);
+        }
+        catch (error: any) {
+            if (error?.response?.status === 400 || error?.status === 400) {
+                console.log('📦 Bad request - showing as no orders found:', error.message);
+                return {
+                    meta: {
+                        totalPages: 0,
+                        total_count: 0
+                    },
+                    items: []
+                };
+            }
+
+            console.error('Error fetching data:', error);
             updateState({ error: true, loading: false });
         }
     };

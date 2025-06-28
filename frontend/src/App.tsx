@@ -79,7 +79,8 @@ export const App: React.FC = () => {
                         <Route path="/reset-password" element={<ResetPasswordPage/>}/>
                         <Route path="/people/:type" element={<PersonPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
-                        <Route path="/orders" element={<OrdersPage/>}/>
+                        <Route path="/orders" element={<OrdersPage forWhom='all'/>}/>
+                        <Route path="/my-orders" element={<OrdersPage forWhom={context.role === 'CLIENT'? 'client' : 'employee'}/>}/>
                     </Routes>
                 </div>
                 {context.user && <Footer links={links} user={context.role!} contacts={myContacts}/>}

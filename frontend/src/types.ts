@@ -6,7 +6,7 @@ export type EmployeeSortField = 'name' | 'email' | 'birthdate';
 export type ClientSortField = 'name' | 'email' | 'balance';
 export type OrderSortField = 'order_date' | 'price' | 'client_email' | 'employee_email' | 'client_name' | 'employee_name';
 export type BookSortField = 'name' | 'author' | 'genre' | 'price' | 'publication_date' | 'age_group' | 'pages';
-export type SortField = BookSortField | ClientSortField | OrderSortField | EmployeeSortField;
+export type ForWhomOrder = 'all' | 'employee' | 'client';
 export type User = ClientType | EmployeeType;
 export type BookType = {
     name: string;
@@ -111,9 +111,7 @@ export type Links = {
     clientLinks: LinkItem[];
 }
 
-
-export type requestType = 'people/clients' | 'orders' | 'books' | 'people/colleagues' | 'profile';
-
+export type requestType = 'people/clients' | 'orders' | 'books' | 'people/colleagues' | 'profile' | 'my-orders';
 
 export type State = {
     loading: boolean;
