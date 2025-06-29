@@ -16,7 +16,7 @@ export const OrderSearchField: React.FC<OrderSearchFieldProps> =
     return (
         <div className={styles.search}>
             <div className={styles.search}>
-                {(forWhom === 'all' || forWhom == 'employee') && (
+                {(forWhom === 'all' || forWhom === 'employee') && (
                     <SearchBar
                         value={filter.clientEmail}
                         onNameChange={(value) => onFilterChange('clientEmail', value)}
@@ -24,7 +24,7 @@ export const OrderSearchField: React.FC<OrderSearchFieldProps> =
                         noMargin={true}
                     />
                 )}
-                {(forWhom === 'all' || forWhom == 'client') && (
+                {(forWhom === 'all' || forWhom === 'client') && (
                     <SearchBar
                         value={filter.employeeEmail}
                         onNameChange={(value) => onFilterChange('employeeEmail', value)}

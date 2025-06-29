@@ -22,7 +22,8 @@ public class CorrectSortFieldsValidator implements ConstraintValidator<CorrectSo
         this.sortOptionsSettings = sortOptionsSettings;
     }
 
-    private Map<String, String> parseSortMappings(CorrectSortFields.SortMapping[] mappingArray){
+    private Map<String, String> parseSortMappings
+            (CorrectSortFields.SortMapping[] mappingArray){
         Map<String, String> mappings = new HashMap<>();
         for(CorrectSortFields.SortMapping mapping : mappingArray){
             mappings.put(mapping.from(), mapping.to());
@@ -44,15 +45,11 @@ public class CorrectSortFieldsValidator implements ConstraintValidator<CorrectSo
     @Override
     public boolean isValid(Pageable pageable, ConstraintValidatorContext context) {
         if (pageable == null || pageable.getSort().isUnsorted()) return true;
-
         Sort sort = pageable.getSort();
-
         if (sort.isUnsorted()) return true;
         for(Sort.Order order : sort){
             String requestedField = order.getProperty();
-
             String entityField = sortMappings.getOrDefault(requestedField, requestedField);
-
             if(!sortOptions.contains(entityField)){
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate(

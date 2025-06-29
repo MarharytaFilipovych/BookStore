@@ -37,9 +37,7 @@ public class MyPasswordValidator implements ConstraintValidator<ValidPassword, S
         rules.add(new CharacterRule(EnglishCharacterData.LowerCase, properties.getMinLowercase()));
         rules.add(new CharacterRule(EnglishCharacterData.Digit, properties.getMinDigits()));
         rules.add(new CharacterRule(EnglishCharacterData.Special, properties.getMinSpecial()));
-        if (!properties.isAllowWhitespace()) {
-            rules.add(new WhitespaceRule());
-        }
+        if (!properties.isAllowWhitespace()) rules.add(new WhitespaceRule());
         int maxSequence = properties.getMaxSequenceLength();
         rules.add(new IllegalSequenceRule(EnglishSequenceData.Alphabetical, maxSequence, false));
         rules.add(new IllegalSequenceRule(EnglishSequenceData.Numerical, maxSequence, false));
@@ -48,12 +46,7 @@ public class MyPasswordValidator implements ConstraintValidator<ValidPassword, S
         if (properties.getCommonPasswords().length != 0) {
             String[] commonPasswords = properties.getCommonPasswords().clone();
             Arrays.sort(commonPasswords);
-
-            rules.add(new DictionaryRule(
-                    new WordListDictionary(
-                            new ArrayWordList(commonPasswords)
-                    )
-            ));
+            rules.add(new DictionaryRule(new WordListDictionary(new ArrayWordList(commonPasswords))));
         }
         return rules;
     }

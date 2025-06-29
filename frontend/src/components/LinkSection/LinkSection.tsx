@@ -11,12 +11,12 @@ export const LinksSection: React.FC<{ links: Links, style: 'menu' | 'footer', us
                 [styles.footer]: style === 'footer',
                 [styles.menu]: style === 'menu'
             })}>
-                {user == 'EMPLOYEE' && links.employeeLinks.map((link, index) => (
+                {user === 'EMPLOYEE' && links.employeeLinks.map((link, index) => (
                     <li key={`link-${index}`} className={styles.link}>
                         <Link to={`/${link.link}`}>{link.name}</Link>
                     </li>
                 ))}
-                {user == 'CLIENT' && links.clientLinks.map((link, index) => (
+                {user === 'CLIENT' && links.clientLinks.map((link, index) => (
                     <li key={`userlink-${index}`} className={styles.link}>
                         <Link to={`/${link.link}`}>{link.name}</Link>
                     </li>

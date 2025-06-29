@@ -19,5 +19,4 @@ public class BookStoreServiceSolutionApplication {
     public static void main(String[] args) {
         SpringApplication.run(BookStoreServiceSolutionApplication.class, args);
     }
-
 }

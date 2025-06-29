@@ -41,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> getAllOrders(Pageable pageable) {
         Pageable mappedPageable = sortMappingService.applyMappings(pageable, "order");
-        return orderRepository.findAllByClientNotNullAndEmployeeNotNull(mappedPageable).map(orderMapper::toDto);
+        return orderRepository.findAll(mappedPageable).map(orderMapper::toDto);
     }
 
     @Override

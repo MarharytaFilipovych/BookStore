@@ -44,11 +44,9 @@ public class GlobalExceptionHandlerLoggingAspect {
     private void logExceptionHandling(String handlerMethod, Exception exception) {
         HttpServletRequest request = getCurrentRequest();
         String requestInfo = "";
-        
         if (request != null) {
             requestInfo = String.format(" [%s %s]", request.getMethod(), request.getRequestURI());
         }
-        
         if (exception != null) {
             log.warn("EXCEPTION_HANDLED: {} handling {}{} -> {}", 
                 handlerMethod,
@@ -65,7 +63,6 @@ public class GlobalExceptionHandlerLoggingAspect {
     private void logExceptionResponse(String handlerMethod, Exception exception, Object result) {
         if (result instanceof ResponseEntity<?> responseEntity) {
             String errorMessage = extractErrorMessage(responseEntity.getBody());
-            
             log.info("EXCEPTION_RESPONSE: {} -> {} {}", 
                 handlerMethod,
                 responseEntity.getStatusCode(),

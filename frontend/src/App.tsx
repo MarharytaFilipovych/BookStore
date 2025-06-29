@@ -42,7 +42,6 @@ export const App: React.FC = () => {
 
     return (
         <>
-
             <ScrollToTop />
             {warning && <Warning
                 onClick={async ()=>{

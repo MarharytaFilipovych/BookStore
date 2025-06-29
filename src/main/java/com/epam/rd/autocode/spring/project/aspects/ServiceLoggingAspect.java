@@ -33,10 +33,8 @@ public class ServiceLoggingAspect {
         String methodName = LoggingUtils.getMethodName(joinPoint);
         String methodSignature = LoggingUtils.getMethodSignature(joinPoint);
         Object[] args = joinPoint.getArgs();
-        
         long startTime = System.currentTimeMillis();
         logMethodEntry(className, methodName, args);
-        
         try {
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - startTime;
@@ -82,8 +80,10 @@ public class ServiceLoggingAspect {
     }
 
     private void updatePerformanceStatistics(String methodSignature, long executionTime) {
-        executionCounts.computeIfAbsent(methodSignature, k -> new AtomicLong(0)).incrementAndGet();
-        totalExecutionTimes.computeIfAbsent(methodSignature, k -> new AtomicLong(0)).addAndGet(executionTime);
+        executionCounts.computeIfAbsent(methodSignature,
+                k -> new AtomicLong(0)).incrementAndGet();
+        totalExecutionTimes.computeIfAbsent(methodSignature,
+                k -> new AtomicLong(0)).addAndGet(executionTime);
         maxExecutionTimes.merge(methodSignature, executionTime, Long::max);
         minExecutionTimes.merge(methodSignature, executionTime, Long::min);
     }
@@ -93,7 +93,6 @@ public class ServiceLoggingAspect {
         AtomicLong totalTime = totalExecutionTimes.get(methodSignature);
         Long maxTime = maxExecutionTimes.get(methodSignature);
         Long minTime = minExecutionTimes.get(methodSignature);
-        
         if (count != null && totalTime != null) {
             long avgTime = totalTime.get() / count.get();
             log.info(LoggingUtils.formatPerformanceStats(methodSignature, count.get(), avgTime, minTime, maxTime));

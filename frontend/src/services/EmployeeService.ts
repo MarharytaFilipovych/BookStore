@@ -1,11 +1,6 @@
 import { apiClient } from '../config/ApiClient';
-import {
-    EmployeeType,
-    PaginatedResponseDTO,
-    API_ENDPOINTS,
-    EmployeeSortField,
-    SortOrder
-} from '../types';
+import {EmployeeType, PaginatedResponseDTO, EmployeeSortField, SortOrder, OrderType} from '../types';
+import {API_ENDPOINTS} from "../BusinessData";
 
 export class EmployeeService {
 
@@ -79,17 +74,14 @@ export class EmployeeService {
 
         try {
             const response = await apiClient.post<EmployeeType>(
-                API_ENDPOINTS.employees.getAll, // POST to /employees
+                API_ENDPOINTS.employees.getAll,
                 employee
             );
-
             console.log('✅ EmployeeService: Person created successfully', {
                 createdEmployee: response.data.name,
                 email: response.data.email
             });
-
             return response.data;
-
         } catch (error) {
             console.error('❌ EmployeeService: Failed to create employee', {
                 employeeEmail: employee.email,
@@ -107,22 +99,15 @@ export class EmployeeService {
         });
 
         try {
-            await apiClient.put<void>(
-                API_ENDPOINTS.employees.update(email),
-                updates
-            );
-
+            await apiClient.put<void>(API_ENDPOINTS.employees.update(email), updates);
             console.log('✅ EmployeeService: Employee updated successfully (status code received)');
-
             const updatedEmployee: EmployeeType = {
                 email: email,
                 phone: updates.phone!,
                 birthdate: updates.birthdate!,
                 name: updates.name!
             };
-
             console.log('🔄 EmployeeService: Constructed updated employee object', updatedEmployee);
-
             return updatedEmployee;
 
         } catch (error) {
@@ -140,11 +125,9 @@ export class EmployeeService {
 
         try {
             await apiClient.delete(API_ENDPOINTS.employees.delete(email));
-
             console.log('✅ EmployeeService: Person deleted successfully', {
                 deletedEmployee: email
             });
-
         } catch (error) {
             console.error('❌ EmployeeService: Failed to delete employee', {
                 employeeEmail: email,
@@ -166,17 +149,12 @@ export class EmployeeService {
         });
 
         try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                size: size.toString(),
-            });
-
+            const params = new URLSearchParams({page: page.toString(), size: size.toString(),});
             if (sortBy) {
                 params.append('sort', `${sortBy},${sortOrder}`);
                 console.log(`📊 EmployeeService: Sorting orders by ${sortBy} (${sortOrder})`);
             }
-
-            const response = await apiClient.get<PaginatedResponseDTO<import('../types').OrderType>>(
+            const response = await apiClient.get<PaginatedResponseDTO<OrderType>>(
                 `${API_ENDPOINTS.orders.getByEmployee(employeeEmail)}?${params.toString()}`
             );
 
@@ -186,9 +164,7 @@ export class EmployeeService {
                 ordersOnPage: response.data.orders?.length || 0,
                 sortedBy: sortBy ? `${sortBy} (${sortOrder})` : 'default'
             });
-
             return response.data;
-
         } catch (error) {
             console.error('❌ EmployeeService: Failed to get employee orders', {
                 employeeEmail, sortBy, error

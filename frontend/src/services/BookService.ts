@@ -1,54 +1,8 @@
 import { apiClient } from '../config/ApiClient';
-import {
-    BookType,
-    PaginatedResponseDTO,
-    SearchBook,
-    UpdateBookRequest,
-    API_ENDPOINTS,
-    BookSortField,
-    SortOrder
-} from '../types';
+import {BookType, PaginatedResponseDTO, SearchBook, UpdateBookRequest, BookSortField, SortOrder} from '../types';
+import {API_ENDPOINTS} from "../BusinessData";
 
 export class BookService {
-
-    static async getBooks(
-        page = 0,
-        size = 10,
-        sortBy?: BookSortField,
-        sortOrder: SortOrder = 'asc'
-    ): Promise<PaginatedResponseDTO<BookType>> {
-        console.log('📚 BookService: Getting books with sorting...', {
-            page, size, sortBy, sortOrder
-        });
-
-        try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                size: size.toString(),
-            });
-
-            if (sortBy) {
-                params.append('sort', `${sortBy},${sortOrder}`);
-                console.log(`📊 BookService: Sorting by ${sortBy} (${sortOrder})`);
-            }
-
-            const response = await apiClient.get<PaginatedResponseDTO<BookType>>(
-                `${API_ENDPOINTS.books.getAll}?${params.toString()}`
-            );
-
-            console.log('✅ BookService: Books retrieved successfully', {
-                sortedBy: sortBy ? `${sortBy} (${sortOrder})` : 'default',
-                totalBooks: response.data.meta?.total_count || 0,
-                booksOnPage: response.data.books?.length || 0
-            });
-
-            return response.data;
-
-        } catch (error) {
-            console.error('❌ BookService: Failed to get sorted books', error);
-            throw error;
-        }
-    }
 
     static async searchBooks(
         searchParams: SearchBook,
@@ -62,11 +16,7 @@ export class BookService {
         });
 
         try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                size: size.toString(),
-            });
-
+            const params = new URLSearchParams({page: page.toString(), size: size.toString(),});
             if (sortBy) {
                 params.append('sort', `${sortBy},${sortOrder}`);
                 console.log(`📊 BookService: Sorting search results by ${sortBy} (${sortOrder})`);
@@ -86,9 +36,7 @@ export class BookService {
                 hasSorting: !!sortBy
             });
 
-            const response = await apiClient.get<PaginatedResponseDTO<BookType>>(
-                `${API_ENDPOINTS.books.search}?${params.toString()}`
-            );
+            const response = await apiClient.get<PaginatedResponseDTO<BookType>>(`${API_ENDPOINTS.books.search}?${params.toString()}`);
 
             console.log('✅ BookService: Search completed successfully', {
                 resultsFound: response.data.meta?.total_count || 0,
@@ -109,9 +57,7 @@ export class BookService {
         console.log('📖 BookService: Getting book by name...', { name });
 
         try {
-            const response = await apiClient.get<BookType>(
-                API_ENDPOINTS.books.getByName(name)
-            );
+            const response = await apiClient.get<BookType>(API_ENDPOINTS.books.getByName(name));
 
             console.log('✅ BookService: Book retrieved successfully', {
                 bookName: response.data.name,
@@ -136,11 +82,7 @@ export class BookService {
         });
 
         try {
-            const response = await apiClient.post<BookType>(
-                API_ENDPOINTS.books.create,
-                book
-            );
-
+            const response = await apiClient.post<BookType>(API_ENDPOINTS.books.create, book);
             console.log('✅ BookService: Book created successfully', {
                 createdBook: response.data.name,
                 author: response.data.author,
@@ -150,10 +92,7 @@ export class BookService {
             return response.data;
 
         } catch (error) {
-            console.error('❌ BookService: Failed to create book', {
-                bookName: book.name,
-                error
-            });
+            console.error('❌ BookService: Failed to create book', {bookName: book.name, error});
             throw error;
         }
     }
@@ -166,45 +105,26 @@ export class BookService {
         });
 
         try {
-            const response = await apiClient.put<BookType>(
-                API_ENDPOINTS.books.update(name),
-                updates
-            );
-
+            const response = await apiClient.put<BookType>(API_ENDPOINTS.books.update(name), updates);
             console.log('✅ BookService: Book updated successfully', {
                 updatedBook: response.data.name,
                 previousName: name,
                 fieldsUpdated: Object.keys(updates)
             });
-
             return response.data;
-
         } catch (error) {
-            console.error('❌ BookService: Failed to update book', {
-                bookName: name,
-                updates,
-                error
-            });
+            console.error('❌ BookService: Failed to update book', {bookName: name, updates, error});
             throw error;
         }
     }
 
-
     static async deleteBook(name: string): Promise<void> {
         console.log('🗑️ BookService: Deleting book...', { name });
-
         try {
             await apiClient.delete(API_ENDPOINTS.books.delete(name));
-
-            console.log('✅ BookService: Book deleted successfully', {
-                deletedBook: name
-            });
-
+            console.log('✅ BookService: Book deleted successfully', {deletedBook: name});
         } catch (error) {
-            console.error('❌ BookService: Failed to delete book', {
-                bookName: name,
-                error
-            });
+            console.error('❌ BookService: Failed to delete book', {bookName: name, error});
             throw error;
         }
     }

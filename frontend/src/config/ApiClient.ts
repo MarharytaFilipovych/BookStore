@@ -1,14 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import {API_ENDPOINTS, TokenResponseDTO, RefreshTokenDTO, Role} from '../types';
+import {TokenResponseDTO, RefreshTokenDTO, Role} from '../types';
+import {API_ENDPOINTS} from "../BusinessData";
 
 class ApiClient {
     private readonly client: AxiosInstance;
     private isRefreshing = false;
-    private failedQueue: Array<{
-        resolve: (value: any) => void;
-        reject: (error: any) => void;
-        config: any;
-    }> = [];
+    private failedQueue: Array<{ resolve: (value: any) => void; reject: (error: any) => void; config: any; }> = [];
 
     constructor() {
         console.log('🏗️ Initializing ApiClient...');
@@ -27,16 +24,12 @@ class ApiClient {
 
     private processQueue(error: any, token: string | null = null) {
         this.failedQueue.forEach(({ resolve, reject, config }) => {
-            if (error) {
-                reject(error);
-            } else {
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                }
+            if (error) reject(error);
+            else {
+                if (token) config.headers.Authorization = `Bearer ${token}`;
                 resolve(this.client(config));
             }
         });
-
         this.failedQueue = [];
     }
 
@@ -144,11 +137,7 @@ class ApiClient {
                         const response = await axios.post<TokenResponseDTO>(
                             `${this.client.defaults.baseURL}${API_ENDPOINTS.auth.refresh}`,
                             refreshData,
-                            {
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            }
+                            {headers: {'Content-Type': 'application/json'}}
                         );
 
                         const newAccessToken = response.data.access_token;
@@ -182,32 +171,21 @@ class ApiClient {
                         this.isRefreshing = false;
                     }
                 }
-
                 return Promise.reject(error);
             }
         );
-
         console.log('✅ Interceptors configured successfully');
     }
 
     private clearAuthData() {
         console.log('🧹 Clearing authentication data...');
-
-        const keysToRemove = [
-            'accessToken',
-            'refreshToken',
-            'user',
-            'role',
-            'basket'
-        ];
-
+        const keysToRemove = ['accessToken', 'refreshToken', 'user', 'role', 'basket'];
         keysToRemove.forEach(key => {
             if (localStorage.getItem(key)) {
                 localStorage.removeItem(key);
                 console.log(`🗑️ Removed ${key} from localStorage`);
             }
         });
-
         console.log('✅ Authentication data cleared');
     }
 

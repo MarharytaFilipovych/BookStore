@@ -19,7 +19,9 @@ public class MyUserDetailsServiceImpl implements MyUserDetailsService {
     private final ClientRepository clientRepository;
     private final BlockedClientRepository blockedClientRepository;
 
-    public MyUserDetailsServiceImpl(EmployeeRepository employeeRepository, ClientRepository clientRepository, BlockedClientRepository blockedClientRepository) {
+    public MyUserDetailsServiceImpl
+            (EmployeeRepository employeeRepository, ClientRepository clientRepository,
+             BlockedClientRepository blockedClientRepository) {
         this.employeeRepository = employeeRepository;
         this.clientRepository = clientRepository;
         this.blockedClientRepository = blockedClientRepository;

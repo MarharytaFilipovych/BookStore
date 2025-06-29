@@ -17,7 +17,8 @@ public class RoleBasedAuthenticationProvider implements AuthenticationProvider {
     private final MyUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-    public RoleBasedAuthenticationProvider(MyUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public RoleBasedAuthenticationProvider
+            (MyUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -31,7 +32,8 @@ public class RoleBasedAuthenticationProvider implements AuthenticationProvider {
             if(!passwordEncoder.matches(password, userDetails.getPassword())){
                 throw new BadCredentialsException("Invalid credentials!");
             }
-            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken
+                    (userDetails, null, userDetails.getAuthorities());
         }
         throw new BadCredentialsException("Invalid authentication details: role required");
     }

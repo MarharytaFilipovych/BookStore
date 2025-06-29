@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 @Aspect
@@ -28,10 +27,9 @@ public class ControllerLoggingAspect {
         String methodName = LoggingUtils.getMethodName(joinPoint);
         HttpServletRequest request = getCurrentRequest();
         String requestLog = buildRequestLog(request, className, methodName, joinPoint.getArgs());
-
         try {
             Object result = joinPoint.proceed();
-            String responseLog = buildResponseLog(className, methodName, result);
+            String responseLog = buildResponseLog(result);
             log.info("{} -> {}", requestLog, responseLog);
             return result;
         } catch (Exception e) {
@@ -40,23 +38,20 @@ public class ControllerLoggingAspect {
         }
     }
 
-    private String buildRequestLog(HttpServletRequest request, String className, String methodName, Object[] args) {
+    private String buildRequestLog(HttpServletRequest request,
+                                   String className, String methodName, Object[] args) {
         StringBuilder sb = new StringBuilder();
-
         if (request != null) {
-            sb.append(request.getMethod()).append(" ").append(request.getRequestURI());
+            sb.append(request.getMethod())
+                    .append(" ").append(request.getRequestURI());
         }
-
-        sb.append(" ").append(className).append(".").append(methodName).append("()");
-
-        if (args.length > 0) {
-            sb.append(" ").append(LoggingUtils.formatArguments(args));
-        }
-
+        sb.append(" ").append(className)
+                .append(".").append(methodName).append("()");
+        if (args.length > 0) sb.append(" ").append(LoggingUtils.formatArguments(args));
         return sb.toString();
     }
 
-    private String buildResponseLog(String className, String methodName, Object result) {
+    private String buildResponseLog(Object result) {
         if (result instanceof ResponseEntity<?> responseEntity) {
             return String.format("%s %s",
                     responseEntity.getStatusCode(),

@@ -53,18 +53,21 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponseDTO> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleMethodArgumentTypeMismatchException
+            (MethodArgumentTypeMismatchException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO("Invalid parameter type for: " + ex.getName()));
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, OrderMustContainClientException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({IllegalArgumentException.class,
+            OrderMustContainClientException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<ErrorResponseDTO> handleBadRequestExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO(ex.getMessage()));
     }
 
-    @ExceptionHandler({UsernameNotFoundException.class, SecurityException.class, UserDetailsAreNullException.class})
+    @ExceptionHandler({UsernameNotFoundException.class,
+            SecurityException.class, UserDetailsAreNullException.class})
     public ResponseEntity<ErrorResponseDTO> handleUnauthorizedExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponseDTO(ex.getMessage()));
@@ -83,7 +86,8 @@ public class GlobalExceptionController {
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleHandlerMethodValidationException
+            (HandlerMethodValidationException ex) {
         String errorMessage = ex.getAllValidationResults().stream()
                 .flatMap(result -> result.getResolvableErrors().stream())
                 .map(MessageSourceResolvable::getDefaultMessage)

@@ -14,7 +14,8 @@ public class LoggingUtils {
             Object arg = args[i];
             if (arg == null) sb.append("null");
             else if (containsSensitiveData(arg)) sb.append("[PROTECTED]");
-            else sb.append(arg.getClass().getSimpleName()).append("(").append(arg).append(")");
+            else sb.append(arg.getClass().getSimpleName())
+                        .append("(").append(arg).append(")");
         }
         sb.append("]");
         return sb.toString();

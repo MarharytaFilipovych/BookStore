@@ -57,7 +57,8 @@ public class EmployeeController {
 
     @PreAuthorize("#email == authentication.name and hasRole('EMPLOYEE')")
     @PutMapping("/{email}")
-    public ResponseEntity<Void> updateEmployee(@PathVariable @Email String email, @Valid @RequestBody EmployeeUpdateDTO dto){
+    public ResponseEntity<Void> updateEmployee(@PathVariable @Email String email,
+                                               @Valid @RequestBody EmployeeUpdateDTO dto){
         employeeService.updateEmployeeByEmail(email, dto);
         return ResponseEntity.noContent().build();
     }

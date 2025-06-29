@@ -1,11 +1,6 @@
 import { apiClient } from '../config/ApiClient';
-import {
-    ClientType,
-    PaginatedResponseDTO,
-    API_ENDPOINTS,
-    ClientSortField,
-    SortOrder, Links
-} from '../types';
+import {ClientType, PaginatedResponseDTO, ClientSortField, SortOrder} from '../types';
+import {API_ENDPOINTS} from "../BusinessData";
 
 export class ClientService {
 
@@ -20,11 +15,7 @@ export class ClientService {
         });
 
         try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                size: size.toString(),
-            });
-
+            const params = new URLSearchParams({page: page.toString(), size: size.toString(),});
             if (sortBy) {
                 params.append('sort', `${sortBy},${sortOrder}`);
                 console.log(`📊 ClientService: Sorting by ${sortBy} (${sortOrder})`);
@@ -33,15 +24,12 @@ export class ClientService {
             const response = await apiClient.get<PaginatedResponseDTO<ClientType>>(
                 `${API_ENDPOINTS.clients.getAll}?${params.toString()}`
             );
-
             console.log('✅ ClientService: Clients retrieved successfully', {
                 sortedBy: sortBy ? `${sortBy} (${sortOrder})` : 'default',
                 totalClients: response.data.meta?.total_count || 0,
                 clientsOnPage: response.data.clients?.length || 0
             });
-
             return response.data;
-
         } catch (error) {
             console.error('❌ ClientService: Failed to get sorted clients', error);
             throw error;
@@ -52,18 +40,13 @@ export class ClientService {
         console.log('👤 ClientService: Getting client by email...', { email });
 
         try {
-            const response = await apiClient.get<ClientType>(
-                API_ENDPOINTS.clients.getByEmail(email)
-            );
-
+            const response = await apiClient.get<ClientType>(API_ENDPOINTS.clients.getByEmail(email));
             console.log('✅ ClientService: Client retrieved successfully', {
                 clientName: response.data.name,
                 email: response.data.email,
                 balance: response.data.balance
             });
-
             return response.data;
-
         } catch (error) {
             console.error('❌ ClientService: Failed to get client', { email, error });
             throw error;
@@ -78,31 +61,17 @@ export class ClientService {
         });
 
         try {
-            // Send the update request (returns only status code)
-            await apiClient.put<void>(
-                API_ENDPOINTS.clients.update(email),
-                updates
-            );
-
+            await apiClient.put<void>(API_ENDPOINTS.clients.update(email), updates);
             console.log('✅ ClientService: Client updated successfully (status code received)');
-
-            // Construct the updated client object by merging current data with updates
             const updatedClient: ClientType = {
                name: updates.name!,
                 balance: updates.balance!,
                 email: email
             };
-
             console.log('🔄 ClientService: Constructed updated client object', updatedClient);
-
             return updatedClient;
-
         } catch (error) {
-            console.error('❌ ClientService: Failed to update client', {
-                clientEmail: email,
-                updates,
-                error
-            });
+            console.error('❌ ClientService: Failed to update client', {clientEmail: email, updates, error});
             throw error;
         }
     }
@@ -111,16 +80,9 @@ export class ClientService {
 
         try {
             await apiClient.delete(API_ENDPOINTS.clients.delete(email));
-
-            console.log('✅ ClientService: Client deleted successfully', {
-                deletedClient: email
-            });
-
+            console.log('✅ ClientService: Client deleted successfully', {deletedClient: email});
         } catch (error) {
-            console.error('❌ ClientService: Failed to delete client', {
-                clientEmail: email,
-                error
-            });
+            console.error('❌ ClientService: Failed to delete client', {clientEmail: email, error});
             throw error;
         }
     }
@@ -130,11 +92,7 @@ export class ClientService {
 
         try {
             const blockData = reason ? { reason } : {};
-
-            await apiClient.post(
-                API_ENDPOINTS.clients.block(email),
-                blockData
-            );
+            await apiClient.post(API_ENDPOINTS.clients.block(email), blockData);
 
             console.log('✅ ClientService: Client blocked successfully', {
                 blockedClient: email,
@@ -263,12 +221,7 @@ export class ClientService {
         });
 
         try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                size: size.toString(),
-            });
-
-            // Add sorting if specified
+            const params = new URLSearchParams({page: page.toString(), size: size.toString(),});
             if (sortBy) {
                 params.append('sort', `${sortBy},${sortOrder}`);
                 console.log(`📊 ClientService: Sorting orders by ${sortBy} (${sortOrder})`);

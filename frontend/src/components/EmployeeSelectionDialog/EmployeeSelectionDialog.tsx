@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { EmployeeService } from '../../services/EmployeeService';
 import { MiniButton } from '../MiniButton/MiniButton';
 import styles from './style.module.css';

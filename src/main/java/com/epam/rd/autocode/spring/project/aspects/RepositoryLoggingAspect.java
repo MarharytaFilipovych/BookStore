@@ -47,7 +47,8 @@ public class RepositoryLoggingAspect {
         Object[] args = joinPoint.getArgs();
         
         long startTime = System.currentTimeMillis();
-        log.info("Executing data modification: {}.{}() with arguments: {}", className, methodName, LoggingUtils.formatArguments(args));
+        log.info("Executing data modification: {}.{}() with arguments: {}",
+                className, methodName, LoggingUtils.formatArguments(args));
         try {
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - startTime;
@@ -90,8 +91,12 @@ public class RepositoryLoggingAspect {
 
     private String formatRetrievalResult(Object result) {
         if (result == null) return "Result: null";
-        if (result instanceof java.util.Collection<?> collection) return String.format("Result: Collection with %d items", collection.size());
-        if (result instanceof java.util.Optional<?> optional) return optional.isPresent() ? "Result: Optional with value" : "Result: Empty Optional";
+        if (result instanceof java.util.Collection<?> collection) {
+            return String.format("Result: Collection with %d items", collection.size());
+        }
+        if (result instanceof java.util.Optional<?> optional) {
+            return optional.isPresent() ? "Result: Optional with value" : "Result: Empty Optional";
+        }
         if (result instanceof Boolean) return String.format("Result: %s", result);
         return String.format("Result: %s", result.getClass().getSimpleName());
     }

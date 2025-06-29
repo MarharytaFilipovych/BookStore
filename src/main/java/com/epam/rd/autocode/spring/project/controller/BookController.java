@@ -61,7 +61,8 @@ public class BookController {
 
     @PreAuthorize("hasRole('EMPLOYEE')")
     @PutMapping("/{name}")
-    public ResponseEntity<Void> updateBook(@PathVariable @BookTitle String name, @Valid @RequestBody BookDTO dto){
+    public ResponseEntity<Void> updateBook(@PathVariable @BookTitle String name,
+                                           @Valid @RequestBody BookDTO dto){
         bookService.updateBookByName(name, dto);
         return ResponseEntity.noContent().build();
     }

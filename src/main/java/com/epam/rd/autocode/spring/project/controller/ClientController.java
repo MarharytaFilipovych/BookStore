@@ -80,8 +80,9 @@ public class ClientController {
     }
 
     @GetMapping("/blocked")
-    public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getBlockedClients(@CorrectSortFields(entityType = SortableEntity.BLOCKED_CLIENT)
-                                                                             @PageableDefault(sort = "name") Pageable pageable){
+    public ResponseEntity<PaginatedResponseDTO<ClientDTO>> getBlockedClients(
+            @CorrectSortFields(entityType = SortableEntity.BLOCKED_CLIENT)
+            @PageableDefault(sort = "name") Pageable pageable){
         Page<ClientDTO> page = clientService.getBlockedClients(pageable);
         return ResponseEntity.ok(getPaginatedResponse(page));
     }
@@ -101,10 +102,5 @@ public class ClientController {
     public ResponseEntity<Void> unblockClient(@PathVariable @Email String email){
         clientService.unblockClient(email);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/blocked/{email}")
-    public ResponseEntity<Boolean> checkIfClientIsBLocked(@PathVariable @Email String email){
-        return ResponseEntity.ok(clientService.isBlocked(email));
     }
 }

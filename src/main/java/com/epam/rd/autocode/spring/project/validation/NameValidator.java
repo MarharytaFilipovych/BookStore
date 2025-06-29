@@ -21,7 +21,8 @@ public class NameValidator implements ConstraintValidator<CorrectName, String> {
         if (value == null)return !required;
         if(value.isBlank())return false;
         String trimmedValue = value.trim();
-        if(trimmedValue.length() > 100 || trimmedValue.length() < 2)return false;
+        int NAME_LENGTH = 100;
+        if(trimmedValue.length() > NAME_LENGTH || trimmedValue.length() < 2)return false;
         return pattern.matcher(trimmedValue).matches();
     }
 }

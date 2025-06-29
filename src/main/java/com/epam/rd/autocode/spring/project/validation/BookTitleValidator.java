@@ -5,7 +5,8 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class BookTitleValidator implements ConstraintValidator<BookTitle, String> {
-    boolean required;
+    private boolean required;
+
     @Override
     public void initialize(BookTitle constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
@@ -15,6 +16,7 @@ public class BookTitleValidator implements ConstraintValidator<BookTitle, String
     @Override
     public boolean isValid(String title, ConstraintValidatorContext context) {
         if (title == null)return !required;
-        return !title.isBlank() && title.trim().length() <= 255;
+        int TITLE_LENGTH = 255;
+        return !title.isBlank() && title.trim().length() <= TITLE_LENGTH;
     }
 }

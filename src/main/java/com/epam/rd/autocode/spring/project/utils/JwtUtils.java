@@ -27,13 +27,9 @@ public class JwtUtils {
         String username;
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        } else if (principal instanceof String) {
-            username = (String) principal;
-        } else {
-            throw new IllegalArgumentException("Principal must be either UserDetails or String");
-        }
+        if (principal instanceof UserDetails userDetails) username = userDetails.getUsername();
+        else if (principal instanceof String) username = (String) principal;
+        else throw new IllegalArgumentException("Principal must be either UserDetails or String");
 
         return Jwts.builder()
                 .issuer(settings.getIssuer())
@@ -42,7 +38,8 @@ public class JwtUtils {
                         .map(GrantedAuthority::getAuthority)
                         .toList())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + settings.getExpirationTime().toMillis()))
+                .expiration(new Date(System.currentTimeMillis()
+                        + settings.getExpirationTime().toMillis()))
                 .signWith(getSignInKey())
                 .compact();
     }
@@ -77,13 +74,9 @@ public class JwtUtils {
         String principal;
         Object authPrincipal = authentication.getPrincipal();
 
-        if (authPrincipal instanceof UserDetails userDetails) {
-            principal = userDetails.getUsername();
-        } else if (authPrincipal instanceof String) {
-            principal = (String) authPrincipal;
-        } else {
-            return false;
-        }
+        if (authPrincipal instanceof UserDetails userDetails) principal = userDetails.getUsername();
+        else if (authPrincipal instanceof String) principal = (String) authPrincipal;
+        else return false;
 
         return username != null &&
                 username.equals(principal) &&

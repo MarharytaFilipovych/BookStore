@@ -29,7 +29,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final SortMappingService sortMappingService;
     private final EmployeeRefreshTokenRepository employeeRefreshTokenRepository;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper mapper, OrderRepository orderRepository, PasswordEncoder passwordEncoder, SortMappingService sortMappingService, EmployeeRefreshTokenRepository employeeRefreshTokenRepository) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository,
+                               EmployeeMapper mapper, PasswordEncoder passwordEncoder,
+                               SortMappingService sortMappingService,
+                               EmployeeRefreshTokenRepository employeeRefreshTokenRepository) {
         this.employeeRepository = employeeRepository;
         this.employeeMapper = mapper;
         this.passwordEncoder = passwordEncoder;

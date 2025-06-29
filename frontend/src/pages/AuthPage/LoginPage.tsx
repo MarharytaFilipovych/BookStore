@@ -5,7 +5,6 @@ import {useParams} from "react-router-dom";
 import {Role} from "../../types";
 import {AppContext} from "../../context";
 import styles from './style.module.css';
-import {AuthService} from "../../services/AuthService";
 
 export const LoginPage: React.FC = () => {
     const userType: Role = useParams().user === 'employee' ? 'EMPLOYEE' : 'CLIENT';

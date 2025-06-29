@@ -5,9 +5,9 @@ import {
     ForgotPasswordDTO,
     ResetPasswordDTO,
     RefreshTokenDTO,
-    LogoutDTO,
-    API_ENDPOINTS, ClientType
+    LogoutDTO, ClientType
 } from '../types';
+import {API_ENDPOINTS} from "../BusinessData";
 
 export class AuthService {
 

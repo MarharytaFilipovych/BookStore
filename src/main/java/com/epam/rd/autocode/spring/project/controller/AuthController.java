@@ -23,7 +23,8 @@ public class AuthController {
     private final EmployeeService employeeService;
     private final ClientService clientService;
 
-    public AuthController(AuthService authService,EmployeeService employeeService, ClientService clientService) {
+    public AuthController(AuthService authService,
+                          EmployeeService employeeService, ClientService clientService) {
         this.authService = authService;
         this.employeeService = employeeService;
         this.clientService = clientService;

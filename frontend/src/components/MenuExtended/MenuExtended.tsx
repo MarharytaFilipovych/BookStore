@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import styles from './style.module.css';
 import {MiniButton} from '../MiniButton/MiniButton';
 import {ActionButton} from '../AuthorizationButton/ActionButton';
-import {Link, useNavigate} from 'react-router';
+import {useNavigate} from 'react-router';
 import {LinksSection} from '../LinkSection/LinkSection';
 import {Warning} from '../Warning/Warning';
 import {Links, Role} from '../../types';

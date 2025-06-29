@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface BookRepository extends JpaRepository<Book, Long>, QuerydslPredicateExecutor<Book> {
+public interface BookRepository
+        extends JpaRepository<Book, Long>, QuerydslPredicateExecutor<Book> {
     Optional<Book> findByName(String name);
 
     @Transactional

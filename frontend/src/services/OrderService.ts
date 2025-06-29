@@ -1,13 +1,6 @@
 import { apiClient } from '../config/ApiClient';
-import {
-    OrderType,
-    BookItem,
-    PaginatedResponseDTO,
-    API_ENDPOINTS,
-    OrderSortField,
-    SortOrder
-} from '../types';
-import {BookService} from "./BookService";
+import {OrderType, PaginatedResponseDTO, OrderSortField, SortOrder} from '../types';
+import {API_ENDPOINTS} from "../BusinessData";
 
 export class OrderService {
 
@@ -22,10 +15,7 @@ export class OrderService {
         });
 
         try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                size: size.toString(),
-            });
+            const params = new URLSearchParams({page: page.toString(), size: size.toString(),});
 
             if (sortBy) {
                 params.append('sort', `${sortBy},${sortOrder}`);
@@ -59,20 +49,14 @@ export class OrderService {
         });
 
         try {
-            const response = await apiClient.post<OrderType>(
-                API_ENDPOINTS.orders.create,
-                orderData
-            );
-
+            const response = await apiClient.post<OrderType>(API_ENDPOINTS.orders.create, orderData);
             console.log('✅ OrderService: Order created successfully', {
                 orderDate: response.data.order_date,
                 clientEmail: response.data.client_email,
                 totalPrice: response.data.price,
                 items: response.data.book_items.length
             });
-
             return response.data;
-
         } catch (error) {
             console.error('❌ OrderService: Failed to create order', {
                 clientEmail: orderData.client_email,
@@ -82,71 +66,6 @@ export class OrderService {
         }
     }
 
-
-    static async createOrderFromBasket(
-        clientEmail: string,
-        basketItems: BookItem[],
-        employeeEmail?: string
-    ): Promise<OrderType> {
-        console.log('🛒 OrderService: Creating order from basket...', {
-            clientEmail,
-            employeeEmail,
-            itemCount: basketItems.length
-        });
-
-        try {
-            const totalPrice = await OrderService.calculateOrderPrice(basketItems);
-
-            const orderData: Omit<OrderType, 'order_date'> = {
-                client_email: clientEmail,
-                employee_email: employeeEmail,
-                price: totalPrice,
-                book_items: basketItems
-            };
-
-            return OrderService.createOrder(orderData);
-
-        } catch (error) {
-            console.error('❌ OrderService: Failed to create order from basket', {
-                clientEmail,
-                basketItems,
-                error
-            });
-            throw error;
-        }
-    }
-
-    static async calculateOrderPrice(basketItems: BookItem[]): Promise<number> {
-        console.log('💰 OrderService: Calculating order price...', {
-            itemCount: basketItems.length
-        });
-
-        let totalPrice = 0;
-
-        try {
-            // Fetch price for each book in the basket
-            for (const item of basketItems) {
-                const book = await BookService.getBookByName(item.book_name);
-                const itemTotal = book.price * item.quantity;
-                totalPrice += itemTotal;
-
-                console.log(`📖 OrderService: ${item.book_name} - $${book.price} x ${item.quantity} = $${itemTotal}`);
-            }
-
-            console.log('✅ OrderService: Order price calculated', {
-                totalItems: basketItems.reduce((sum, item) => sum + item.quantity, 0),
-                totalPrice: totalPrice.toFixed(2)
-            });
-
-            return totalPrice;
-
-        } catch (error) {
-            console.error('❌ OrderService: Failed to calculate order price', { basketItems, error });
-            throw error;
-        }
-    }
-
-
     static async confirmOrder(orderToConfirm: OrderType, employeeEmail: string): Promise<void> {
         console.log('✅ OrderService: Confirming order...', {
             orderDate: orderToConfirm.order_date,
@@ -155,22 +74,13 @@ export class OrderService {
         });
 
         try {
-            const orderData: OrderType = {
-                ...orderToConfirm,
-                employee_email: employeeEmail
-            };
-
-             await apiClient.put<void>(
-                API_ENDPOINTS.orders.getAll,
-                orderData
-            );
-
+            const orderData: OrderType = {...orderToConfirm, employee_email: employeeEmail};
+            await apiClient.put<void>(API_ENDPOINTS.orders.getAll, orderData);
             console.log('✅ OrderService: Order confirmed successfully', {
                 orderDate: orderToConfirm.order_date,
                 clientEmail: orderToConfirm.client_email,
                 confirmedBy: employeeEmail
             });
-
         } catch (error) {
             console.error('❌ OrderService: Failed to confirm order', {
                 orderDate: orderToConfirm.order_date,

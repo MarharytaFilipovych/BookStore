@@ -148,48 +148,6 @@ export type TokenResponseDTO = {
     expires_in: number; // seconds
 }
 
-export const API_ENDPOINTS = {
-    books: {
-        getAll: '/books',
-        getByName: (name: string) => `/books/${encodeURIComponent(name)}`,
-        create: '/books',
-        update: (name: string) => `/books/${encodeURIComponent(name)}`,
-        delete: (name: string) => `/books/${encodeURIComponent(name)}`,
-        search: '/books/search',
-    },
-    orders: {
-        getAll: '/orders',
-        getByClient: (email: string) => `/clients/${encodeURIComponent(email)}/orders`,
-        getByEmployee: (email: string) => `/employees/${encodeURIComponent(email)}/orders`,
-        create: '/orders',
-    },
-    clients: {
-        getAll: '/clients',
-        getByEmail: (email: string) => `/clients/${encodeURIComponent(email)}`,
-        update: (email: string) => `/clients/${encodeURIComponent(email)}`,
-        delete: (email: string) => `/clients/${encodeURIComponent(email)}`,
-        isBlocked: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
-        block: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
-        unblock: (email: string) => `/clients/blocked/${encodeURIComponent(email)}`,
-        getAllBlockedList: () => '/clients/blocked/list',
-        getAllBlocked: () => '/clients/blocked'
-    },
-    employees: {
-        getAll: '/employees',
-        getByEmail: (email: string) => `/employees/${encodeURIComponent(email)}`,
-        update: (email: string) => `/employees/${encodeURIComponent(email)}`,
-        delete: (email: string) => `/employees/${encodeURIComponent(email)}`,
-    },
-    auth: {
-        login: '/auth/login',
-        refresh: '/auth/refresh-token',
-        logout: '/auth/logout',
-        forgotPassword: '/auth/forgot-password',
-        changePassword: '/auth/change-password',
-        registerClient: '/auth/register/client',
-    },
-} as const;
-
 export type BookFilterState = {
     name: string;
     genre: string;
