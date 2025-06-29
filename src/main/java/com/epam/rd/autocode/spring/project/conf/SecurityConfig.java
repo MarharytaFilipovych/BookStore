@@ -52,7 +52,7 @@ public class SecurityConfig {
                             response.getWriter().write("Access Denied");
                         })
                 )
-                .addFilterBefore(rateLimitingFilter, RateLimitingFilter.class)
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
