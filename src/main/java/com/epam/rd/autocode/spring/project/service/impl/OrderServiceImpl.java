@@ -28,7 +28,13 @@ public class OrderServiceImpl implements OrderService {
     private final BookRepository bookRepository;
     private final SortMappingService sortMappingService;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderMapper orderMapper, EmployeeRepository employeeRepository, ClientRepository clientRepository, BookItemMapper bookItemMapper, BookRepository bookRepository, SortMappingService sortMappingService) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            OrderMapper orderMapper,
+                            EmployeeRepository employeeRepository,
+                            ClientRepository clientRepository,
+                            BookItemMapper bookItemMapper,
+                            BookRepository bookRepository,
+                            SortMappingService sortMappingService) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.employeeRepository = employeeRepository;

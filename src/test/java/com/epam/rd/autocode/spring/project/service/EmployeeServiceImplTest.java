@@ -6,6 +6,7 @@ import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.mappers.EmployeeMapper;
 import com.epam.rd.autocode.spring.project.model.Employee;
+import com.epam.rd.autocode.spring.project.repo.EmployeeRefreshTokenRepository;
 import com.epam.rd.autocode.spring.project.repo.EmployeeRepository;
 import com.epam.rd.autocode.spring.project.service.impl.EmployeeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import static com.epam.rd.autocode.spring.project.testdata.EmployeeData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +34,7 @@ public class EmployeeServiceImplTest {
     @Mock private EmployeeMapper employeeMapper;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private SortMappingService sortMappingService;
+    @Mock private EmployeeRefreshTokenRepository employeeRefreshTokenRepository;
 
     @InjectMocks
     private EmployeeServiceImpl employeeService;
@@ -57,7 +57,7 @@ public class EmployeeServiceImplTest {
         Page<Employee> employeePage = new PageImpl<>(employeeList, mappedPageable, employeeList.size());
 
         when(sortMappingService.applyMappings(pageable, "employee")).thenReturn(mappedPageable);
-        when(employeeRepository.findAll(pageable)).thenReturn(employeePage);
+        when(employeeRepository.findAll(mappedPageable)).thenReturn(employeePage);
 
         for (int i = 0; i < employeeList.size(); i++) {
             when(employeeMapper.toDto(employeeList.get(i))).thenReturn(employeeDTOList.get(i));
@@ -74,7 +74,7 @@ public class EmployeeServiceImplTest {
     private void mockEmptyPageableRepository(Pageable pageable, Pageable mappedPageable) {
         Page<Employee> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
         when(sortMappingService.applyMappings(pageable, "employee")).thenReturn(mappedPageable);
-        when(employeeRepository.findAll(pageable)).thenReturn(emptyPage);
+        when(employeeRepository.findAll(mappedPageable)).thenReturn(emptyPage);
     }
 
     private void mockSuccessfulEmployeeUpdate(EmployeeDTO updateData, Employee updatedEmployee) {
@@ -126,9 +126,9 @@ public class EmployeeServiceImplTest {
         return mappedEmployee;
     }
 
-    private void verifyPageableOperations(Pageable originalPageable) {
+    private void verifyPageableOperations(Pageable originalPageable, Pageable mappedPageable) {
         verify(sortMappingService).applyMappings(originalPageable, "employee");
-        verify(employeeRepository).findAll(originalPageable);
+        verify(employeeRepository).findAll(mappedPageable);
     }
 
     private void verifyPagedResults(Page<EmployeeDTO> result, List<EmployeeDTO> expectedContent, int expectedTotalElements) {
@@ -210,7 +210,7 @@ public class EmployeeServiceImplTest {
         employeeService.getAllEmployees(pageable);
 
         // Assert
-        verifyPageableOperations(pageable);
+        verifyPageableOperations(pageable, mappedPageable);
     }
 
     @Test
@@ -225,7 +225,7 @@ public class EmployeeServiceImplTest {
 
         // Assert
         verifyPagedResults(result, employeeDTOs, employees.size());
-        verifyPageableOperations(pageable);
+        verifyPageableOperations(pageable, mappedPageable);
         verify(employeeMapper, times(employees.size())).toDto(any(Employee.class));
     }
 
@@ -285,7 +285,7 @@ public class EmployeeServiceImplTest {
 
         // Assert
         verifyEmptyResults(result);
-        verify(employeeRepository).findAll(pageable);
+        verify(employeeRepository).findAll(mappedPageable);
         verify(employeeMapper, never()).toDto(any());
     }
 
@@ -384,6 +384,7 @@ public class EmployeeServiceImplTest {
 
         // Assert
         verify(employeeRepository).deleteByEmail(employeeEmail);
+        verify(employeeRefreshTokenRepository).deleteEmployeeRefreshTokenByEmployee_Email(employeeEmail);
     }
 
     @Test
@@ -527,6 +528,6 @@ public class EmployeeServiceImplTest {
 
         // Assert
         assertNotNull(result);
-        verifyPageableOperations(originalPageable);
+        verifyPageableOperations(originalPageable, mappedPageable);
     }
 }

@@ -535,4 +535,58 @@ class ClientControllerTest {
                 .andExpect(status().isUnauthorized());
         verify(clientService, never()).unblockClient(anyString());
     }
+
+    @Test
+    @WithMockUser(roles = {"EMPLOYEE"})
+    void getBlockedClientsList_ShouldReturnListOfBlockedClients() throws Exception {
+        // Arrange
+        List<ClientDTO> blockedClients = clientDTOs.stream().limit(3).toList();
+        when(clientService.getBlockedClients()).thenReturn(blockedClients);
+
+        // Act & Assert
+        ResultActions resultActions = mockMvc.perform(get("/clients/blocked/list"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(blockedClients.size())));
+
+        for (int i = 0; i < blockedClients.size(); i++) {
+            verifyClientJsonResponse(resultActions, "$[" + i + "]", blockedClients.get(i));
+        }
+
+        verify(clientService).getBlockedClients();
+    }
+
+    @Test
+    @WithMockUser(roles = {"EMPLOYEE"})
+    void getBlockedClientsList_WithEmptyResults_ShouldReturnEmptyList() throws Exception {
+        // Arrange
+        when(clientService.getBlockedClients()).thenReturn(List.of());
+
+        // Act & Assert
+        mockMvc.perform(get("/clients/blocked/list"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(clientService).getBlockedClients();
+    }
+
+    @Test
+    @WithMockUser(roles = {"CLIENT"})
+    void getBlockedClientsList_WithClientRole_ShouldReturn403() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/clients/blocked/list"))
+                .andExpect(status().isForbidden());
+
+        verify(clientService, never()).getBlockedClients();
+    }
+
+    @Test
+    void getBlockedClientsList_WithoutAuthentication_ShouldReturn401() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/clients/blocked/list"))
+                .andExpect(status().isUnauthorized());
+
+        verify(clientService, never()).getBlockedClients();
+    }
 }

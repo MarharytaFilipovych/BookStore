@@ -8,6 +8,7 @@ import com.epam.rd.autocode.spring.project.mappers.ClientMapper;
 import com.epam.rd.autocode.spring.project.model.BlockedClient;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.repo.BlockedClientRepository;
+import com.epam.rd.autocode.spring.project.repo.ClientRefreshTokenRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.service.impl.ClientServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +37,8 @@ public class ClientServiceImplTest {
     @Mock private BlockedClientRepository blockedClientRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private SortMappingService sortMappingService;
-
+    @Mock private ClientRefreshTokenRepository clientRefreshTokenRepository
+            ;
     @InjectMocks
     private ClientServiceImpl clientService;
 
@@ -119,16 +121,23 @@ public class ClientServiceImplTest {
 
     private void mockPageableBlockedClientOperations(Pageable pageable, List<BlockedClient> blockedClients,
                                                      List<ClientDTO> expectedDTOs) {
-        Page<BlockedClient> blockedPage = new PageImpl<>(blockedClients, pageable, blockedClients.size());
-        when(blockedClientRepository.findAll(pageable)).thenReturn(blockedPage);
+        Pageable mappedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("id"));
+        when(sortMappingService.applyMappings(pageable, "blocked_client")).thenReturn(mappedPageable);
+
+        Page<BlockedClient> blockedPage = new PageImpl<>(blockedClients, mappedPageable, blockedClients.size());
+        when(blockedClientRepository.findAll(mappedPageable)).thenReturn(blockedPage);
+
         for (int i = 0; i < blockedClients.size(); i++) {
             when(clientMapper.toDto(blockedClients.get(i).getClient())).thenReturn(expectedDTOs.get(i));
         }
     }
 
     private void mockEmptyPageableBlockedClientRepository(Pageable pageable) {
-        Page<BlockedClient> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(blockedClientRepository.findAll(pageable)).thenReturn(emptyPage);
+        Pageable mappedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("id"));
+        when(sortMappingService.applyMappings(pageable, "blocked_client")).thenReturn(mappedPageable);
+
+        Page<BlockedClient> emptyPage = new PageImpl<>(List.of(), mappedPageable, 0);
+        when(blockedClientRepository.findAll(mappedPageable)).thenReturn(emptyPage);
     }
 
     private void verifyPageableOperations(Pageable originalPageable, Pageable mappedPageable) {
@@ -399,6 +408,7 @@ public class ClientServiceImplTest {
 
         // Assert
         verify(blockedClientRepository).deleteByClient_Email(clientEmail);
+        verify(clientRefreshTokenRepository).deleteClientRefreshTokensByClient_Email(clientEmail);
         verify(clientRepository).deleteByEmail(clientEmail);
     }
 
@@ -526,24 +536,6 @@ public class ClientServiceImplTest {
     }
 
     @Test
-    void getBlockedClients_WithPageable_ShouldReturnPageOfClientDTOs() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10);
-        List<BlockedClient> blockedClients = List.of(blockedClient);
-        mockPageableBlockedClientOperations(pageable, blockedClients, List.of(clientDTO));
-
-        // Act
-        Page<ClientDTO> result = clientService.getBlockedClients(pageable);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(clientDTO, result.getContent().get(0));
-        verify(blockedClientRepository).findAll(pageable);
-        verify(clientMapper).toDto(client);
-    }
-
-    @Test
     void getBlockedClients_WithEmptyBlockedRepository_ShouldReturnEmptyList() {
         // Arrange
         when(blockedClientRepository.findAll()).thenReturn(List.of());
@@ -558,9 +550,31 @@ public class ClientServiceImplTest {
     }
 
     @Test
+    void getBlockedClients_WithPageable_ShouldReturnPageOfClientDTOs() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("id"));
+        List<BlockedClient> blockedClients = List.of(blockedClient);
+        mockPageableBlockedClientOperations(pageable, blockedClients, List.of(clientDTO));
+
+        // Act
+        Page<ClientDTO> result = clientService.getBlockedClients(pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(clientDTO, result.getContent().get(0));
+
+        verify(sortMappingService).applyMappings(pageable, "blocked_client");
+        verify(blockedClientRepository).findAll(mappedPageable);
+        verify(clientMapper).toDto(client);
+    }
+
+    @Test
     void getBlockedClients_WithPageable_WhenEmptyBlockedRepository_ShouldReturnEmptyPage() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
+        Pageable mappedPageable = PageRequest.of(0, 10, Sort.by("id"));
         mockEmptyPageableBlockedClientRepository(pageable);
 
         // Act
@@ -568,7 +582,9 @@ public class ClientServiceImplTest {
 
         // Assert
         verifyEmptyResults(result);
-        verify(blockedClientRepository).findAll(pageable);
+
+        verify(sortMappingService).applyMappings(pageable, "blocked_client");
+        verify(blockedClientRepository).findAll(mappedPageable);
         verify(clientMapper, never()).toDto(any());
     }
 
