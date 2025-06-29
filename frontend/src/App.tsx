@@ -29,11 +29,11 @@ export const App: React.FC = () => {
     const navigate = useNavigate();
     const [isBasketOpen, setIsBasketOpen] = useState<boolean>(false);
     const location = useLocation();
+    const publicRoutes = ['/', '/login/client', '/login/employee', '/sign', '/forgot', '/reset-password'];
+    const isPublicRoute = publicRoutes.includes(location.pathname);
 
     useEffect(() => {
         if (context.isLoading) return;
-        const publicRoutes = ['/', '/login/client', '/login/employee', '/sign', '/forgot', '/reset-password'];
-        const isPublicRoute = publicRoutes.includes(location.pathname);
         if (!context.user && !isPublicRoute) {
             console.log('🚪 User not authenticated, redirecting to welcome page...');
             navigate('/', { replace: true });
@@ -59,7 +59,7 @@ export const App: React.FC = () => {
             )}
 
             <div className={styles.wrapper}>
-                {context.user && (
+                {context.user && !isPublicRoute && (
                     <Header part='main'>
                         <Header part='left'>
                             <MenuButton user={context.role!} links={links}/>

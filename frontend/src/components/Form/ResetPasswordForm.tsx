@@ -46,20 +46,21 @@ export const ResetPasswordForm: React.FC<{
         {processing && (<Icon topic='loading' size='big' />)}
         <form className={styles.form} onSubmit={submit} ref={formRef}>
             {error && (<p className={styles.errorMessage}>{error}</p>)}
-            <h2>Reset Your Password</h2>
-            <p>We have sent a reset code to <strong>{email}</strong></p>
-            <p>Enter the code from your email along with your new password:</p>
-            <input type='email' value={email} readOnly className={styles.readOnlyInput} aria-label='Email'/>
+            <div className={styles.instructions}>
+                <h2>Reset your password!</h2>
+                <p>We have sent a reset code to <strong>{email}</strong></p>
+                <p>Enter the code from your email along with your new password:</p>
+            </div>
             <input name='resetCode' type='text' placeholder='Enter reset code from your email...' required aria-label='Reset Code' autoComplete='off'/>
             <input name='newPassword' type='password' placeholder='New password...' minLength={8} required aria-label='New Password'/>
             <input name='confirmPassword' type='password' placeholder='Confirm new password...' minLength={8} required aria-label='Confirm Password'/>
-            <ActionButton warning={false} type='reset' form={true} disabled={processing}/>
-            <ActionButton warning={false} type='cancel' form={false} disabled={processing} onClick={() => navigate('/forgot-password')}/>
-            <div className={styles.helpText}>
-                <p>Didn't receive an email? Check your spam folder or try again!</p>
+            <div className={styles.buttons}>
+                <ActionButton warning={false} type='reset' form={true} disabled={processing}/>
+                <ActionButton warning={false} type='cancel' form={false} disabled={processing}
+                              onClick={() => navigate('/forgot')}/>
                 <ActionButton warning={false} type='send-again' form={false} disabled={processing}
-                    onClick={() => navigate('/forgot-password')}
-                />
+                              onClick={() => navigate('/forgot')}/>
             </div>
-        </form>);</>)
+
+        </form></>)
 };

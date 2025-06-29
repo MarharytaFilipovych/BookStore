@@ -45,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmployeeRefreshTokenRepository employeeRefreshTokenRepository;
     private final EmployeeResetCodeRepository employeeResetCodeRepository;
     private final ClientResetCodeRepository clientResetCodeRepository;
+    private final EmailService emailService;
 
     @Value("${refresh-token-expiration-time}")
     private Duration refreshTokenExpirationTime;
@@ -52,7 +53,14 @@ public class AuthServiceImpl implements AuthService {
     @Value("${reset-code-expiration-time}")
     private Duration resetCodeExpirationTime;
 
-    public AuthServiceImpl(AuthenticationProvider authenticationProvider, JwtUtils jwtUtils, JwtSettings jwtSettings, EmployeeService employeeService, MyUserDetailsService myUserDetailsService, ClientService clientService, ClientRefreshTokenRepository clientRefreshTokenRepository, EmployeeRefreshTokenRepository employeeRefreshTokenRepository, EmployeeResetCodeRepository employeeResetCodeRepository, ClientResetCodeRepository clientResetCodeRepository) {
+    public AuthServiceImpl(AuthenticationProvider authenticationProvider,
+                           JwtUtils jwtUtils, JwtSettings jwtSettings,
+                           EmployeeService employeeService, MyUserDetailsService myUserDetailsService,
+                           ClientService clientService,
+                           ClientRefreshTokenRepository clientRefreshTokenRepository,
+                           EmployeeRefreshTokenRepository employeeRefreshTokenRepository,
+                           EmployeeResetCodeRepository employeeResetCodeRepository,
+                           ClientResetCodeRepository clientResetCodeRepository, EmailService emailService) {
         this.authenticationProvider = authenticationProvider;
         this.jwtUtils = jwtUtils;
         this.jwtSettings = jwtSettings;
@@ -63,6 +71,7 @@ public class AuthServiceImpl implements AuthService {
         this.employeeRefreshTokenRepository = employeeRefreshTokenRepository;
         this.employeeResetCodeRepository = employeeResetCodeRepository;
         this.clientResetCodeRepository = clientResetCodeRepository;
+        this.emailService = emailService;
     }
 
     public TokenResponseDTO loginUser(LoginDTO request){
@@ -102,9 +111,14 @@ public class AuthServiceImpl implements AuthService {
         );
     }
 
-    public UUID forgotPassword(ForgotPasswordDTO request){
+    public void forgotPassword(ForgotPasswordDTO request){
         UserDetails user = myUserDetailsService.loadUserBasedOnRole(request.getEmail(), request.getRole());
-        return generateResetCode(user);
+        String resetCode = generateResetCode(user).toString();
+        emailService.sendPasswordResetEmail(
+                request.getEmail(),
+                resetCode.toString(),
+                request.getRole().name()
+        );
     }
 
     public void changePassword(ResetPasswordDto request){

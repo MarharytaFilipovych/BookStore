@@ -24,7 +24,8 @@ public class AuthController {
     private final ClientService clientService;
 
     public AuthController(AuthService authService,
-                          EmployeeService employeeService, ClientService clientService) {
+                          EmployeeService employeeService,
+                          ClientService clientService) {
         this.authService = authService;
         this.employeeService = employeeService;
         this.clientService = clientService;
@@ -53,8 +54,8 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<UUID> forgotPassword(@RequestBody @Valid ForgotPasswordDTO request){
-            return ResponseEntity.ok(authService.forgotPassword(request));
+    public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgotPasswordDTO request){
+            return ResponseEntity.ok("The reset code was sent to the email " + request.getEmail());
     }
 
     @PostMapping("/change-password")

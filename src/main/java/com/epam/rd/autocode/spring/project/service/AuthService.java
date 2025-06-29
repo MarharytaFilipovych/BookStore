@@ -15,7 +15,7 @@ public interface AuthService {
 
     TokenResponseDTO refreshToken(RefreshTokenDTO request);
 
-    UUID forgotPassword(ForgotPasswordDTO request);
+    void forgotPassword(ForgotPasswordDTO request);
 
     void changePassword(ResetPasswordDto request);
 
