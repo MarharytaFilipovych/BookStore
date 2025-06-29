@@ -3,7 +3,7 @@ import styles from './style.module.css';
 import { ClientType } from "../../types";
 import { MiniButton } from "../MiniButton/MiniButton";
 
-interface ClientComponentProps extends ClientType {
+type ClientComponentProps = ClientType & {
     isBlocked?: boolean;
     onBlock: (email: string) => Promise<void>;
     onUnblock: (email: string) => Promise<void>;
@@ -13,9 +13,7 @@ export const ClientComponent: React.FC<ClientComponentProps> = ({name, email, ba
     return (
         <div className={`${styles.container} ${isBlocked ? styles.blocked : ''}`}>
             <h3 className={styles.name}>{name}</h3>
-            <a href={`mailto:${email}`} className={styles.email}>
-                {email}
-            </a>
+            <a href={`mailto:${email}`} className={styles.email}>{email}</a>
             <p className={styles.addInfo}>${balance}</p>
             <MiniButton
                 topic={isBlocked ? 'ban' : 'unban'}

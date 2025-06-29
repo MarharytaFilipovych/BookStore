@@ -42,18 +42,11 @@ type GenericPageState<TItem> = {
     items: TItem[];
 } & StateWithPagination;
 
-export function GenericSearchablePage<TItem, TFilter extends Record<string, any>, TSortField>({
-                                                                                                  fetchData,
-                                                                                                  getFilterFromParams,
-                                                                                                  sortOptions,
-                                                                                                  searchComponent,
-                                                                                                  renderItem,
-                                                                                                  containerClassName = styles.page,
-                                                                                                  noResultsMessage = "No results found! Try adjusting your search criteria!",
-                                                                                                  showResultsCount = false,
-                                                                                                  resultsCountText = (count: number) => `Found ${count} results!`,
-                                                                                                    refreshTrigger
-                                                                                              }: GenericSearchablePageProps<TItem, TFilter, TSortField>) {
+export function GenericSearchablePage<TItem, TFilter extends Record<string, any>, TSortField>
+({fetchData, getFilterFromParams, sortOptions, searchComponent, renderItem,
+     containerClassName = styles.page, noResultsMessage = "No results found! Try adjusting your search criteria!",
+     showResultsCount = false, resultsCountText = (count: number) => `Found ${count} results!`, refreshTrigger
+}: GenericSearchablePageProps<TItem, TFilter, TSortField>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation();
 
@@ -102,7 +95,6 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
                     items: []
                 };
             }
-
             console.error('Error fetching data:', error);
             updateState({ error: true, loading: false });
         }

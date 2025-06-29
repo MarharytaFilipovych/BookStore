@@ -36,7 +36,6 @@ export const LoginPage: React.FC = () => {
             await context.login({email, password, role});
             console.log('✅ LoginPage: context.login completed successfully');
 
-            // Check if user was set
             console.log('🔍 LoginPage: Checking context state after login:', {
                 hasUser: !!context.user,
                 userEmail: context.user?.email,

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import styles from './style.module.css';
 import { AppContext } from "../../context";
 import { MiniButton } from "../MiniButton/MiniButton";
@@ -7,14 +7,22 @@ import { BookService } from "../../services/BookService";
 import {useStateWithUpdater} from "../../hooks/useStateWithUpdater";
 import {OrderService} from "../../services/OrderService";
 import {Icon} from "../Icon/Icon";
-import {AuthorizationButton} from "../AuthorizationButton/AuthorizationButton";
+import {ActionButton} from "../AuthorizationButton/ActionButton";
 
+type BasketState = {
+    bookPrices: Record<string, number>;
+    bookDetails: Record<string, BookType>;
+} & State;
+
+const initialState: BasketState = {
+    loading: false,
+    error: false,
+    bookDetails: {},
+    bookPrices: {}
+}
 export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
     const context = useContext(AppContext);
-    const [bookPrices, setBookPrices] = useState<Record<string, number>>({});
-    const [bookDetails, setBookDetails] = useState<Record<string, BookType>>({});
-    const [state, updateState] = useStateWithUpdater<State>({loading: false, error: false});
-    const [fetchingPrices, setFetchingPrices] = useState(false);
+    const [state, updateState] = useStateWithUpdater<BasketState>(initialState);
 
     const handleOrder = async () => {
         if (context.basket.length === 0) return;
@@ -44,8 +52,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
 
     const loadBookDetails = async () => {
         if (context.basket.length === 0) {
-            setBookPrices({});
-            setBookDetails({});
+            updateState({bookPrices: {}, bookDetails: {}});
             return;
         }
 
@@ -55,7 +62,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
 
         try {
             const fetchPromises = context.basket
-                .filter(item => !bookPrices[item.book_name])
+                .filter(item => !state.bookPrices[item.book_name])
                 .map(async (item) => {
                     const book = await BookService.getBookByName(item.book_name);
                     prices[item.book_name] = book.price;
@@ -63,14 +70,14 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                 });
 
             await Promise.all(fetchPromises);
-
-            setBookPrices(prev => ({ ...prev, ...prices }));
-            setBookDetails(prev => ({ ...prev, ...details }));
+            updateState({
+                bookPrices: { ...state.bookPrices, ...prices },
+                bookDetails: { ...state.bookDetails, ...details }
+            });
         } catch (error) {
             console.error('Failed to load book details:', error);
             updateState({error: true});
         } finally {
-            setFetchingPrices(false);
             updateState({loading: false});
         }
     };
@@ -81,7 +88,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
 
     const calculateTotal = (): number => {
         return context.basket.reduce((total, item) => {
-            const price = bookPrices[item.book_name] || 0;
+            const price = state.bookPrices[item.book_name] || 0;
             return total + (price * item.quantity);
         }, 0);
     };
@@ -91,7 +98,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
     };
 
     return <>
-        ({(state.loading || fetchingPrices) && (<Icon topic='loading' size='big' />)}
+        ({state.loading && (<Icon topic='loading' size='big' />)}
         {state.error && (<Icon topic='error' size='big' />)}
         {!state.error && (
             <div className={styles.overlay} onClick={onClose}>
@@ -118,8 +125,8 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                             <>
                                 <div className={styles.basketItems}>
                                     {context.basket.map((item, index) => {
-                                        const book = bookDetails[item.book_name];
-                                        const price = bookPrices[item.book_name] || 0;
+                                        const book = state.bookDetails[item.book_name];
+                                        const price = state.bookPrices[item.book_name] || 0;
                                         return (
                                             <div key={`${item.book_name}-${index}`} className={styles.basketItem}>
                                                 <div className={styles.itemInfo}>
@@ -160,8 +167,8 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                                     </div>
 
                                     <div className={styles.actionButtons}>
-                                        <AuthorizationButton type='cancel' onClick={context.clearBasket} disabled={state.loading || context.basket.length === 0}/>
-                                        <AuthorizationButton type='submit' onClick={handleOrder} disabled={state.loading || context.basket.length === 0}/>
+                                        <ActionButton type='cancel' onClick={context.clearBasket} disabled={state.loading || context.basket.length === 0}/>
+                                        <ActionButton type='submit' onClick={handleOrder} disabled={state.loading || context.basket.length === 0}/>
                                     </div>
                                 </div>
                             </>

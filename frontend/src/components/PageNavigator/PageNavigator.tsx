@@ -14,12 +14,7 @@ export const PageNavigator: React.FC<{ page: number, pageCount: number, onPageSe
     const {currentPage, visiblePages, buttonStates, onPageChange, onLeftArrowClick, onRightArrowClick} = usePagination(page, pageCount, onPageSelect);
     return (
         <div className={styles.pages}>
-            <MiniButton
-                topic='caret'
-                isDisabled={buttonStates.leftArrow}
-                size='medium'
-                onClick={onLeftArrowClick}
-            />
+            <MiniButton topic='caret' isDisabled={buttonStates.leftArrow} size='medium' onClick={onLeftArrowClick}/>
             {visiblePages.map(page => (
                 <PageItem
                     key={page}
@@ -28,13 +23,7 @@ export const PageNavigator: React.FC<{ page: number, pageCount: number, onPageSe
                     index={page}
                 />
             ))}
-            <MiniButton
-                topic='caret'
-                mirror={true}
-                isDisabled={buttonStates.rightArrow}
-                size='medium'
-                onClick={onRightArrowClick}
-            />
+            <MiniButton topic='caret' mirror={true} isDisabled={buttonStates.rightArrow} size='medium' onClick={onRightArrowClick}/>
         </div>
     );
 };
@@ -42,9 +31,7 @@ export const PageNavigator: React.FC<{ page: number, pageCount: number, onPageSe
 const PageItem: React.FC<PageItemProps> = ({ type, index, onClick }) => {
     return (
         <a
-            className={classNames(styles.page, {
-                [styles.active]: type === 'active'
-            })}
+            className={classNames(styles.page, {[styles.active]: type === 'active'})}
             href='#'
             onClick={e => {
                 e.preventDefault();

@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback} from "react";
 import { useParams} from "react-router-dom";
-import { PersonFilterState, SortOrder, ClientType, EmployeeType, ClientSortField, EmployeeSortField, StateWithPagination } from "../../types";
+import { PersonFilterState, SortOrder, ClientType, EmployeeType, ClientSortField, EmployeeSortField} from "../../types";
 import { PersonSearchField } from "../../components/Search/PersonSearchField";
 import { clientSortOptionsWithMappings, employeeSortOptionsWithMappings } from "../../BusinessData";
 import { GenericSearchablePage } from "./GenereicSearchablePage";

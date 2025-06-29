@@ -13,7 +13,7 @@ export type AppContextType = {
     user: User | null;
     role: Role;
     basket: Basket;
-    isLoading: boolean; // Add loading state
+    isLoading: boolean;
 
     login: (request: LoginRequest) => Promise<void>;
     logout: () => Promise<void>;

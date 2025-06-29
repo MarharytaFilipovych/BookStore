@@ -1,6 +1,6 @@
 import React, {FormEvent, useRef} from 'react';
 import styles from './style.module.css';
-import {AuthorizationButton} from '../AuthorizationButton/AuthorizationButton';
+import {ActionButton} from '../AuthorizationButton/ActionButton';
 import {Role} from "../../types";
 import {useNavigate} from "react-router";
 import {Icon} from "../Icon/Icon";
@@ -26,12 +26,10 @@ export const ForgotPasswordForm: React.FC<{
             {processing && (<Icon topic='loading' size='big' />)}
                 <form className={styles.form} onSubmit={submit} ref={formRef}>
                     {error && (<p className={styles.errorMessage}>{error}</p>)}
-
                     <div className={styles.instructions}>
                         <h2>Reset your password!</h2>
                         <p>Enter your email address and we'll redirect you to the change password form:)</p>
                     </div>
-
                     <input
                         name='email'
                         type='email'
@@ -40,20 +38,9 @@ export const ForgotPasswordForm: React.FC<{
                         required
                         aria-label='Email'
                     />
-
                     <div className={styles.buttons}>
-                        <AuthorizationButton
-                            warning={false}
-                            type='reset'
-                            form={true}
-                            disabled={processing}
-                        />
-
-                        <AuthorizationButton
-                            warning={false}
-                            type='cancel'
-                            form={false}
-                            disabled={processing}
+                        <ActionButton warning={false} type='reset' form={true} disabled={processing}/>
+                        <ActionButton warning={false} type='cancel' form={false} disabled={processing}
                             onClick={() => navigate(`/login/${role === 'EMPLOYEE' ? 'employee' : 'client'}`)}
                         />
                     </div>

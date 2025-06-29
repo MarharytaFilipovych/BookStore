@@ -1,11 +1,8 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect} from 'react';
 import styles from './style.module.css';
-import {AuthorizationButton} from "../../components/AuthorizationButton/AuthorizationButton";
+import {ActionButton} from "../../components/AuthorizationButton/ActionButton";
 import {Link, useNavigate} from "react-router";
-import {State} from "../../types";
-import {Icon} from "../../components/Icon/Icon";
 import {AppContext} from "../../context";
-
 
 export const WelcomePage: React.FC = ()=>{
     const navigate = useNavigate();
@@ -25,17 +22,16 @@ export const WelcomePage: React.FC = ()=>{
             <div className={styles.sections}>
                 <section className={styles.employee}>
                     <h2>Employee!</h2>
-                    <Link to={'/login/employee'}><AuthorizationButton type='log-in'/></Link>
+                    <Link to={'/login/employee'}><ActionButton type='log-in'/></Link>
                 </section>
                 <section className={styles.customer}>
                     <h2>Customer!</h2>
                     <div className={styles.buttons}>
-                        <Link to={'/login/client'}><AuthorizationButton type='log-in'/></Link>
-                        <Link to={'/sign'}><AuthorizationButton type='sign'/></Link>
+                        <Link to={'/login/client'}><ActionButton type='log-in'/></Link>
+                        <Link to={'/sign'}><ActionButton type='sign'/></Link>
                     </div>
                 </section>
             </div>
-
         </div>
     </>
 }

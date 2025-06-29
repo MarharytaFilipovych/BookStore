@@ -37,11 +37,7 @@ export const ResetPasswordPage: React.FC = () => {
 
     return (
         <div className={styles.formContainer}>
-                <ResetPasswordForm
-                    onSubmit={handleResetPassword}
-                    error={error}
-                    processing={processing}
-                />
+                <ResetPasswordForm onSubmit={handleResetPassword} error={error} processing={processing}/>
         </div>
     );
 };

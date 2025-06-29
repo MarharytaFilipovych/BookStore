@@ -14,9 +14,7 @@ type MiniButtonProps = {
 export const MiniButton: React.FC<MiniButtonProps> = ({topic, size, onClick, isDisabled, mirror}) => {
     return (
         <button
-            className={classNames(styles.miniButton, {
-                [styles.right]: mirror
-            })}
+            className={classNames(styles.miniButton, {[styles.right]: mirror})}
             onClick={onClick}
             disabled={isDisabled}
         >

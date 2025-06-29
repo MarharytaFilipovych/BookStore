@@ -10,11 +10,8 @@ type SearchFieldProps = {
     onFilterChange: (key: keyof PersonFilterState, value: string) => void;
 }
 
-export const PersonSearchField: React.FC<SearchFieldProps> = ({
-                                                                  sortOptions,
-                                                                  filter,
-                                                                  onFilterChange
-                                                              }) => {
+export const PersonSearchField: React.FC<SearchFieldProps> =
+    ({sortOptions, filter, onFilterChange}) => {
     return (
         <div className={styles.search}>
                 <SearchBar

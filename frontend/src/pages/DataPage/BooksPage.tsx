@@ -114,11 +114,8 @@ export const BooksPage: React.FC = () => {
         try {
             await BookService.createBook(book);
             console.log('✅ BooksPage: Book created successfully, refreshing page...');
-
-            // Close dialog and refresh
             setIsCreateBookDialogOpen(false);
             setRefreshTrigger(prev => prev + 1);
-
         } catch (error: any) {
             console.error('❌ BooksPage: Failed to create book:', error);
             setCreateBookError(error.response?.data?.message || 'Failed to create book. Please try again.');
@@ -146,14 +143,9 @@ export const BooksPage: React.FC = () => {
         <>
             {context.role === 'EMPLOYEE' && (
                 <div className={styles.button}>
-                    <Button
-                        purpose='Create new book!'
-                        onClick={() => setIsCreateBookDialogOpen(true)}
-                        disabled={isCreatingBook}
-                    />
+                    <Button purpose='Create new book!' onClick={() => setIsCreateBookDialogOpen(true)} disabled={isCreatingBook}/>
                 </div>
             )}
-
                 <GenericSearchablePage<BookType, BookFilterState, BookSortField>
                     fetchData={fetchBooks}
                     getFilterFromParams={getFilterState}
@@ -165,7 +157,6 @@ export const BooksPage: React.FC = () => {
                     resultsCountText={(count) => `Found ${count} ${count === 1 ? 'book' : 'books'}!`}
                     refreshTrigger={refreshTrigger}
                 />
-
                 {isCreateBookDialogOpen && (
                     <BookForm
                         onSubmit={handleBookCreate}

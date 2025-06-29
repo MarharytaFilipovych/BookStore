@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import styles from './style.module.css';
 import { BookType, Language, AgeGroup } from "../../types";
 import { MiniButton } from "../MiniButton/MiniButton";
-import { AuthorizationButton } from "../AuthorizationButton/AuthorizationButton";
+import { ActionButton } from "../AuthorizationButton/ActionButton";
 import { ageGroups, genres, languages } from "../../BusinessData";
 import {Icon} from "../Icon/Icon";
 
@@ -263,8 +263,8 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
                     </div>
 
                     <div className={styles.formActions}>
-                        <AuthorizationButton type='cancel' onClick={onCancel} />
-                        <AuthorizationButton type='submit' form={true} disabled={processing} />
+                        <ActionButton type='cancel' onClick={onCancel} />
+                        <ActionButton type='submit' form={true} disabled={processing} />
                     </div>
                 </form>
             </div>

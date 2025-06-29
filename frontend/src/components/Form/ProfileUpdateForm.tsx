@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { ClientType, EmployeeType, Role } from '../../types';
 import styles from './style.module.css';
-import { Icon } from "../Icon/Icon";
-import { AuthorizationButton } from "../AuthorizationButton/AuthorizationButton";
+import { ActionButton } from "../AuthorizationButton/ActionButton";
 import { Warning } from "../Warning/Warning";
 import { useNavigate } from "react-router";
 
-interface ProfileUpdateFormProps {
+type ProfileUpdateFormProps = {
     user: ClientType | EmployeeType;
     userRole: Role;
     onUpdate: (updatedData: Partial<ClientType | EmployeeType>) => Promise<void>;
@@ -15,14 +14,7 @@ interface ProfileUpdateFormProps {
     error: string;
 }
 
-export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
-                                                                        user,
-                                                                        userRole,
-                                                                        onUpdate,
-                                                                        onDeleteAccount,
-                                                                        processing = false,
-                                                                        error = ''
-                                                                    }) => {
+export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({user, userRole, onUpdate, onDeleteAccount, processing = false, error = ''}) => {
     const [warning, setWarning] = useState<boolean>(false);
     const navigate = useNavigate();
 
@@ -48,42 +40,21 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-
-        if (errors[field]) {
-            setErrors(prev => ({
-                ...prev,
-                [field]: ''
-            }));
-        }
+        setFormData(prev => ({...prev, [field]: value}));
+        if (errors[field]) setErrors(prev => ({...prev, [field]: ''}));
     };
 
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
-
-        if (!formData.name.trim()) {
-            newErrors.name = 'Name is required';
-        }
-
+        if (!formData.name.trim()) newErrors.name = 'Name is required';
         if (userRole === 'EMPLOYEE') {
-            if (!formData.phone?.trim()) {
-                newErrors.phone = 'Phone is required';
-            }
-            if (!formData.birthdate) {
-                newErrors.birthdate = 'Birth date is required';
-            }
+            if (!formData.phone?.trim()) newErrors.phone = 'Phone is required';
+            if (!formData.birthdate) newErrors.birthdate = 'Birth date is required';
         }
-
         if (userRole === 'CLIENT') {
             const balance = parseFloat(formData.balance || '0');
-            if (isNaN(balance) || balance < 0) {
-                newErrors.balance = 'Balance must be a valid positive number';
-            }
+            if (isNaN(balance) || balance < 0) newErrors.balance = 'Balance must be a valid positive number';
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -91,22 +62,12 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) return;
-
         try {
-            if (userRole === 'CLIENT') {
-                await onUpdate({
-                    name: formData.name,
-                    balance: parseFloat(formData.balance || '0')
-                });
-            } else {
-                await onUpdate({
-                    name: formData.name,
-                    phone: formData.phone,
-                    birthdate: formData.birthdate
-                });
-            }
+            if (userRole === 'CLIENT') await onUpdate({name: formData.name, balance: parseFloat(formData.balance || '0')});
+            else await onUpdate({name: formData.name, phone: formData.phone, birthdate: formData.birthdate});
         } catch (error) {
             console.error('Failed to update profile:', error);
+            error = 'Could not update your profile! ';
         }
     };
 
@@ -124,12 +85,8 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                 />
             )}
             <form onSubmit={handleSubmit} className={styles.form}>
-
-                <div className={styles.instructions}>
-                    <h2>Update your profile!</h2>
-                </div>
+                <div className={styles.instructions}><h2>Update your profile!</h2></div>
                 {error && (<p className={styles.errorMessage}>{error}</p>)}
-
                 <div className={styles.formGroup}>
                     <input
                         type="email"
@@ -139,7 +96,6 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                         disabled
                     />
                 </div>
-
                 <div className={styles.formGroup}>
                     <label className={styles.label}>
                         Name <span className={styles.required}>*</span>
@@ -154,7 +110,6 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                     />
                     {errors.name && <span className={styles.errorMessage}>{errors.name}</span>}
                 </div>
-
                 {userRole === 'CLIENT' && (
                     <div className={styles.formGroup}>
                         <label className={styles.label}>Balance</label>
@@ -171,7 +126,6 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                         {errors.balance && <span className={styles.errorMessage}>{errors.balance}</span>}
                     </div>
                 )}
-
                 {userRole === 'EMPLOYEE' && (
                     <>
                         <div className={styles.formGroup}>
@@ -205,25 +159,10 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({
                         </div>
                     </>
                 )}
-
                 <div className={styles.buttons}>
-                    <AuthorizationButton
-                        type='delete'
-                        form={true}
-                        disabled={processing}
-                        onClick={() => setWarning(true)}
-                    />
-                    <AuthorizationButton
-                        type='submit'
-                        form={true}
-                        disabled={processing}
-                    />
-                    <AuthorizationButton
-                        type='forgot'
-                        form={false}
-                        disabled={processing}
-                        onClick={() => navigate('/forgot', { state: { role: userRole } })}
-                    />
+                    <ActionButton type='delete' form={true} disabled={processing} onClick={() => setWarning(true)}/>
+                    <ActionButton type='submit' form={true} disabled={processing}/>
+                    <ActionButton type='forgot' form={false} disabled={processing} onClick={() => navigate('/forgot', { state: { role: userRole } })}/>
                 </div>
             </form>
         </>

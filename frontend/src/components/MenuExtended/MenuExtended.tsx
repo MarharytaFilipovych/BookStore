@@ -1,11 +1,10 @@
 import React, {useContext, useState} from 'react';
 import styles from './style.module.css';
 import {MiniButton} from '../MiniButton/MiniButton';
-import {AuthorizationButton} from '../AuthorizationButton/AuthorizationButton';
+import {ActionButton} from '../AuthorizationButton/ActionButton';
 import {Link, useNavigate} from 'react-router';
 import {LinksSection} from '../LinkSection/LinkSection';
 import {Warning} from '../Warning/Warning';
-//import {AppContext} from '../../context';
 import {Links, Role} from '../../types';
 import {AppContext} from "../../context";
 
@@ -14,7 +13,6 @@ type MenuExtendedProps ={
     onClose: ()=>void,
     user: Role
 }
-
 
 export const MenuExtended: React.FC<MenuExtendedProps>=({links,  onClose, user})=>{
     const [warning, setWarning] = useState(false);
@@ -38,9 +36,8 @@ export const MenuExtended: React.FC<MenuExtendedProps>=({links,  onClose, user})
 
             <LinksSection links={links} style={'menu'} user={user}/>
             <div className={styles.auth}>
-                <AuthorizationButton type={'log-out'} onClick={()=>setWarning(true)}/>
+                <ActionButton type={'log-out'} onClick={()=>setWarning(true)}/>
             </div>
-
         </div>;
     </>;
 };

@@ -32,7 +32,7 @@
     align-items: center;
     padding: 1.5rem 2rem 1rem;
     border-bottom: 2px solid #e5e7eb;
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #a182b9 0%, #b672f5 100%);
     color: white;
 }
 
@@ -84,7 +84,7 @@
 .inputGroup select:focus,
 .inputGroup textarea:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: #290844;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -149,47 +149,6 @@
     background-color: #f9fafb;
 }
 
-.cancelButton,
-.submitButton {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-    min-width: 120px;
-}
-
-.cancelButton {
-    background-color: #f3f4f6;
-    color: #374151;
-    border-color: #d1d5db;
-}
-
-.cancelButton:hover {
-    background-color: #e5e7eb;
-    border-color: #9ca3af;
-}
-
-.submitButton {
-    background-color: #2563eb;
-    color: white;
-    border-color: #2563eb;
-}
-
-.submitButton:hover {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
-}
-
-.submitButton:active {
-    transform: translateY(0);
-}
-
-/* Required field indicator */
 .inputGroup label::after {
     content: none;
 }
@@ -201,7 +160,6 @@
     color: #ef4444;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .overlay {
         padding: 0.5rem;
@@ -235,14 +193,8 @@
         flex-direction: column;
     }
 
-    .cancelButton,
-    .submitButton {
-        width: 100%;
-        padding: 1rem;
-    }
 }
 
-/* Full-width inputs for single column */
 .inputGroup:only-child {
     grid-column: 1 / -1;
 }
@@ -251,7 +203,6 @@
     grid-template-columns: 1fr;
 }
 
-/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
     .inputGroup input,
     .inputGroup select,
@@ -262,7 +213,6 @@
     }
 }
 
-/* Focus visible for keyboard navigation */
 .inputGroup input:focus-visible,
 .inputGroup select:focus-visible,
 .inputGroup textarea:focus-visible,

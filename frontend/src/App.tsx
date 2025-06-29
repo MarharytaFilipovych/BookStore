@@ -2,7 +2,7 @@ import {AppContext} from "./context";
 import React, {useEffect, useState} from "react";
 import {Link, useLocation, useNavigate} from "react-router";
 import {Warning} from "./components/Warning/Warning";
-import {AuthorizationButton} from "./components/AuthorizationButton/AuthorizationButton";
+import {ActionButton} from "./components/AuthorizationButton/ActionButton";
 import {WelcomePage} from "./pages/WelcomePage/WelcomePage";
 import {Route, Routes} from "react-router-dom";
 import {LoginPage} from "./pages/AuthPage/LoginPage";
@@ -70,7 +70,7 @@ export const App: React.FC = () => {
                             <Link to={'/books'}><MiniButton topic='search' size='premedium'/></Link>
                             {context.role === 'CLIENT' && (<MiniButton topic='basket' size='premedium' onClick={() => setIsBasketOpen(true)} />)}
                             <h2>{context.user.name}</h2>
-                            <AuthorizationButton type={'log-out'} onClick={()=> setWarning(true)}/>
+                            <ActionButton type={'log-out'} onClick={()=> setWarning(true)}/>
                         </Header>
                     </Header>
                 )}

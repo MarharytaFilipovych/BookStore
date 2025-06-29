@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React from 'react';
 import styles from './style.module.css';
 import {EmployeeType} from "../../types";
 import classNames from "classnames";

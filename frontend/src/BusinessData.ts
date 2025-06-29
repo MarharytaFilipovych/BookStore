@@ -1,12 +1,4 @@
-import {
-    BookSortField,
-    ClientSortField,
-    ContactProp,
-    EmployeeSortField,
-    Links,
-    OrderSortField,
-    SortOrder
-} from './types';
+import {BookSortField, ClientSortField, ContactProp, EmployeeSortField, Links, OrderSortField, SortOrder} from './types';
 
 export const links: Links = {
     employeeLinks: [

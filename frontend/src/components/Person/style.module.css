@@ -11,9 +11,9 @@
     min-height: 80px;
     width: 80%;
 }
+
 .employeeContainer{
     grid-template-columns: repeat(3, 1fr) 2fr;
-
 }
 
 .container:hover {
@@ -54,7 +54,6 @@
     border-radius: 8px;
     border: 1px solid #d1d5db;
 }
-
 
 @media (max-width: 768px) {
     .container {

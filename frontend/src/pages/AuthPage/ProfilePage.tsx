@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { ClientType, EmployeeType} from '../../types';
 import { ClientService } from '../../services/ClientService';
 import { EmployeeService } from '../../services/EmployeeService';

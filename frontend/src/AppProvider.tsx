@@ -1,7 +1,6 @@
-import React, {ReactNode, useEffect, useState} from "react";
+import React, {ReactNode, useEffect} from "react";
 import {
     Basket,
-    BookItem,
     ClientType,
     ForgotPasswordDTO,
     LoginRequest,
@@ -82,7 +81,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
             user: null,
             role: 'CLIENT',
             basket: [],
-            isLoading: false, // Set loading to false after cleanup
+            isLoading: false,
         });
     };
 
@@ -93,7 +92,6 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         });
 
         try {
-            // Step 1: Get tokens from backend
             console.log('📡 AppProvider: Calling AuthService.login...');
             const tokenResponse = await AuthService.login(request);
             console.log('✅ AppProvider: Tokens received', {
@@ -101,13 +99,9 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
                 hasRefreshToken: !!tokenResponse.refresh_token,
                 expiresIn: tokenResponse.expires_in
             });
-
-            // Step 2: Set authorization header
             console.log('🔑 AppProvider: Setting authorization header...');
             apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.access_token}`);
             console.log('✅ AppProvider: Authorization header set');
-
-            // Step 3: Fetch user data
             console.log('👤 AppProvider: Fetching user data...');
             let userResponse;
             if (request.role === 'CLIENT') {
@@ -121,42 +115,29 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
                 userName: userResponse?.name,
                 userEmail: userResponse?.email
             });
-
-            // Step 4: Set user and role in context
             console.log('💾 AppProvider: Setting user in context...');
             const userData = userResponse;
             setUser(userData);
             console.log('✅ AppProvider: User set in context:', userData);
-
             console.log('🏷️ AppProvider: Setting role in context...');
             setRole(request.role);
             console.log('✅ AppProvider: Role set in context:', request.role);
-
             console.log('🎉 AppProvider: Login process completed successfully!');
-
         } catch (error) {
             console.error('❌ AppProvider: Login failed at some step:', error);
-
-            // More detailed error logging
             if (error instanceof Error) {
                 console.error('❌ AppProvider: Error details:', {
                     message: error.message,
                     stack: error.stack
                 });
             }
-
             throw new Error('Login failed. Please check your credentials.');
         }
     };
 
     const logout = async (): Promise<void> => {
         try {
-            if (state.user?.email && state.role) {
-                await AuthService.logout({
-                    email: state.user.email,
-                    role: state.role,
-                });
-            }
+            if (state.user?.email && state.role) await AuthService.logout({email: state.user.email, role: state.role,});
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
@@ -224,9 +205,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     const refreshAuthToken = async (): Promise<boolean> => {
         try {
             const refreshToken = AuthService.getRefreshToken();
-            if (!refreshToken || !state.user?.email || !state.role) {
-                return false;
-            }
+            if (!refreshToken || !state.user?.email || !state.role) return false;
 
             const tokenResponse = await AuthService.refreshToken({
                 refresh_token: refreshToken,

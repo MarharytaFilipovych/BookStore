@@ -15,14 +15,8 @@ type SearchFieldProps = {
     onFilterChange: (key: keyof (BookFilterState), value: string) => void;
 }
 
-export const BookSearchField: React.FC<SearchFieldProps> = ({
-                                                            genres,
-                                                            languages,
-                                                            ageGroups,
-                                                            sortOptions,
-                                                            filter,
-                                                            onFilterChange
-                                                        }) => {
+export const BookSearchField: React.FC<SearchFieldProps> =
+    ({genres, languages, ageGroups, sortOptions, filter, onFilterChange}) => {
     return (
         <div className={styles.search}>
             <div className={styles.filterContainer}>

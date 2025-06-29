@@ -1,6 +1,6 @@
 import React, {FormEvent, useRef} from 'react';
 import styles from './style.module.css';
-import {AuthorizationButton} from '../AuthorizationButton/AuthorizationButton';
+import {ActionButton} from '../AuthorizationButton/ActionButton';
 import {Role} from "../../types";
 import {useNavigate} from "react-router";
 import {Icon} from "../Icon/Icon";
@@ -48,13 +48,13 @@ export const LogInForm: React.FC<{
                 aria-label='Password'
             />
             <div className={styles.buttons}>
-                <AuthorizationButton
+                <ActionButton
                     warning={false}
                     type='log-in'
                     form={true}
                     disabled={processing}
                 />
-                <AuthorizationButton
+                <ActionButton
                     warning={false}
                     type='forgot'
                     form={true}

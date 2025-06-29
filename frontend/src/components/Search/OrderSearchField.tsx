@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './style.module.css';
 import { SearchBar } from './SearchBar';
 import { Filter } from './Filter';
-import {ForWhomOrder, OrderFilterState, Role} from "../../types";
+import {ForWhomOrder, OrderFilterState} from "../../types";
 
 type OrderSearchFieldProps = {
     sortOptions: string[];
@@ -11,11 +11,8 @@ type OrderSearchFieldProps = {
     forWhom: ForWhomOrder;
 }
 
-export const OrderSearchField: React.FC<OrderSearchFieldProps> = ({
-                                                                      sortOptions,
-                                                                      filter,
-                                                                      onFilterChange, forWhom
-                                                                  }) => {
+export const OrderSearchField: React.FC<OrderSearchFieldProps> =
+    ({sortOptions, filter, onFilterChange, forWhom}) => {
     return (
         <div className={styles.search}>
             <div className={styles.search}>

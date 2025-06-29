@@ -2,39 +2,47 @@ import React, { useState } from 'react';
 import { EmployeeService } from '../../services/EmployeeService';
 import { MiniButton } from '../MiniButton/MiniButton';
 import styles from './style.module.css';
-import {AuthorizationButton} from "../AuthorizationButton/AuthorizationButton";
+import {ActionButton} from "../AuthorizationButton/ActionButton";
+import {useStateWithUpdater} from "../../hooks/useStateWithUpdater";
 
-interface EmployeeSelectionDialogProps {
+type EmployeeSelectionDialogProps = {
     isOpen: boolean;
     onClose: () => void;
     onSelectEmployee: (employeeEmail: string) => void;
 }
 
+type State = {
+    email: string,
+    isValidating: boolean,
+    error: string
+}
+
+const initialState: State = {
+    email: '',
+    isValidating: false,
+    error: ''
+}
+
 export const EmployeeSelectionDialog: React.FC<EmployeeSelectionDialogProps> = ({isOpen, onClose, onSelectEmployee}) => {
-    const [employeeEmail, setEmployeeEmail] = useState<string>('');
-    const [isValidating, setIsValidating] = useState(false);
-    const [error, setError] = useState<string>('');
+    const [state, setState] = useStateWithUpdater<State>(initialState);
 
     const handleConfirm = async () => {
-        if (!employeeEmail.trim()) return;
-        setIsValidating(true);
-        setError('');
-
+        if (!state.email.trim()) return;
+        setState({isValidating: true, error: ''})
         try {
-            await EmployeeService.getEmployeeByEmail(employeeEmail);
-            onSelectEmployee(employeeEmail);
+            await EmployeeService.getEmployeeByEmail(state.email);
+            onSelectEmployee(state.email);
             handleClose();
         } catch (error: any) {
-            if (error.response?.status === 404) setError('Employee does not exist');
-            else setError('Invalid email');
+            if (error.response?.status === 404) setState({error: 'Employee does not exist!'});
+            else setState({error: 'Incorrect email!'});
         } finally {
-            setIsValidating(false);
+            setState({isValidating: false})
         }
     };
 
     const handleClose = () => {
-        setEmployeeEmail('');
-        setError('');
+        setState({email: '', error: ''})
         onClose();
     };
 
@@ -51,23 +59,20 @@ export const EmployeeSelectionDialog: React.FC<EmployeeSelectionDialogProps> = (
                 <div className={styles.dialogContent}>
                     <input
                         type="email"
-                        className={`${styles.emailInput} ${error ? styles.emailInputError : ''}`}
+                        className={`${styles.emailInput} ${state.error ? styles.emailInputError : ''}`}
                         placeholder="employee@gmail.com"
-                        value={employeeEmail}
-                        onChange={(e) => {
-                            setEmployeeEmail(e.target.value);
-                            setError('');
-                        }}
+                        value={state.email}
+                        onChange={(e) => {setState({email: e.target.value, error: ''});}}
                         onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-                        disabled={isValidating}
+                        disabled={state.isValidating}
                         autoFocus
                     />
-                    {error && <div className={styles.errorMessage}>{error}</div>}
+                    {state.error && <div className={styles.errorMessage}>{state.error}</div>}
                 </div>
 
                 <div className={styles.dialogActions}>
-                    <AuthorizationButton type='cancel' onClick={handleClose}/>
-                    <AuthorizationButton type='submit' onClick={handleConfirm} disabled={!employeeEmail.trim() || isValidating}/>
+                    <ActionButton type='cancel' onClick={handleClose}/>
+                    <ActionButton type='submit' onClick={handleConfirm} disabled={!state.email.trim() || state.isValidating}/>
                 </div>
             </div>
         </div>

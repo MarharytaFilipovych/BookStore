@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './style.module.css';
-import { AuthorizationButton } from '../AuthorizationButton/AuthorizationButton';
+import { ActionButton } from '../AuthorizationButton/ActionButton';
 
 type WarningProps = {
     onClick: () => void,
@@ -13,16 +13,8 @@ export const Warning: React.FC<WarningProps> = ({ onClick, purpose, onCancel, me
     return  <div className={styles.warning}>
             <p>{message}</p>
             <div className={styles.buttons}>
-                <AuthorizationButton
-                    type={purpose}
-                    warning={true}
-                    onClick={onClick}
-                />
-                <AuthorizationButton
-                    type='cancel'
-                    warning={true}
-                    onClick={onCancel}
-                />
+                <ActionButton type={purpose} warning={true} onClick={onClick}/>
+                <ActionButton type='cancel' warning={true} onClick={onCancel}/>
             </div>
         </div>;
 };

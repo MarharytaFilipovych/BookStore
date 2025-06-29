@@ -8,6 +8,7 @@ export type OrderSortField = 'order_date' | 'price' | 'client_email' | 'employee
 export type BookSortField = 'name' | 'author' | 'genre' | 'price' | 'publication_date' | 'age_group' | 'pages';
 export type ForWhomOrder = 'all' | 'employee' | 'client';
 export type User = ClientType | EmployeeType;
+
 export type BookType = {
     name: string;
     genre: string;
@@ -34,12 +35,6 @@ export type ClientType = {
     password?: string;
     balance: number;
 }
-export type ClientTypeWithStatus = {
-    client: ClientType,
-    blocked: boolean
-}
-
-
 
 export type EmployeeType = {
     name: string;
@@ -124,9 +119,6 @@ export type StateWithPagination = State & {
     currentPage: number;
 }
 
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
-
 export type ForgotPasswordDTO = {
     email: string;
     role: Role;
@@ -155,7 +147,6 @@ export type TokenResponseDTO = {
     refresh_token: string;
     expires_in: number; // seconds
 }
-
 
 export const API_ENDPOINTS = {
     books: {

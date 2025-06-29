@@ -3,12 +3,12 @@ import {API_ENDPOINTS, TokenResponseDTO, RefreshTokenDTO, Role} from '../types';
 
 class ApiClient {
     private readonly client: AxiosInstance;
-    private isRefreshing = false; // ✅ ADDED: Prevent multiple refresh attempts
+    private isRefreshing = false;
     private failedQueue: Array<{
         resolve: (value: any) => void;
         reject: (error: any) => void;
         config: any;
-    }> = []; // ✅ ADDED: Queue for failed requests during refresh
+    }> = [];
 
     constructor() {
         console.log('🏗️ Initializing ApiClient...');
@@ -25,7 +25,6 @@ class ApiClient {
         this.setupInterceptors();
     }
 
-    // ✅ ADDED: Process queued requests after successful refresh
     private processQueue(error: any, token: string | null = null) {
         this.failedQueue.forEach(({ resolve, reject, config }) => {
             if (error) {
@@ -48,7 +47,6 @@ class ApiClient {
             (config) => {
                 console.log(`🚀 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
 
-                // Only set token if Authorization header isn't already present
                 if (!config.headers.Authorization) {
                     const token = localStorage.getItem('accessToken');
                     if (token) {
@@ -96,11 +94,9 @@ class ApiClient {
                     message: error.response?.data?.message || error.message
                 });
 
-                // Handle 401 errors (token expired)
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     console.log('🔄 Token expired (401), attempting refresh...');
 
-                    // ✅ FIXED: Handle concurrent requests during refresh
                     if (this.isRefreshing) {
                         console.log('⏳ Refresh already in progress, queuing request...');
                         return new Promise((resolve, reject) => {
@@ -123,7 +119,6 @@ class ApiClient {
 
                         console.log('🔄 Calling refresh token endpoint...');
 
-                        // ✅ FIXED: Parse user data properly
                         let email: string;
                         try {
                             const userData = JSON.parse(savedUser);
@@ -133,9 +128,8 @@ class ApiClient {
                             throw new Error('Invalid user data');
                         }
 
-                        // ✅ FIXED: Use correct refresh token payload structure
                         const refreshData: RefreshTokenDTO = {
-                            refresh_token: refreshToken, // ✅ FIXED: Correct field name
+                            refresh_token: refreshToken,
                             email: email,
                             role: savedRole as Role
                         };
@@ -147,7 +141,6 @@ class ApiClient {
                             hasRefreshToken: !!refreshToken
                         });
 
-                        // ✅ FIXED: Use a fresh axios instance to avoid interceptor loop
                         const response = await axios.post<TokenResponseDTO>(
                             `${this.client.defaults.baseURL}${API_ENDPOINTS.auth.refresh}`,
                             refreshData,
@@ -160,7 +153,6 @@ class ApiClient {
 
                         const newAccessToken = response.data.access_token;
 
-                        // Store new tokens
                         localStorage.setItem('accessToken', newAccessToken);
                         if (response.data.refresh_token) {
                             localStorage.setItem('refreshToken', response.data.refresh_token);
@@ -171,7 +163,6 @@ class ApiClient {
 
                         console.log('✅ Token refresh successful, processing queued requests...');
 
-                        // ✅ FIXED: Update original request and process queue
                         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                         this.processQueue(null, newAccessToken);
 
@@ -188,7 +179,7 @@ class ApiClient {
 
                         return Promise.reject(refreshError);
                     } finally {
-                        this.isRefreshing = false; // ✅ FIXED: Reset refresh flag
+                        this.isRefreshing = false;
                     }
                 }
 
@@ -313,5 +304,4 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
-// ✅ ADDED: Debug helper
 (window as any).debugApi = () => apiClient.debugAuthState();

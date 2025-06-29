@@ -297,7 +297,6 @@
     transform: none;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .overlay {
         align-items: stretch;

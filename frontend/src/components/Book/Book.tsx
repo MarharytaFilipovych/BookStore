@@ -1,79 +1,82 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext} from 'react';
 import styles from './style.module.css';
-import { BookType } from "../../types";
+import {BookType} from "../../types";
 import { AppContext } from "../../context";
 import { MiniButton } from "../MiniButton/MiniButton";
 import { BookForm } from "../BookForm/BookForm";
 import {Warning} from "../Warning/Warning";
+import {useStateWithUpdater} from "../../hooks/useStateWithUpdater";
 
-interface BookProps extends BookType {
+type BookProps =  BookType & {
     onDelete: (bookName: string) => Promise<void>;
     onUpdate: (bookName: string, updatedBook: BookType) => Promise<void>;
 }
 
+type BookState = {
+    showDetails: boolean,
+    showEditForm: boolean,
+    warning: boolean,
+    error: string
+    loading: boolean
+};
+
+const initialState: BookState = {
+    showDetails: false,
+    showEditForm: false,
+    loading: false,
+    error: '',
+    warning: false
+}
+
 export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
     const context = useContext(AppContext);
-    const [showDetails, setShowDetails] = useState(false);
-    const [showEditForm, setShowEditForm] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [formError, setFormError] = useState<string>('');
-    const [warning, setWarning] = useState<boolean>(false);
+    const [state, updateState] = useStateWithUpdater<BookState>(initialState);
 
     const handleSubmitEdit = async (updatedBook: BookType) => {
         console.log('📝 Book: handleSubmitEdit called with:', updatedBook);
         try {
-            setIsProcessing(true);
-            setFormError('');
+            updateState({loading: true, error: ''})
             await onUpdate(book.name, updatedBook);
-            setShowEditForm(false);
-            setIsProcessing(false);
-
+            updateState({loading: false,showEditForm: false})
         } catch (error) {
             console.error('Failed to update book:', error);
-            setFormError('Could not update book! Please try again.');
-            setIsProcessing(false);
+            updateState({loading: false, error: 'Could not update book! Please try again.'})
         }
     };
 
     const handleDeleteBook = async () => {
         try {
-            setIsProcessing(true);
+            updateState({loading: true})
             console.log('🗑️ Book: Requesting deletion...', book.name);
             await onDelete(book.name);
         } catch (error) {
             console.error('❌ Book: Failed to delete book:', error);
-            setIsProcessing(false);
             alert('This book cannot be deleted!');
+        }finally {
+            updateState({loading: false})
         }
-    };
-
-    const handleCancelEdit = () => {
-        setShowEditForm(false);
-        setFormError('');
-        setIsProcessing(false);
     };
 
     return (
         <>
-            {warning && (
+            {state.warning && (
                 <Warning
                     onClick={async ()=>{
-                        setWarning(false);
+                        updateState({warning: false});
                         await handleDeleteBook();
                     }}
-                    onCancel={() => setWarning(false)}
+                    onCancel={() => updateState({warning: false})}
                     purpose='delete'
                     message={'Are you sure about deleting this book?'}
                 />
             )}
             <div className={styles.bookContainer}>
                 <div className={styles.bookInfo}>
-                    <h3 className={styles.bookName} onClick={() => setShowDetails(!showDetails)}>
+                    <h3 className={styles.bookName} onClick={() => updateState({showDetails: !state.showDetails})}>
                         {book.name}
                     </h3>
                     <p className={styles.bookAuthor}>by {book.author}</p>
                 </div>
-
                 <div className={styles.bookActions}>
                     <p className={styles.bookPrice}>${book.price}</p>
                     <p className={styles.bookQuantity}>
@@ -81,45 +84,24 @@ export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
                     </p>
                     {context?.role === 'CLIENT' ? (
                         <div className={styles.employeeActions}>
-                            <MiniButton
-                                topic='basket'
-                                size='medium'
-                                onClick={() => context.addToBasket(book.name)}
-                            />
-                            <MiniButton
-                                topic='bin'
-                                size='medium'
-                                onClick={() => context.removeFromBasket(book.name)}
-                            />
+                            <MiniButton topic='basket' size='medium' onClick={() => context.addToBasket(book.name)}/>
+                            <MiniButton topic='bin' size='medium' onClick={() => context.removeFromBasket(book.name)}/>
                         </div>
-
                     ) : (
                         <div className={styles.employeeActions}>
-                            <MiniButton
-                                topic='bin'
-                                size='medium'
-                                onClick={() => setWarning(true)}
-                            />
-                            <MiniButton
-                                topic='update'
-                                size='medium'
-                                onClick={() => setShowEditForm(true)}
-                            />
+                            <MiniButton topic='bin' size='medium' onClick={() => updateState({warning: true})}/>
+                            <MiniButton topic='update' size='medium' onClick={() => updateState({showEditForm: true})}/>
                         </div>
                     )}
                 </div>
             </div>
 
-            {showDetails && (
-                <div className={styles.overlay} onClick={() => setShowDetails(!showDetails)}>
+            {state.showDetails && (
+                <div className={styles.overlay} onClick={() => updateState({showDetails: !state.showDetails})}>
                     <article className={styles.bookDescription} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.bookDetailsHeader}>
                             <h3>{book.name}</h3>
-                            <MiniButton
-                                topic='cross'
-                                size='premedium'
-                                onClick={() => setShowDetails(!showDetails)}
-                            />
+                            <MiniButton topic='cross' size='premedium' onClick={() => updateState({showDetails: !state.showDetails})}/>
                         </div>
                         <div className={styles.bookDetailsContent}>
                             <p>This book was written by <strong>{book.author}</strong> in <strong>{book.publication_date}</strong>.</p>
@@ -134,14 +116,13 @@ export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
                     </article>
                 </div>
             )}
-
-            {showEditForm && (
+            {state.showEditForm && (
                 <BookForm
                     initialData={book}
                     onSubmit={handleSubmitEdit}
-                    onCancel={handleCancelEdit}
-                    error={formError}
-                    processing={isProcessing}
+                    onCancel={()=>updateState({loading: false, showEditForm: false, error: ''})}
+                    error={state.error}
+                    processing={state.loading}
                 />
             )}
         </>

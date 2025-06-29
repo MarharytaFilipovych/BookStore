@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './style.module.css';
 import classNames from 'classnames';
 
-type AuthorizationButtonProps = {
+type ActionButtonProps = {
     type: 'log-in' | 'sign' | 'log-out' | 'delete' | 'cancel' | 'forgot' | 'reset' | 'send-again' | 'submit' | 'clear' | 'order',
     warning?: boolean
     form?: boolean,
@@ -10,8 +10,7 @@ type AuthorizationButtonProps = {
     disabled?: boolean;
 }
 
-export const AuthorizationButton: React.FC<AuthorizationButtonProps> = ({warning, type, form, onClick, disabled}) => {
-
+export const ActionButton: React.FC<ActionButtonProps> = ({warning, type, form, onClick, disabled}) => {
     let buttonText;
     switch (type) {
         case 'log-in':
@@ -52,14 +51,13 @@ export const AuthorizationButton: React.FC<AuthorizationButtonProps> = ({warning
     return <button disabled={disabled}
                    className={classNames(styles.button, {
                        [styles.logIn]: type === 'log-in',
-                       [styles.signIn]: type === 'sign',
+                       [styles.signIn]: type === 'sign' || type === 'submit' || type === 'order',
                        [styles.logOut]: type === 'log-out',
                        [styles.delete]: type === 'delete',
                        [styles.cancel]: type === 'cancel' || type === 'clear',
                        [styles.forgot]: type === 'forgot',
                        [styles.reset]: type === 'reset',
                        [styles.sendAgain]: type === 'send-again',
-                       [styles.submit]: type === 'submit' || type === 'order',
                        [styles.warning]: warning
                    })}
                    type={form ? 'submit' : 'button'}
