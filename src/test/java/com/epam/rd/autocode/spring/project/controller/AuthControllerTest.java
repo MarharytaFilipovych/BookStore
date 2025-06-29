@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -296,9 +295,6 @@ class AuthControllerTest {
 
     @Test
     void forgotPassword_WithValidEmail_ShouldReturnResetCode() throws Exception {
-        // Arrange
-        when(authService.forgotPassword(forgotPasswordDTO)).thenReturn(resetPasswordDto.getResetCode());
-
         // Act & Assert
         mockMvc.perform(post("/auth/forgot-password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -306,11 +302,7 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$").isString())
-                .andExpect(result -> {
-                    String responseBody = result.getResponse().getContentAsString();
-                    String actualUuid = objectMapper.readValue(responseBody, String.class);
-                    assertTrue(actualUuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
-                });
+                .andExpect(jsonPath("$").value("The reset code was sent to the email test@example.com"));
 
         verify(authService).forgotPassword(forgotPasswordDTO);
     }

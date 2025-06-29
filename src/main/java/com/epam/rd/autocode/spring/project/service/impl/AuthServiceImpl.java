@@ -116,8 +116,8 @@ public class AuthServiceImpl implements AuthService {
         String resetCode = generateResetCode(user).toString();
         emailService.sendPasswordResetEmail(
                 request.getEmail(),
-                resetCode.toString(),
-                request.getRole().name()
+                resetCode,
+                request.getRole().getSimpleName().toLowerCase()
         );
     }
 

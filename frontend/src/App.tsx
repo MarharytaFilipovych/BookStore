@@ -46,6 +46,7 @@ export const App: React.FC = () => {
             {warning && <Warning
                 onClick={async ()=>{
                     await context.logout();
+                    setWarning(false);
                     navigate('/');
                 }}
                 onCancel={()=>setWarning(false)}

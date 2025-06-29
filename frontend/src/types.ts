@@ -63,12 +63,12 @@ export type SearchBook = {
     genre?: string;
     author?: string;
     language?: Language;
-    age_group?: AgeGroup;
-    min_price?: number;
-    max_price?: number;
-    min_pages?: number;
-    max_pages?: number;
-    publication_year?: number;
+    ageGroup?: AgeGroup;
+    minPrice?: number;
+    maxPrice?: number;
+    minPages?: number;
+    maxPages?: number;
+    publicationYear?: number;
 }
 
 export type MetaDTO = {
@@ -145,7 +145,7 @@ export type LogoutDTO = {
 export type TokenResponseDTO = {
     access_token: string;
     refresh_token: string;
-    expires_in: number; // seconds
+    expires_in: number;
 }
 
 export type BookFilterState = {

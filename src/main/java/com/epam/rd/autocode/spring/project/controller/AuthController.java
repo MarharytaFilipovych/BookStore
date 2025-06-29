@@ -55,7 +55,8 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgotPasswordDTO request){
-            return ResponseEntity.ok("The reset code was sent to the email " + request.getEmail());
+        authService.forgotPassword(request);
+        return ResponseEntity.ok("The reset code was sent to the email " + request.getEmail());
     }
 
     @PostMapping("/change-password")

@@ -52,6 +52,7 @@ class AuthServiceImplTest {
     @Mock private EmployeeRefreshTokenRepository employeeRefreshTokenRepository;
     @Mock private EmployeeResetCodeRepository employeeResetCodeRepository;
     @Mock private ClientResetCodeRepository clientResetCodeRepository;
+    @Mock private EmailService emailService;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -347,12 +348,11 @@ class AuthServiceImplTest {
         mockResetCodeCreation(role, resetCodeUuid);
 
         // Act
-        UUID result = authService.forgotPassword(forgotRequest);
+        authService.forgotPassword(forgotRequest);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(resetCodeUuid, result);
         verify(myUserDetailsService).loadUserBasedOnRole(email, role);
+        verify(emailService).sendPasswordResetEmail(eq(email), any(String.class), eq(role.getSimpleName().toLowerCase()));
         long id = role == Role.EMPLOYEE ? ((Employee)userDetails).getId() : ((Client)userDetails).getId();
         verifyResetCodeOperations(role, id);
     }
@@ -366,11 +366,12 @@ class AuthServiceImplTest {
         mockResetCodeCreation(Role.EMPLOYEE, resetCodeUuid);
 
         // Act
-        UUID result = authService.forgotPassword(forgotRequest);
+        authService.forgotPassword(forgotRequest);
 
         // Assert
-        assertNotNull(result);
         verify(employeeResetCodeRepository).deleteEmployeeResetCodesByEmployee_Id(employee.getId());
+        verify(emailService).sendPasswordResetEmail(eq(employee.getEmail()), any(String.class),
+                eq(Role.EMPLOYEE.getSimpleName().toLowerCase()));
         verifyResetCodeCreation(Role.EMPLOYEE, employee);
     }
 
@@ -383,11 +384,12 @@ class AuthServiceImplTest {
         mockResetCodeCreation(Role.CLIENT, resetCodeUuid);
 
         // Act
-        UUID result = authService.forgotPassword(forgotRequest);
+        authService.forgotPassword(forgotRequest);
 
         // Assert
-        assertNotNull(result);
         verify(clientResetCodeRepository).deleteClientResetCodesByClient_Id(client.getId());
+        verify(emailService).sendPasswordResetEmail(eq(client.getEmail()), any(String.class),
+                eq(Role.CLIENT.getSimpleName().toLowerCase()));
         verifyResetCodeCreation(Role.CLIENT, client);
     }
 

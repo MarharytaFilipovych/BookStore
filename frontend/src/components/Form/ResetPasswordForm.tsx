@@ -31,14 +31,14 @@ export const ResetPasswordForm: React.FC<{
         }
 
         await onSubmit(email, resetCode, newPassword, role);
-        navigate('/login', {
+        navigate(`/login/${role}`, {
             state: { message: 'Password reset successful! Please log in with your new password.' }
         });
 
     };
 
     if (!email || !role) {
-        navigate('/forgot-password');
+        navigate('/forgot');
         return null;
     }
 

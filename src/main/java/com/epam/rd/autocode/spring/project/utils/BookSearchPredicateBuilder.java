@@ -83,10 +83,12 @@ public class BookSearchPredicateBuilder {
     }
 
     public BookSearchPredicateBuilder withPublicationYear(java.time.Year year) {
+        int NUMBER_OF_MONTHS = 12;
+        int NUMBER_OF_DAYS_IN_MONTH = 31;
         Optional.ofNullable(year)
                 .ifPresent(y -> {
                     LocalDate startOfYear = LocalDate.of(y.getValue(), 1, 1);
-                    LocalDate endOfYear = LocalDate.of(y.getValue(), 12, 31);
+                    LocalDate endOfYear = LocalDate.of(y.getValue(), NUMBER_OF_MONTHS, NUMBER_OF_DAYS_IN_MONTH);
                     predicate.and(book.publicationDate.between(startOfYear, endOfYear));
                 });
         return this;
