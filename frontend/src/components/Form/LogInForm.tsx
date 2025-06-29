@@ -48,12 +48,7 @@ export const LogInForm: React.FC<{
                 aria-label='Password'
             />
             <div className={styles.buttons}>
-                <ActionButton
-                    warning={false}
-                    type='log-in'
-                    form={true}
-                    disabled={processing}
-                />
+                <ActionButton warning={false} type='log-in' form={true} disabled={processing}/>
                 <ActionButton
                     warning={false}
                     type='forgot'

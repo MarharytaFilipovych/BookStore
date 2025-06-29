@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.conf;
 
 import com.epam.rd.autocode.spring.project.filters.JwtAuthenticationFilter;
+import com.epam.rd.autocode.spring.project.filters.RateLimitingFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,7 @@ public class SecurityConfig {
     private String frontendUrl;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, RateLimitingFilter rateLimitingFilter) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(request -> getCors()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -35,10 +36,6 @@ public class SecurityConfig {
                         .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/swagger-ui.html").permitAll()
-                        .requestMatchers("/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/books/**").hasAnyRole("EMPLOYEE", "CLIENT")
                         .requestMatchers("/books/**").hasRole("EMPLOYEE")
                         .requestMatchers("/clients/blocked/**").hasRole("EMPLOYEE")
@@ -55,6 +52,7 @@ public class SecurityConfig {
                             response.getWriter().write("Access Denied");
                         })
                 )
+                .addFilterBefore(rateLimitingFilter, RateLimitingFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
