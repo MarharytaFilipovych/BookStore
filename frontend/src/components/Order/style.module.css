@@ -97,11 +97,11 @@
 .orderPrice {
     font-size: 1.1rem;
     font-weight: bold;
-    color: #059669;
+    color: #9c5aa6;
     background-color: #f0fdf4;
     padding: 0.25rem 0.5rem;
     border-radius: 6px;
-    border: 1px solid #bbf7d0;
+    border: 1px solid #eccdec;
 }
 
 .orderActions {
@@ -130,9 +130,9 @@
 }
 
 .statusBadge.pending {
-    background-color: #fef3c7;
-    color: #92400e;
-    border-color: #fde68a;
+    background-color: #cc97de;
+    color: #461446;
+    border-color: #e78de5;
 }
 
 .overlay {
@@ -222,7 +222,7 @@
 }
 
 .unassigned {
-    color: #dc2626 !important;
+    color: #491651 !important;
     font-weight: bold !important;
     font-style: italic;
 }
@@ -248,8 +248,8 @@
 }
 
 .statusIndicator.pending {
-    background-color: #fef3c7;
-    color: #92400e !important;
+    background-color: #cc97de;
+    color: #491651 !important;
 }
 
 .bookItemsSection {

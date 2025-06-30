@@ -17,7 +17,7 @@ interface GenericSearchablePageProps<TItem, TFilter, TSortField> {
         filter: TFilter,
         sorting?: { sortBy: TSortField; sortOrder: SortOrder }
     ) => Promise<{
-        meta: { totalPages: number; total_count: number };
+        meta: { total_pages: number; total_count: number };
         items: TItem[];
     }>;
 
@@ -75,9 +75,17 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
                 filterState,
                 sorting
             );
+            console.log('📊 BooksPage: RAW API Response:', response);
+            console.log('📊 BooksPage: Meta details:', {
+                totalPages: response.meta.total_pages,
+                totalCount: response.meta.total_count,
+                currentPage: response.meta.total_pages,
+
+            });
+
 
             updateState({
-                totalPages: response.meta.totalPages,
+                totalPages: response.meta.total_pages,
                 totalResults: response.meta.total_count,
                 error: false,
                 loading: false,

@@ -96,7 +96,8 @@ export const genres: string[] =  [
     'Fiction', 'Non-Fiction', 'Mystery', 'Romance', 'Fantasy', 'Science Fiction',
     'Thriller', 'Biography', 'History', 'Self-Help', 'Technical', 'Drama',
     'Comedy', 'Horror', 'Adventure', 'Poetry', 'Philosophy', 'Religion',
-    'Art', 'Travel', 'Cooking', 'Health', 'Business', 'Education', 'Classic Literature'
+    'Art', 'Travel', 'Cooking', 'Health', 'Business', 'Education', 'Classic Literature','Historical Fiction',
+    'Literary Fiction', 'Action', 'Cyberpunk', 'Paranormal', 'Young Adult', 'Steampunk'
 ];
 
 export const PAGE_SIZE: number = 20;

@@ -65,6 +65,7 @@ export const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({user, userR
         try {
             if (userRole === 'CLIENT') await onUpdate({name: formData.name, balance: parseFloat(formData.balance || '0')});
             else await onUpdate({name: formData.name, phone: formData.phone, birthdate: formData.birthdate});
+            alert("Your profile was updated!");
         } catch (error) {
             console.error('Failed to update profile:', error);
             error = 'Could not update your profile! ';

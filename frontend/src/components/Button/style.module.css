@@ -1,7 +1,7 @@
 .button{
-    color: #030718;
+    color: #251c25;
     width: 16rem;
-    height: 4rem;
+    height: 5rem;
     border-radius: 40%;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
@@ -22,8 +22,8 @@
 
 @media only screen and (max-width: 768px) {
     .button{
-        width: 10rem;
-        height: 3rem;
-        font-size: 1.2rem;
+        width: 11rem;
+        height: 4rem;
+        font-size: 1.1rem;
     }
 }

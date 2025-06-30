@@ -133,6 +133,9 @@
 .bookDetailsContent strong {
     color: #374151;
 }
+strong{
+    font-weight: bold;
+}
 
 @media (max-width: 768px) {
     .bookContainer {
@@ -140,6 +143,72 @@
         gap: 1rem;
         padding: 1rem;
         text-align: center;
+    }
+
+    .bookName {
+        font-size: 1.2rem;
+    }
+
+    .bookAuthor {
+        font-size: 0.8rem;
+    }
+
+    .bookGenre {
+        font-size: 0.7rem;
+        background-color: #f0f0f0;
+    }
+
+    .bookPrice {
+        font-size: 1rem;
+    }
+
+    .bookQuantity{
+        font-size: 1.1rem;
+    }
+
+    .bookDescription {
+        font-size: 1rem;
+    }
+
+    .bookDetailsHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 0.4rem solid #e5e7eb;
+        background-color: #f9fafb;
+        margin: 0;
+    }
+
+    .bookDetailsHeader h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #191a1c;
+        font-weight: bold;
+    }
+
+    .bookDetailsContent {
+        padding: 1.5rem;
+        overflow-y: auto;
+        max-height: calc(80vh - 100px);
+    }
+
+    .bookDetailsContent p {
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+    }
+
+    .bookDetailsContent p:last-child {
+        margin-bottom: 0;
+    }
+    .employeeActions{
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        align-items: center;
+    }
+    .bookDetailsContent strong {
+        color: #374151;
     }
 
     .bookInfo,

@@ -77,7 +77,7 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
         pageSize: number,
         filter: OrderFilterState,
         sorting?: { sortBy: OrderSortField; sortOrder: SortOrder }
-    ): Promise<{ meta: { totalPages: number; total_count: number }; items: OrderType[] }> => {
+    ): Promise<{ meta: { total_pages: number; total_count: number }; items: OrderType[] }> => {
         let response;
         switch (forWhom){
             case 'client':
@@ -102,7 +102,7 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
         }
         return {
             meta: {
-                totalPages: response.meta.totalPages,
+                total_pages: response.meta.total_pages,
                 total_count: response.meta.total_count
             },
             items: response.orders || []

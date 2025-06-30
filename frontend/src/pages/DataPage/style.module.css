@@ -30,3 +30,20 @@
     justify-content: center;
     margin-bottom: 2rem
 }
+
+@media only screen and (max-width: 768px) {
+    .page {
+        gap: 1rem;
+    }
+    .page h2{
+        margin: 1rem 4rem;
+        font-size: 1.4rem;
+    }
+    .container{
+        gap: 1.2rem;
+    }
+
+    .button{
+        margin-bottom: 1.6rem
+    }
+}

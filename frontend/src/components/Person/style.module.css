@@ -36,6 +36,8 @@
     font-weight: bold;
     font-size: 1.2rem;
     color: #1a0221;
+    text-align: center;
+
 }
 
 .email {
@@ -45,6 +47,9 @@
     font-style: italic;
 }
 
+.birth{
+    text-align: center;
+}
 .number {
     font-size: 1rem;
     font-weight: 600;
@@ -57,9 +62,30 @@
 
 @media (max-width: 768px) {
     .container {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
-        text-align: center;
+        padding: 1.4rem;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 0.75rem;
+    }
+
+    .employeeContainer {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    .name {
+        font-size: 1.1rem;
+    }
+
+    .addInfo{
+        font-size: 0.9rem;
+    }
+
+    .email {
+        font-size: 0.8rem;
+    }
+
+    .number {
+        font-size: 0.7rem;
     }
 }

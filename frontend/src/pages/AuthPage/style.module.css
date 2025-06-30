@@ -34,5 +34,20 @@
 
 .roleInfo strong {
     color: #020220;
-    font-weight: 600;
+    font-weight: bold;
+}
+
+@media only screen and (max-width: 768px) {
+    .formContainer {
+        padding: 0 2.6rem;
+        gap: 3rem;
+    }
+    .roleInfo {
+        margin-bottom: 1.3rem;
+        padding: 0.5rem;
+    }
+
+    .roleInfo p {
+        font-size: 1.1rem;
+    }
 }

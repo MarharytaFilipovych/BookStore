@@ -1,16 +1,8 @@
 import { apiClient } from '../config/ApiClient';
-import {
-    LoginRequest,
-    TokenResponseDTO,
-    ForgotPasswordDTO,
-    ResetPasswordDTO,
-    RefreshTokenDTO,
-    LogoutDTO, ClientType
-} from '../types';
+import {LoginRequest, TokenResponseDTO, ForgotPasswordDTO, ResetPasswordDTO, RefreshTokenDTO, LogoutDTO, ClientType} from '../types';
 import {API_ENDPOINTS} from "../BusinessData";
 
 export class AuthService {
-
     static async login(credentials: LoginRequest): Promise<TokenResponseDTO> {
         console.log('🔐 AuthService: Starting login process...', {
             email: credentials.email,
@@ -20,10 +12,7 @@ export class AuthService {
 
         try {
             const response = await apiClient.post<TokenResponseDTO>(
-                API_ENDPOINTS.auth.login,
-                credentials
-            );
-
+                API_ENDPOINTS.auth.login, credentials);
             console.log('✅ AuthService: Login successful', {
                 hasAccessToken: !!response.data.access_token,
                 hasRefreshToken: !!response.data.refresh_token,

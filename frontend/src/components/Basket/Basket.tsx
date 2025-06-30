@@ -40,6 +40,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                 }))
             };
             await OrderService.createOrder(orderData);
+            alert("Your order was successfully processed!")
             context.clearBasket();
             onClose();
         } catch (error) {
@@ -108,7 +109,7 @@ export const Basket: React.FC<{onClose: () => void}> = ({ onClose }) => {
                             <h2>Your basket!</h2>
                             <div className={styles.basketSummary}>
                             <span className={styles.itemCount}>
-                                {getTotalItems()} {getTotalItems() === 1 ? 'item' : 'items'}
+                                {getTotalItems()} {getTotalItems() === 1 ? 'book' : 'books'}
                             </span>
                             </div>
                         </div>

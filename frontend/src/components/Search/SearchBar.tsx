@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './style.module.css';
 import { Icon } from '../Icon/Icon';
-import classNames from 'classnames'; // if using a classnames library
+import classNames from 'classnames';
 
 export const SearchBar: React.FC<{
     value: string;

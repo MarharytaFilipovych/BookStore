@@ -58,6 +58,5 @@ export const LogInForm: React.FC<{
                 />
             </div>
         </form>
-        );
     </>)
 };

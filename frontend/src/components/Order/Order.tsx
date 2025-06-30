@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import styles from './style.module.css';
 import {OrderType} from "../../types";
 import {MiniButton} from "../MiniButton/MiniButton";
+import {AppContext} from "../../context";
 
 type OrderComponentProps = OrderType & {
     onAssignEmployee?: (orderId: string) => void;
@@ -9,6 +10,7 @@ type OrderComponentProps = OrderType & {
 
 export const OrderComponent: React.FC<OrderComponentProps> = (order) => {
     const [showDetails, setShowDetails] = useState(false);
+    const context = useContext(AppContext);
 
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString);
@@ -56,12 +58,13 @@ export const OrderComponent: React.FC<OrderComponentProps> = (order) => {
                     </div>
                 </div>
 
-                <div className={styles.orderActions}>
+                {context.role === 'EMPLOYEE' && (
+                    <div className={styles.orderActions}>
                     <div className={`${styles.statusBadge} ${styles[getOrderStatus()]}`}>{getOrderStatus()}</div>
                     {!order.employee_email && (<MiniButton topic='plus' size='medium' onClick={()=>{
                         if (order.onAssignEmployee) order.onAssignEmployee(order.order_date);
                     }}/>)}
-                </div>
+                </div>)}
             </div>
 
             {showDetails && (

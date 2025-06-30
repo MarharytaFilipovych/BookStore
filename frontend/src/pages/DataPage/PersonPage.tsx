@@ -54,7 +54,7 @@ export const PersonPage: React.FC = () => {
         pageSize: number,
         filter: PersonFilterState,
         sorting?: { sortBy: PersonSortField; sortOrder: SortOrder }
-    ): Promise<{ meta: { totalPages: number; total_count: number }; items: PersonType[] }> => {
+    ): Promise<{ meta: { total_pages: number; total_count: number }; items: PersonType[] }> => {
         if (isClientsPage) {
             let response;
             if(type === 'blocked'){
@@ -74,7 +74,7 @@ export const PersonPage: React.FC = () => {
             }
             return {
                 meta: {
-                    totalPages: response.meta.totalPages,
+                    total_pages: response.meta.total_pages,
                     total_count: response.meta.total_count
                 },
                 items: (response.clients || []) as PersonType[]
@@ -88,7 +88,7 @@ export const PersonPage: React.FC = () => {
             );
             return {
                 meta: {
-                    totalPages: response.meta.totalPages,
+                    total_pages: response.meta.total_pages,
                     total_count: response.meta.total_count
                 },
                 items: (response.employees || []) as PersonType[]

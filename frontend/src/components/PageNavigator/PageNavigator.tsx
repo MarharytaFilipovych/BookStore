@@ -14,7 +14,7 @@ export const PageNavigator: React.FC<{ page: number, pageCount: number, onPageSe
     const {currentPage, visiblePages, buttonStates, onPageChange, onLeftArrowClick, onRightArrowClick} = usePagination(page, pageCount, onPageSelect);
     return (
         <div className={styles.pages}>
-            <MiniButton topic='caret' isDisabled={buttonStates.leftArrow} size='medium' onClick={onLeftArrowClick}/>
+            <MiniButton topic='caret' isDisabled={buttonStates.leftArrow} size='premedium' onClick={onLeftArrowClick}/>
             {visiblePages.map(page => (
                 <PageItem
                     key={page}
@@ -23,7 +23,7 @@ export const PageNavigator: React.FC<{ page: number, pageCount: number, onPageSe
                     index={page}
                 />
             ))}
-            <MiniButton topic='caret' mirror={true} isDisabled={buttonStates.rightArrow} size='medium' onClick={onRightArrowClick}/>
+            <MiniButton topic='caret' mirror={true} isDisabled={buttonStates.rightArrow} size='premedium' onClick={onRightArrowClick}/>
         </div>
     );
 };
