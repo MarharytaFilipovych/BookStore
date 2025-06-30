@@ -34,10 +34,7 @@ export const App: React.FC = () => {
 
     useEffect(() => {
         if (context.isLoading) return;
-        if (!context.user && !isPublicRoute) {
-            console.log('🚪 User not authenticated, redirecting to welcome page...');
-            navigate('/', { replace: true });
-        }
+        if (!context.user && !isPublicRoute) navigate('/', { replace: true });
     }, [context.user, context.isLoading, location.pathname, navigate]);
 
     return (

@@ -119,12 +119,12 @@ export type StateWithPagination = State & {
     currentPage: number;
 }
 
-export type ForgotPasswordDTO = {
+export type ForgotPassword = {
     email: string;
     role: Role;
 }
 
-export type ResetPasswordDTO = {
+export type ResetPassword = {
     email: string;
     password: string;
     reset_code: string;

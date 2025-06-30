@@ -1,13 +1,5 @@
 import React, {ReactNode, useEffect} from "react";
-import {
-    Basket,
-    ClientType,
-    ForgotPasswordDTO,
-    LoginRequest,
-    ResetPasswordDTO,
-    Role,
-    User
-} from "./types";
+import {Basket, ClientType, ForgotPassword, LoginRequest, ResetPassword, Role, User} from "./types";
 import {apiClient} from "./config/ApiClient";
 import { AppContext } from './context';
 import { AuthService } from './services/AuthService';
@@ -145,7 +137,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         }
     };
 
-    const forgotPassword = async (data: ForgotPasswordDTO): Promise<void> => {
+    const forgotPassword = async (data: ForgotPassword): Promise<void> => {
         try {
             await AuthService.forgotPassword(data);
         } catch (error) {
@@ -154,7 +146,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         }
     };
 
-    const resetPassword = async (data: ResetPasswordDTO): Promise<void> => {
+    const resetPassword = async (data: ResetPassword): Promise<void> => {
         try {
             await AuthService.resetPassword(data);
         } catch (error) {
@@ -202,26 +194,6 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         updateState({ basket: [] });
     };
 
-    const refreshAuthToken = async (): Promise<boolean> => {
-        try {
-            const refreshToken = AuthService.getRefreshToken();
-            if (!refreshToken || !state.user?.email || !state.role) return false;
-
-            const tokenResponse = await AuthService.refreshToken({
-                refresh_token: refreshToken,
-                email: state.user.email,
-                role: state.role
-            });
-
-            apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.access_token}`);
-            return true;
-        } catch (error) {
-            console.error('Token refresh failed:', error);
-            cleanUser();
-            return false;
-        }
-    };
-
     const contextValue = {
         user: state.user,
         role: state.role,
@@ -233,7 +205,6 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         forgotPassword,
         resetPassword,
         registerClient,
-        refreshAuthToken,
 
         setUser,
         setRole,

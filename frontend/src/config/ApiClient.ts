@@ -35,31 +35,18 @@ class ApiClient {
 
     private setupInterceptors() {
         console.log('⚙️ Setting up request/response interceptors...');
-
         this.client.interceptors.request.use(
             (config) => {
                 console.log(`🚀 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
-
                 if (!config.headers.Authorization) {
                     const token = localStorage.getItem('accessToken');
                     if (token) {
                         config.headers.Authorization = `Bearer ${token}`;
                         console.log('🔑 JWT token attached from localStorage');
-                    } else {
-                        console.log('⚠️ No JWT token found in localStorage');
-                    }
-                } else {
-                    console.log('🔑 Using existing Authorization header');
-                }
-
-                if (config.data) {
-                    console.log('📦 Request data:', config.data);
-                }
-
-                if (config.params) {
-                    console.log('🔍 Request params:', config.params);
-                }
-
+                    } else console.log('⚠️ No JWT token found in localStorage');
+                } else console.log('🔑 Using existing Authorization header');
+                if (config.data) console.log('📦 Request data:', config.data);
+                if (config.params) console.log('🔍 Request params:', config.params);
                 return config;
             },
             (error) => {
@@ -75,83 +62,62 @@ class ApiClient {
                     statusText: response.statusText,
                     dataSize: JSON.stringify(response.data).length + ' bytes'
                 });
-
                 return response;
             },
             async (error) => {
                 const originalRequest = error.config;
-
                 console.error(`❌ API error from ${originalRequest?.url}:`, {
                     status: error.response?.status,
                     statusText: error.response?.statusText,
                     message: error.response?.data?.message || error.message
                 });
-
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     console.log('🔄 Token expired (401), attempting refresh...');
-
                     if (this.isRefreshing) {
                         console.log('⏳ Refresh already in progress, queuing request...');
                         return new Promise((resolve, reject) => {
                             this.failedQueue.push({ resolve, reject, config: originalRequest });
                         });
                     }
-
                     originalRequest._retry = true;
                     this.isRefreshing = true;
-
                     try {
                         const refreshToken = localStorage.getItem('refreshToken');
                         const savedUser = localStorage.getItem('user');
                         const savedRole = localStorage.getItem('role');
-
-                        if (!refreshToken || !savedUser || !savedRole) {
-                            console.log('❌ Missing refresh data, redirecting to login');
-                            throw new Error('Missing authentication data');
-                        }
-
                         console.log('🔄 Calling refresh token endpoint...');
-
-                        let email: string;
-                        try {
-                            const userData = JSON.parse(savedUser);
-                            email = userData.email;
-                        } catch (parseError) {
-                            console.error('❌ Failed to parse user data:', parseError);
-                            throw new Error('Invalid user data');
+                        let email: string = '';
+                        if (savedUser) {
+                            try {
+                                const userData = JSON.parse(savedUser);
+                                email = userData.email || '';
+                            } catch (parseError) {
+                                console.error('❌ Failed to parse user data:', parseError);
+                            }
                         }
-
                         const refreshData: RefreshTokenDTO = {
-                            refresh_token: refreshToken,
+                            refresh_token: refreshToken || '',
                             email: email,
                             role: savedRole as Role
                         };
-
                         console.log('📤 Sending refresh token request:', {
                             endpoint: API_ENDPOINTS.auth.refresh,
                             email,
                             role: savedRole,
                             hasRefreshToken: !!refreshToken
                         });
-
                         const response = await axios.post<TokenResponseDTO>(
                             `${this.client.defaults.baseURL}${API_ENDPOINTS.auth.refresh}`,
                             refreshData,
                             {headers: {'Content-Type': 'application/json'}}
                         );
-
                         const newAccessToken = response.data.access_token;
-
                         localStorage.setItem('accessToken', newAccessToken);
                         if (response.data.refresh_token) {
                             localStorage.setItem('refreshToken', response.data.refresh_token);
                             console.log('🔄 Both access and refresh tokens updated');
-                        } else {
-                            console.log('🔄 Only access token updated');
-                        }
-
+                        } else console.log('🔄 Only access token updated');
                         console.log('✅ Token refresh successful, processing queued requests...');
-
                         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                         this.processQueue(null, newAccessToken);
 
@@ -159,13 +125,10 @@ class ApiClient {
 
                     } catch (refreshError) {
                         console.error('❌ Token refresh failed:', refreshError);
-
                         this.clearAuthData();
                         this.processQueue(refreshError, null);
-
                         console.log('🚪 Redirecting to welcome page...');
                         window.location.href = '/';
-
                         return Promise.reject(refreshError);
                     } finally {
                         this.isRefreshing = false;
@@ -191,64 +154,35 @@ class ApiClient {
 
     async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         console.log(`📖 GET request initiated: ${url}`);
-
-        if (config?.params) {
-            console.log('🔍 GET params:', config.params);
-        }
-
+        if (config?.params) console.log('🔍 GET params:', config.params);
         const response = await this.client.get<T>(url, config);
-
         console.log(`📖 GET request completed: ${url} (${response.status})`);
         return response;
     }
 
     async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         console.log(`📝 POST request initiated: ${url}`);
-
-        if (data) {
-            console.log('📦 POST data:', typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
-        }
-
-        if (config?.headers) {
-            console.log('📋 Custom headers:', config.headers);
-        }
-
+        if (data) console.log('📦 POST data:', typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
+        if (config?.headers) console.log('📋 Custom headers:', config.headers);
         const response = await this.client.post<T>(url, data, config);
-
         console.log(`📝 POST request completed: ${url} (${response.status})`);
         return response;
     }
 
     async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         console.log(`✏️ PUT request initiated: ${url}`);
-
-        if (data) {
-            console.log('📦 PUT data:', typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
-        }
-
-        if (config?.params) {
-            console.log('🔍 PUT params:', config.params);
-        }
-
-        if (config?.headers) {
-            console.log('📋 Custom headers:', config.headers);
-        }
-
+        if (data) console.log('📦 PUT data:', typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
+        if (config?.params) console.log('🔍 PUT params:', config.params);
+        if (config?.headers) console.log('📋 Custom headers:', config.headers);
         const response = await this.client.put<T>(url, data, config);
-
         console.log(`✏️ PUT request completed: ${url} (${response.status})`);
         return response;
     }
 
     async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         console.log(`🗑️ DELETE request initiated: ${url}`);
-
-        if (config?.params) {
-            console.log('🔍 DELETE params:', config.params);
-        }
-
+        if (config?.params) console.log('🔍 DELETE params:', config.params);
         const response = await this.client.delete<T>(url, config);
-
         console.log(`🗑️ DELETE request completed: ${url} (${response.status})`);
         return response;
     }
@@ -266,20 +200,6 @@ class ApiClient {
         console.log(`📋 Setting default header: ${key} = ${value}`);
         this.client.defaults.headers.common[key] = value;
     }
-
-    debugAuthState(): void {
-        console.log('🔍 Current authentication state:', {
-            hasAccessToken: !!localStorage.getItem('accessToken'),
-            hasRefreshToken: !!localStorage.getItem('refreshToken'),
-            hasUser: !!localStorage.getItem('user'),
-            hasRole: !!localStorage.getItem('role'),
-            baseURL: this.client.defaults.baseURL,
-            isRefreshing: this.isRefreshing,
-            queuedRequests: this.failedQueue.length
-        });
-    }
 }
 
 export const apiClient = new ApiClient();
-
-(window as any).debugApi = () => apiClient.debugAuthState();

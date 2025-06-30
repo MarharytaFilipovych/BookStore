@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-    User,
-    Role,
-    Basket,
-    ClientType,
-    LoginRequest,
-    ForgotPasswordDTO,
-    ResetPasswordDTO
-} from './types';
+import {User, Role, Basket, ClientType, LoginRequest, ForgotPassword, ResetPassword} from './types';
 
 export type AppContextType = {
     user: User | null;
@@ -17,10 +9,9 @@ export type AppContextType = {
 
     login: (request: LoginRequest) => Promise<void>;
     logout: () => Promise<void>;
-    forgotPassword: (data: ForgotPasswordDTO) => Promise<void>;
-    resetPassword: (data: ResetPasswordDTO) => Promise<void>;
+    forgotPassword: (data: ForgotPassword) => Promise<void>;
+    resetPassword: (data: ResetPassword) => Promise<void>;
     registerClient: (client: ClientType) => Promise<void>;
-    refreshAuthToken: () => Promise<boolean>;
 
     setUser: (user: User | null) => void;
     setRole: (role: Role) => void;
@@ -43,7 +34,6 @@ const defaultContextValue: AppContextType = {
     forgotPassword: async () => { throw new Error('AppContext not initialized') },
     resetPassword: async () => { throw new Error('AppContext not initialized') },
     registerClient: async () => { throw new Error('AppContext not initialized') },
-    refreshAuthToken: async () => { throw new Error('AppContext not initialized') },
 
     setUser: () => { throw new Error('AppContext not initialized') },
     setRole: () => { throw new Error('AppContext not initialized') },

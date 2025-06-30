@@ -14,33 +14,14 @@ export const LoginPage: React.FC = () => {
     const [processing, setProcessing] = useState<boolean>(false);
 
     useEffect(() => {
-        if (context.user) {
-            console.log('✅ LoginPage: User found, navigating to /books');
-            navigate('/books');
-        }
+        if (context.user) navigate('/books');
     }, [context.user, navigate]);
 
     const login = async (email: string, password: string, role: Role) => {
-        console.log('🔐 LoginPage: Login form submitted', {
-            email,
-            role,
-            hasPassword: !!password
-        });
-
         setLoginError(false);
         setProcessing(true);
-
         try {
-            console.log('📡 LoginPage: Calling context.login...');
             await context.login({email, password, role});
-            console.log('✅ LoginPage: context.login completed successfully');
-
-            console.log('🔍 LoginPage: Checking context state after login:', {
-                hasUser: !!context.user,
-                userEmail: context.user?.email,
-                userRole: context.role
-            });
-
         } catch (e) {
             console.error('❌ LoginPage: Login failed:', e);
             setLoginError(true);

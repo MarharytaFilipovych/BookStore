@@ -42,7 +42,6 @@ export const PersonPage: React.FC = () => {
             const blockedClientsResponse = await ClientService.getBlockedClientsList();
             const blockedEmails = new Set(blockedClientsResponse.map(client => client.email));
             setExtendedState(({blockedClients: blockedEmails, isLoadingBlockedList: false}));
-            console.log(`Loaded ${blockedEmails.size} blocked clients`);
         } catch (error) {
             console.error('Failed to fetch blocked clients:', error);
             setExtendedState(({blockedClients: new Set(), isLoadingBlockedList: false}));
@@ -101,7 +100,6 @@ export const PersonPage: React.FC = () => {
         try {
             await ClientService.blockClient(email);
             await fetchBlockedClients();
-            console.log(`Client ${email} blocked successfully`);
         } catch (error) {
             console.error('Failed to block client:', error);
             alert(`Could not block client with email ${email}`);
@@ -116,7 +114,6 @@ export const PersonPage: React.FC = () => {
             await ClientService.unblockClient(email);
             await fetchBlockedClients();
             setExtendedState({refreshTrigger: extendedState.refreshTrigger + 1})
-            console.log(`Client ${email} unblocked successfully`);
         } catch (error) {
             console.error('Failed to unblock client:', error);
             alert(`Could not unblock client with email ${email}`);

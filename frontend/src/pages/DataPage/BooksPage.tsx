@@ -82,11 +82,9 @@ export const BooksPage: React.FC = () => {
     ), []);
 
     const handleBookDelete = useCallback(async (bookName: string) => {
-        console.log('🗑️ BooksPage: Handling book deletion...', { bookName });
         try {
             await BookService.deleteBook(bookName);
             context.removeFromBasket(bookName);
-            console.log('✅ BooksPage: Book deleted successfully, refreshing page...');
             setRefreshTrigger(prev => prev + 1);
         } catch (error) {
             console.error('❌ BooksPage: Failed to delete book:', error);
@@ -95,11 +93,8 @@ export const BooksPage: React.FC = () => {
     }, []);
 
     const handleBookUpdate = useCallback(async (bookName: string, updatedBook: BookType) => {
-        console.log('✏️ BooksPage: Handling book update...', { bookName });
-
         try {
             await BookService.updateBook(bookName, updatedBook);
-            console.log('✅ BooksPage: Book updated successfully, refreshing page...');
             setRefreshTrigger(prev => prev + 1);
         } catch (error) {
             console.error('❌ BooksPage: Failed to update book:', error);
@@ -107,13 +102,11 @@ export const BooksPage: React.FC = () => {
     }, []);
 
     const handleBookCreate = useCallback(async (book: BookType) => {
-        console.log('📚 BooksPage: Handling book creation...', book);
         setIsCreatingBook(true);
         setCreateBookError('');
 
         try {
             await BookService.createBook(book);
-            console.log('✅ BooksPage: Book created successfully, refreshing page...');
             setIsCreateBookDialogOpen(false);
             setRefreshTrigger(prev => prev + 1);
         } catch (error: any) {

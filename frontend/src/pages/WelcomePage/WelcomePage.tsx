@@ -8,10 +8,7 @@ export const WelcomePage: React.FC = ()=>{
     const navigate = useNavigate();
     const context = useContext(AppContext);
     useEffect(() => {
-        if (context.user) {
-            console.log('✅ WelcomePage: User found, navigating to /books');
-            navigate('/books');
-        }
+        if (context.user) navigate('/books');
     }, [context.user, navigate]);
     return <>
         <div className={styles.page}>

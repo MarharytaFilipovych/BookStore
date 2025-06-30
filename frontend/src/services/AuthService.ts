@@ -1,5 +1,5 @@
 import { apiClient } from '../config/ApiClient';
-import {LoginRequest, TokenResponseDTO, ForgotPasswordDTO, ResetPasswordDTO, RefreshTokenDTO, LogoutDTO, ClientType} from '../types';
+import {LoginRequest, TokenResponseDTO, ForgotPassword, ResetPassword, RefreshTokenDTO, LogoutDTO, ClientType} from '../types';
 import {API_ENDPOINTS} from "../BusinessData";
 
 export class AuthService {
@@ -29,9 +29,7 @@ export class AuthService {
                 localStorage.setItem('refreshToken', response.data.refresh_token);
                 console.log('💾 AuthService: Refresh token stored');
             }
-
             return response.data;
-
         } catch (error) {
             console.error('❌ AuthService: Login failed', error);
             AuthService.clearTokens();
@@ -44,7 +42,6 @@ export class AuthService {
             email: logoutData.email,
             role: logoutData.role
         });
-
         try {
             await apiClient.post(API_ENDPOINTS.auth.logout, logoutData);
             console.log('✅ AuthService: Backend logout successful');
@@ -57,29 +54,27 @@ export class AuthService {
         }
     }
 
-    static async forgotPassword(data: ForgotPasswordDTO): Promise<string> {
+    static async forgotPassword(data: ForgotPassword): Promise<string> {
         console.log('🔑 AuthService: Initiating password reset...', {
             email: data.email,
             role: data.role
         });
-
         try {
             const response = await apiClient.post<string>(API_ENDPOINTS.auth.forgotPassword, data);
             console.log('✅ AuthService: Password reset email sent successfully');
-            return response.data; // Returns the reset code UUID
+            return response.data;
         } catch (error) {
             console.error('❌ AuthService: Password reset request failed', error);
             throw error;
         }
     }
 
-    static async resetPassword(data: ResetPasswordDTO): Promise<void> {
+    static async resetPassword(data: ResetPassword): Promise<void> {
         console.log('🔐 AuthService: Resetting password...', {
             email: data.email,
             hasPassword: !!data.password,
             hasResetCode: !!data.reset_code
         });
-
         try {
             await apiClient.post(API_ENDPOINTS.auth.changePassword, data);
             console.log('✅ AuthService: Password reset successful');
@@ -89,52 +84,12 @@ export class AuthService {
         }
     }
 
-    static async refreshToken(data: RefreshTokenDTO): Promise<TokenResponseDTO> {
-        console.log('🔄 AuthService: Refreshing access token...', {
-            email: data.email,
-            role: data.role,
-            hasRefreshToken: !!data.refresh_token
-        });
-
-        try {
-            const response = await apiClient.post<TokenResponseDTO>(
-                API_ENDPOINTS.auth.refresh,
-                data
-            );
-
-            console.log('✅ AuthService: Token refresh successful', {
-                hasAccessToken: !!response.data.access_token,
-                hasRefreshToken: !!response.data.refresh_token,
-                expiresIn: response.data.expires_in
-            });
-
-            if (response.data.access_token) {
-                localStorage.setItem('accessToken', response.data.access_token);
-                console.log('💾 AuthService: New access token stored');
-            }
-
-            if (response.data.refresh_token) {
-                localStorage.setItem('refreshToken', response.data.refresh_token);
-                console.log('💾 AuthService: New refresh token stored');
-            }
-
-            return response.data;
-
-        } catch (error) {
-            console.error('❌ AuthService: Token refresh failed', error);
-            AuthService.clearTokens();
-            throw error;
-        }
-    }
-
     static isAuthenticated(): boolean {
         const token = AuthService.getToken();
-
         if (!token) {
             console.log('⚠️ AuthService: No access token available');
             return false;
         }
-
         try {
             const tokenParts = token.split('.');
             if (tokenParts.length !== 3) {
@@ -165,34 +120,15 @@ export class AuthService {
 
     static getToken(): string | null {
         const token = localStorage.getItem('accessToken');
-
-        if (token) {
-            console.log('🎫 AuthService: Access token retrieved');
-        } else {
-            console.log('⚠️ AuthService: No access token available');
-        }
-
+        if (token) console.log('🎫 AuthService: Access token retrieved');
+        else console.log('⚠️ AuthService: No access token available');
         return token;
-    }
-
-    static getRefreshToken(): string | null {
-        const refreshToken = localStorage.getItem('refreshToken');
-
-        if (refreshToken) {
-            console.log('🎫 AuthService: Refresh token retrieved');
-        } else {
-            console.log('⚠️ AuthService: No refresh token available');
-        }
-
-        return refreshToken;
     }
 
     static clearTokens(): void {
         console.log('🧹 AuthService: Clearing authentication tokens...');
-
         const tokensToRemove = ['accessToken', 'refreshToken'];
         let removedCount = 0;
-
         tokensToRemove.forEach(tokenKey => {
             if (localStorage.getItem(tokenKey)) {
                 localStorage.removeItem(tokenKey);
@@ -200,35 +136,26 @@ export class AuthService {
                 console.log(`🗑️ AuthService: Removed ${tokenKey}`);
             }
         });
-
         console.log(`✅ AuthService: Cleared ${removedCount} tokens`);
     }
 
     static getTokenInfo(): any | null {
         const token = AuthService.getToken();
-
-        if (!token) {
-            return null;
-        }
-
+        if (!token) return null;
         try {
             const tokenParts = token.split('.');
             if (tokenParts.length !== 3) {
                 console.warn('⚠️ AuthService: Invalid token format for info extraction');
                 return null;
             }
-
             const payload = JSON.parse(atob(tokenParts[1]));
-
             console.log('🔍 AuthService: Token info extracted', {
                 subject: payload.sub,
                 issuer: payload.iss,
                 expiresAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown',
                 issuedAt: payload.iat ? new Date(payload.iat * 1000).toISOString() : 'unknown'
             });
-
             return payload;
-
         } catch (error) {
             console.warn('⚠️ AuthService: Failed to extract token info:', error);
             return null;
@@ -242,7 +169,6 @@ export class AuthService {
             hasPassword: !!client.password,
             balance: client.balance
         });
-
         try {
             await apiClient.post(API_ENDPOINTS.auth.registerClient, client);
             console.log('✅ AuthService: Client registration successful', {
@@ -251,23 +177,8 @@ export class AuthService {
             });
         } catch (error) {
             console.error('❌ AuthService: Client registration failed', {
-                clientEmail: client.email,
-                error
-            });
+                clientEmail: client.email, error});
             throw error;
         }
     }
-
-    static debugAuthState(): void {
-        console.log('🔍 AuthService: Current authentication state:', {
-            hasAccessToken: !!AuthService.getToken(),
-            hasRefreshToken: !!AuthService.getRefreshToken(),
-            isAuthenticated: AuthService.isAuthenticated(),
-            tokenInfo: AuthService.getTokenInfo(),
-        });
-    }
-}
-
-if (process.env.NODE_ENV === 'development') {
-    (window as any).debugAuth = () => AuthService.debugAuthState();
 }

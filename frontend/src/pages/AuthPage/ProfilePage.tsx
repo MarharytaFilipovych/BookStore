@@ -27,16 +27,11 @@ export const ProfilePage: React.FC = () => {
             setIsUpdating(true);
             if (userRole === 'CLIENT') {
                 const updatedClient = await ClientService.updateClient(user.email, updatedData);
-                console.log(updatedClient)
                 context.setUser(updatedClient);
             } else {
                 const updatedEmployee = await EmployeeService.updateEmployee(user.email, updatedData);
-                console.log(updatedEmployee)
                 context.setUser(updatedEmployee);
             }
-
-            console.log('✅ Profile updated successfully');
-
         } catch (err) {
             console.error('❌ Failed to update profile:', err);
             setError('Could not update your profile :(((')
@@ -51,11 +46,8 @@ export const ProfilePage: React.FC = () => {
         try {
             if (userRole === 'CLIENT') await ClientService.deleteClient(user.email);
             else await EmployeeService.deleteEmployee(user.email);
-
-            console.log('✅ Account deleted successfully');
             await context.logout();
             navigate('/');
-
         } catch (err) {
             console.error('❌ Failed to delete account:', err);
             setError('Could not delete your account. Please try again.');

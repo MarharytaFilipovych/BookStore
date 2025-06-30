@@ -41,7 +41,6 @@ export const ResetPasswordPage: React.FC = () => {
 
         try {
             await context.forgotPassword({ email, role });
-            console.log('✅ Reset code sent again successfully');
         } catch (err: any) {
             console.error('❌ Failed to send reset code again:', err);
             const errorMessage = err?.response?.data?.message ||

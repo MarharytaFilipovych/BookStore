@@ -89,15 +89,9 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
             case "all":
             default:
                 const filterState = getFilterState(new URLSearchParams(window.location.search));
-                if (filterState.employeeEmail) {
-                    console.log('📦 Fetching orders by employee email:', filterState.employeeEmail);
-                    response = await fetchEmployeeOrders(filterState.employeeEmail, page, pageSize, sorting);
-                } else if (filterState.clientEmail) {
-                    response = await fetchClientOrders(filterState.clientEmail, page, pageSize, sorting);
-                } else {
-                    console.log('📦 Fetching all orders');
-                    response = await OrderService.getOrders(page, pageSize, sorting?.sortBy, sorting?.sortOrder);
-                }
+                if (filterState.employeeEmail) response = await fetchEmployeeOrders(filterState.employeeEmail, page, pageSize, sorting);
+                else if (filterState.clientEmail) response = await fetchClientOrders(filterState.clientEmail, page, pageSize, sorting);
+                else response = await OrderService.getOrders(page, pageSize, sorting?.sortBy, sorting?.sortOrder);
                 break;
         }
         return {
@@ -122,13 +116,7 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
 
     const handleEmployeeSelection = async (employeeEmail: string) => {
         if (!selectedOrder) return;
-         console.log('🔄 Assigning employee to order...', {
-                orderDate: selectedOrder.order_date,
-                clientEmail: selectedOrder.client_email,
-                assignedTo: employeeEmail
-            });
         await OrderService.confirmOrder(selectedOrder, employeeEmail);
-        console.log('✅ Person assigned successfully');
         setRefreshTrigger(prev => prev + 1);
     };
 
@@ -136,8 +124,7 @@ export const OrdersPage: React.FC<{forWhom: ForWhomOrder}> = ({forWhom}) => {
         <OrderComponent
             key={`${order.order_date}-${index}`}
             {...order}
-            onAssignEmployee={(orderId: string) => {
-                console.log('Opening employee selection dialog for order:', orderId);
+            onAssignEmployee={() => {
                 setSelectedOrder(order);
                 setIsDialogOpen(true);
             }}

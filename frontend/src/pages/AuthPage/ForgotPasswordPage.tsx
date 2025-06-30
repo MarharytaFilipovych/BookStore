@@ -21,9 +21,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
         try {
             await context.forgotPassword({ email, role });
-            navigate('/reset-password', {
-                state: { email, role }
-            });
+            navigate('/reset-password', {state: { email, role }});
         } catch (err: any) {
             const errorMessage = err?.response?.data?.message ||
                 err?.message ||

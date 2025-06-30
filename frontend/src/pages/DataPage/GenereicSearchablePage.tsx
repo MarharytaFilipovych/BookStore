@@ -38,9 +38,7 @@ interface GenericSearchablePageProps<TItem, TFilter, TSortField> {
     refreshTrigger?: number;
 }
 
-type GenericPageState<TItem> = {
-    items: TItem[];
-} & StateWithPagination;
+type GenericPageState<TItem> = { items: TItem[]; } & StateWithPagination;
 
 export function GenericSearchablePage<TItem, TFilter extends Record<string, any>, TSortField>
 ({fetchData, getFilterFromParams, sortOptions, searchComponent, renderItem,
@@ -75,14 +73,6 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
                 filterState,
                 sorting
             );
-            console.log('📊 BooksPage: RAW API Response:', response);
-            console.log('📊 BooksPage: Meta details:', {
-                totalPages: response.meta.total_pages,
-                totalCount: response.meta.total_count,
-                currentPage: response.meta.total_pages,
-
-            });
-
 
             updateState({
                 totalPages: response.meta.total_pages,
@@ -122,16 +112,12 @@ export function GenericSearchablePage<TItem, TFilter extends Record<string, any>
 
     const handlePageSelect = (page: number) => {
         setSearchParams(setNewPageInQueryParams(page, searchParams));
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        window.scrollTo({top: 0, behavior: 'smooth'});
     };
 
     const handleShowMore = () => {
         setSearchParams(
-            setNewPageInQueryParams(
-                Math.min(state.pageToFetch + 1, state.totalPages),
+            setNewPageInQueryParams(Math.min(state.pageToFetch + 1, state.totalPages),
                 searchParams
             )
         );

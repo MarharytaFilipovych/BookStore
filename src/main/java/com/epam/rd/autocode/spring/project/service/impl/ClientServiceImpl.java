@@ -105,6 +105,7 @@ public class ClientServiceImpl implements ClientService {
                             Client updatedClient = clientMapper.toEntity(client);
                             updatedClient.setId(existingClient.getId());
                             updatedClient.setEmail(existingClient.getEmail());
+                            updatedClient.setPassword(existingClient.getPassword());
                             clientRepository.save(updatedClient);
                         },
                         () -> {throw new NotFoundException("Client with email " + email);}
