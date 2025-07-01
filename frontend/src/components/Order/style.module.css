@@ -251,7 +251,9 @@
     background-color: #cc97de;
     color: #491651 !important;
 }
-
+.detailRow a {
+    color: #1a0221;
+}
 .bookItemsSection {
     margin-top: 2rem;
     padding-top: 1.5rem;

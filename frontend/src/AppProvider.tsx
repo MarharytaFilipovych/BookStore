@@ -1,4 +1,4 @@
-import React, {ReactNode, useEffect} from "react";
+import React, {ReactNode, useEffect, useCallback} from "react";
 import {Basket, ClientType, ForgotPassword, LoginRequest, ResetPassword, Role, User} from "./types";
 import {apiClient} from "./config/ApiClient";
 import { AppContext } from './context';
@@ -23,30 +23,6 @@ const initialState: AppState = {
 
 export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     const [state, updateState] = useStateWithUpdater<AppState>(initialState);
-
-    useEffect(() => {
-        const initializeAuth = () => {
-            try {
-                const storedUser = localStorage.getItem('user');
-                const storedRole = localStorage.getItem('role');
-                const accessToken = AuthService.getToken();
-
-                if (storedUser && storedRole && accessToken && AuthService.isAuthenticated()) {
-                    const parsedUser = JSON.parse(storedUser);
-                    updateState({user: parsedUser, role: storedRole as Role, isLoading: false});
-
-                    apiClient.setDefaultHeader('Authorization', `Bearer ${accessToken}`);
-                } else {
-                    cleanUser();
-                }
-            } catch (error) {
-                console.error('Error initializing auth state:', error);
-                cleanUser();
-            }
-        };
-
-        initializeAuth();
-    }, []);
 
     const setUser = (newUser: User | null) => {
         if (newUser) {
@@ -77,6 +53,80 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         });
     };
 
+    const initializeAuth = async () => {
+        try {
+            const storedUser = localStorage.getItem('user');
+            const storedRole = localStorage.getItem('role');
+            const accessToken = AuthService.getToken();
+            const refreshToken = localStorage.getItem('refreshToken');
+
+            console.log('🔍 AppProvider: Initializing auth...', {
+                hasStoredUser: !!storedUser,
+                hasStoredRole: !!storedRole,
+                hasAccessToken: !!accessToken,
+                hasRefreshToken: !!refreshToken
+            });
+
+            if (storedUser && storedRole && (accessToken || refreshToken)) {
+                const parsedUser = JSON.parse(storedUser);
+
+                updateState({
+                    user: parsedUser,
+                    role: storedRole as Role,
+                    isLoading: false
+                });
+
+                console.log('✅ AppProvider: User data set', {
+                    userEmail: parsedUser.email,
+                    role: storedRole
+                });
+
+                if (accessToken && AuthService.isAuthenticated()) {
+                    apiClient.setDefaultHeader('Authorization', `Bearer ${accessToken}`);
+                    console.log('✅ AppProvider: Valid token found, user authenticated');
+                } else {
+                    console.log('🔄 AppProvider: Token expired/missing, attempting refresh...');
+                    if (refreshToken) {
+                        try {
+                            console.log('🔄 AppProvider: Calling refresh with user data', {
+                                email: parsedUser.email,
+                                role: storedRole,
+                                hasRefreshToken: !!refreshToken
+                            });
+
+                            const tokenResponse = await AuthService.refreshToken({
+                                refresh_token: refreshToken,
+                                email: parsedUser.email,
+                                role: storedRole as Role
+                            });
+
+                            apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.access_token}`);
+                            console.log('✅ AppProvider: Token refreshed successfully during initialization');
+                        } catch (refreshError) {
+                            console.error('❌ AppProvider: Token refresh failed during initialization:', refreshError);
+                            cleanUser();
+                            return;
+                        }
+                    } else {
+                        console.log('❌ AppProvider: No refresh token available, logging out');
+                        cleanUser();
+                        return;
+                    }
+                }
+            } else {
+                console.log('❌ AppProvider: Missing authentication data, cleaning up');
+                cleanUser();
+            }
+        } catch (error) {
+            console.error('❌ AppProvider: Error during auth initialization:', error);
+            cleanUser();
+        }
+    };
+
+    useEffect(() => {
+        initializeAuth();
+    }, []);
+
     const login = async (request: LoginRequest): Promise<void> => {
         console.log('🔐 AppProvider: Starting login process...', {
             email: request.email,
@@ -84,52 +134,23 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         });
 
         try {
-            console.log('📡 AppProvider: Calling AuthService.login...');
             const tokenResponse = await AuthService.login(request);
-            console.log('✅ AppProvider: Tokens received', {
-                hasAccessToken: !!tokenResponse.access_token,
-                hasRefreshToken: !!tokenResponse.refresh_token,
-                expiresIn: tokenResponse.expires_in
-            });
-            console.log('🔑 AppProvider: Setting authorization header...');
             apiClient.setDefaultHeader('Authorization', `Bearer ${tokenResponse.access_token}`);
-            console.log('✅ AppProvider: Authorization header set');
-            console.log('👤 AppProvider: Fetching user data...');
             let userResponse;
-            if (request.role === 'CLIENT') {
-                console.log('📞 AppProvider: Calling ClientService.getClientByEmail...');
-                userResponse = await ClientService.getClientByEmail(request.email);
-            } else {
-                console.log('📞 AppProvider: Calling EmployeeService.getEmployeeByEmail...');
-                userResponse = await EmployeeService.getEmployeeByEmail(request.email);
-            }
-            console.log('✅ AppProvider: User data received', {
-                userName: userResponse?.name,
-                userEmail: userResponse?.email
-            });
-            console.log('💾 AppProvider: Setting user in context...');
-            const userData = userResponse;
-            setUser(userData);
-            console.log('✅ AppProvider: User set in context:', userData);
-            console.log('🏷️ AppProvider: Setting role in context...');
+            if (request.role === 'CLIENT') userResponse = await ClientService.getClientByEmail(request.email);
+            else userResponse = await EmployeeService.getEmployeeByEmail(request.email);
+            setUser(userResponse);
             setRole(request.role);
-            console.log('✅ AppProvider: Role set in context:', request.role);
-            console.log('🎉 AppProvider: Login process completed successfully!');
+            console.log('✅ AppProvider: Login completed successfully');
         } catch (error) {
-            console.error('❌ AppProvider: Login failed at some step:', error);
-            if (error instanceof Error) {
-                console.error('❌ AppProvider: Error details:', {
-                    message: error.message,
-                    stack: error.stack
-                });
-            }
+            console.error('❌ AppProvider: Login failed:', error);
             throw new Error('Login failed. Please check your credentials.');
         }
     };
 
     const logout = async (): Promise<void> => {
         try {
-            if (state.user?.email && state.role) await AuthService.logout({email: state.user.email, role: state.role,});
+            if (state.user?.email && state.role) await AuthService.logout({email: state.user.email, role: state.role});
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
@@ -213,7 +234,7 @@ export const AppProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         addToBasket,
         removeFromBasket,
         clearBasket,
-        checkQuantity
+        checkQuantity,
     };
 
     return (

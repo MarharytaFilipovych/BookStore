@@ -283,17 +283,6 @@ class AuthControllerTest {
     }
 
     @Test
-    void refreshToken_WithoutAuthentication_ShouldReturn401() throws Exception {
-        // Act & Assert
-        mockMvc.perform(post("/auth/refresh-token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(refreshTokenDTO)))
-                .andExpect(status().isUnauthorized());
-
-        verify(authService, never()).refreshToken(refreshTokenDTO);
-    }
-
-    @Test
     void forgotPassword_WithValidEmail_ShouldReturnResetCode() throws Exception {
         // Act & Assert
         mockMvc.perform(post("/auth/forgot-password")

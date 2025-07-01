@@ -1,11 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import {TokenResponseDTO, RefreshTokenDTO, Role} from '../types';
-import {API_ENDPOINTS} from "../BusinessData";
 
 class ApiClient {
     private readonly client: AxiosInstance;
-    private isRefreshing = false;
-    private failedQueue: Array<{ resolve: (value: any) => void; reject: (error: any) => void; config: any; }> = [];
 
     constructor() {
         console.log('🏗️ Initializing ApiClient...');
@@ -22,19 +18,9 @@ class ApiClient {
         this.setupInterceptors();
     }
 
-    private processQueue(error: any, token: string | null = null) {
-        this.failedQueue.forEach(({ resolve, reject, config }) => {
-            if (error) reject(error);
-            else {
-                if (token) config.headers.Authorization = `Bearer ${token}`;
-                resolve(this.client(config));
-            }
-        });
-        this.failedQueue = [];
-    }
-
     private setupInterceptors() {
         console.log('⚙️ Setting up request/response interceptors...');
+
         this.client.interceptors.request.use(
             (config) => {
                 console.log(`🚀 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
@@ -43,8 +29,12 @@ class ApiClient {
                     if (token) {
                         config.headers.Authorization = `Bearer ${token}`;
                         console.log('🔑 JWT token attached from localStorage');
-                    } else console.log('⚠️ No JWT token found in localStorage');
-                } else console.log('🔑 Using existing Authorization header');
+                    } else {
+                        console.log('⚠️ No JWT token found in localStorage');
+                    }
+                } else {
+                    console.log('🔑 Using existing Authorization header');
+                }
                 if (config.data) console.log('📦 Request data:', config.data);
                 if (config.params) console.log('🔍 Request params:', config.params);
                 return config;
@@ -64,92 +54,17 @@ class ApiClient {
                 });
                 return response;
             },
-            async (error) => {
-                const originalRequest = error.config;
-                console.error(`❌ API error from ${originalRequest?.url}:`, {
+            (error) => {
+                console.error(`❌ API error from ${error.config?.url}:`, {
                     status: error.response?.status,
                     statusText: error.response?.statusText,
                     message: error.response?.data?.message || error.message
                 });
-                if (error.response?.status === 401 && !originalRequest._retry) {
-                    console.log('🔄 Token expired (401), attempting refresh...');
-                    if (this.isRefreshing) {
-                        console.log('⏳ Refresh already in progress, queuing request...');
-                        return new Promise((resolve, reject) => {
-                            this.failedQueue.push({ resolve, reject, config: originalRequest });
-                        });
-                    }
-                    originalRequest._retry = true;
-                    this.isRefreshing = true;
-                    try {
-                        const refreshToken = localStorage.getItem('refreshToken');
-                        const savedUser = localStorage.getItem('user');
-                        const savedRole = localStorage.getItem('role');
-                        console.log('🔄 Calling refresh token endpoint...');
-                        let email: string = '';
-                        if (savedUser) {
-                            try {
-                                const userData = JSON.parse(savedUser);
-                                email = userData.email || '';
-                            } catch (parseError) {
-                                console.error('❌ Failed to parse user data:', parseError);
-                            }
-                        }
-                        const refreshData: RefreshTokenDTO = {
-                            refresh_token: refreshToken || '',
-                            email: email,
-                            role: savedRole as Role
-                        };
-                        console.log('📤 Sending refresh token request:', {
-                            endpoint: API_ENDPOINTS.auth.refresh,
-                            email,
-                            role: savedRole,
-                            hasRefreshToken: !!refreshToken
-                        });
-                        const response = await axios.post<TokenResponseDTO>(
-                            `${this.client.defaults.baseURL}${API_ENDPOINTS.auth.refresh}`,
-                            refreshData,
-                            {headers: {'Content-Type': 'application/json'}}
-                        );
-                        const newAccessToken = response.data.access_token;
-                        localStorage.setItem('accessToken', newAccessToken);
-                        if (response.data.refresh_token) {
-                            localStorage.setItem('refreshToken', response.data.refresh_token);
-                            console.log('🔄 Both access and refresh tokens updated');
-                        } else console.log('🔄 Only access token updated');
-                        console.log('✅ Token refresh successful, processing queued requests...');
-                        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-                        this.processQueue(null, newAccessToken);
-
-                        return this.client(originalRequest);
-
-                    } catch (refreshError) {
-                        console.error('❌ Token refresh failed:', refreshError);
-                        this.clearAuthData();
-                        this.processQueue(refreshError, null);
-                        console.log('🚪 Redirecting to welcome page...');
-                        window.location.href = '/';
-                        return Promise.reject(refreshError);
-                    } finally {
-                        this.isRefreshing = false;
-                    }
-                }
                 return Promise.reject(error);
             }
         );
-        console.log('✅ Interceptors configured successfully');
-    }
 
-    private clearAuthData() {
-        console.log('🧹 Clearing authentication data...');
-        const keysToRemove = ['accessToken', 'refreshToken', 'user', 'role', 'basket'];
-        keysToRemove.forEach(key => {
-            if (localStorage.getItem(key)) {
-                localStorage.removeItem(key);
-                console.log(`🗑️ Removed ${key} from localStorage`);
-            }
-        });
-        console.log('✅ Authentication data cleared');
+        console.log('✅ Interceptors configured successfully');
     }
 
     async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
@@ -201,5 +116,4 @@ class ApiClient {
         this.client.defaults.headers.common[key] = value;
     }
 }
-
 export const apiClient = new ApiClient();

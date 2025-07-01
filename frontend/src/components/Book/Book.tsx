@@ -79,9 +79,11 @@ export const Book: React.FC<BookProps> = ({ onDelete, onUpdate, ...book }) => {
                 </div>
                 <div className={styles.bookActions}>
                     <p className={styles.bookPrice}>${book.price}</p>
-                    <p className={styles.bookQuantity}>
+                    {context.role === 'CLIENT' && (
+                        <p className={styles.bookQuantity}>
                         {context.checkQuantity(book.name)} {context.checkQuantity(book.name) === 1 ? 'item' : 'items'}
                     </p>
+                    )}
                     {context?.role === 'CLIENT' ? (
                         <div className={styles.employeeActions}>
                             <MiniButton topic='basket' size='medium' onClick={() => context.addToBasket(book.name)}/>

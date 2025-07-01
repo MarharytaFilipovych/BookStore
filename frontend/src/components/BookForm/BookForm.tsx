@@ -38,7 +38,7 @@ export const BookForm: React.FC<BookFormProps> = ({ onSubmit, onCancel, initialD
         if (!pages || pages <= 0) newErrors.pages = 'Pages must be greater than 0';
         if (!publicationDate) newErrors.publication_date = 'Publication date is required';
         else {
-            if (new Date(publicationDate) > new Date()) {
+            if (new Date(publicationDate) >= new Date()) {
                 newErrors.publication_date = 'Publication date cannot be in the future';
             }
         }

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { apiClient } from '../config/ApiClient';
 import {LoginRequest, TokenResponseDTO, ForgotPassword, ResetPassword, RefreshTokenDTO, LogoutDTO, ClientType} from '../types';
 import {API_ENDPOINTS} from "../BusinessData";
@@ -13,22 +14,15 @@ export class AuthService {
         try {
             const response = await apiClient.post<TokenResponseDTO>(
                 API_ENDPOINTS.auth.login, credentials);
+
             console.log('✅ AuthService: Login successful', {
                 hasAccessToken: !!response.data.access_token,
                 hasRefreshToken: !!response.data.refresh_token,
                 expiresIn: response.data.expires_in,
                 role: credentials.role
             });
-
-            if (response.data.access_token) {
-                localStorage.setItem('accessToken', response.data.access_token);
-                console.log('💾 AuthService: Access token stored');
-            }
-
-            if (response.data.refresh_token) {
-                localStorage.setItem('refreshToken', response.data.refresh_token);
-                console.log('💾 AuthService: Refresh token stored');
-            }
+            if (response.data.access_token) localStorage.setItem('accessToken', response.data.access_token);
+            if (response.data.refresh_token) localStorage.setItem('refreshToken', response.data.refresh_token);
             return response.data;
         } catch (error) {
             console.error('❌ AuthService: Login failed', error);
@@ -45,7 +39,6 @@ export class AuthService {
         try {
             await apiClient.post(API_ENDPOINTS.auth.logout, logoutData);
             console.log('✅ AuthService: Backend logout successful');
-
         } catch (error) {
             console.warn('⚠️ AuthService: Backend logout failed (continuing with cleanup):', error);
         } finally {
@@ -100,15 +93,24 @@ export class AuthService {
             const payload = JSON.parse(atob(tokenParts[1]));
             const currentTime = Math.floor(Date.now() / 1000);
 
-            if (payload.exp && payload.exp < currentTime) {
-                console.warn('⚠️ AuthService: Token has expired', {
-                    expiredAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown'
+            const BUFFER_SECONDS = 60;
+            const effectiveExpiry = payload.exp - BUFFER_SECONDS;
+
+            if (payload.exp && effectiveExpiry < currentTime) {
+                console.warn('⚠️ AuthService: Token will expire soon (within buffer time)', {
+                    actualExpiry: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown',
+                    effectiveExpiry: new Date(effectiveExpiry * 1000).toISOString(),
+                    bufferSeconds: BUFFER_SECONDS,
+                    timeUntilExpiry: payload.exp - currentTime
                 });
                 return false;
             }
 
-            console.log('✅ AuthService: Token is valid', {
-                expiresAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown'
+            console.log('✅ AuthService: Token is valid with buffer', {
+                actualExpiry: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'unknown',
+                effectiveExpiry: new Date(effectiveExpiry * 1000).toISOString(),
+                timeUntilExpiry: payload.exp - currentTime,
+                bufferSeconds: BUFFER_SECONDS
             });
             return true;
 
@@ -123,6 +125,16 @@ export class AuthService {
         if (token) console.log('🎫 AuthService: Access token retrieved');
         else console.log('⚠️ AuthService: No access token available');
         return token;
+    }
+
+    static getRefreshToken(): string | null {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+            console.log('🎫 AuthService: Refresh token retrieved');
+        } else {
+            console.log('⚠️ AuthService: No refresh token available');
+        }
+        return refreshToken;
     }
 
     static clearTokens(): void {
@@ -178,6 +190,49 @@ export class AuthService {
         } catch (error) {
             console.error('❌ AuthService: Client registration failed', {
                 clientEmail: client.email, error});
+            throw error;
+        }
+    }
+
+    static async refreshToken(data: RefreshTokenDTO): Promise<TokenResponseDTO> {
+        console.log('🔄 AuthService: Refreshing access token...', {
+            email: data.email,
+            role: data.role,
+            hasRefreshToken: !!data.refresh_token
+        });
+
+        try {
+            const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8084';
+            const response = await axios.post<TokenResponseDTO>(
+                `${baseURL}${API_ENDPOINTS.auth.refresh}`,
+                data,
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: 15000
+                }
+            );
+
+            console.log('✅ AuthService: Token refresh successful', {
+                hasAccessToken: !!response.data.access_token,
+                hasRefreshToken: !!response.data.refresh_token,
+                expiresIn: response.data.expires_in
+            });
+
+            if (response.data.access_token) {
+                localStorage.setItem('accessToken', response.data.access_token);
+                console.log('💾 AuthService: New access token stored');
+            }
+
+            if (response.data.refresh_token) {
+                localStorage.setItem('refreshToken', response.data.refresh_token);
+                console.log('💾 AuthService: New refresh token stored');
+            }
+
+            return response.data;
+
+        } catch (error) {
+            console.error('❌ AuthService: Token refresh failed', error);
+            AuthService.clearTokens();
             throw error;
         }
     }

@@ -65,7 +65,7 @@
 
 .bookPrice {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #491651;
 }
@@ -159,7 +159,7 @@ strong{
     }
 
     .bookPrice {
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
 
     .bookQuantity{
